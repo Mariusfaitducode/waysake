@@ -1,0 +1,14 @@
+.postcard {
+  position: relative;
+  margin: 14px auto;
+  width: min(100%, 52vh * 0.8);
+  aspect-ratio: 4 / 5;
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  background: var(--hairline);
+  box-shadow: 0 18px 40px -22px rgba(0, 0, 0, 0.6);
+}
+.postcard img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity 300ms var(--ease); }
+.postcard.is-loaded img { opacity: 1; }
+.postcard__wait { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); font-size: 15px; padding: 20px; text-align: center; }
+.postcard__hint { margin-top: -8px; }

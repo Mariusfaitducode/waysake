@@ -1,0 +1,48 @@
+.social { flex-basis: 100%; display: grid; gap: 10px; }
+.social__caption {
+  width: 100%;
+  max-width: 640px;
+  resize: none;
+  overflow: hidden;
+  border: 0;
+  border-radius: 10px;
+  padding: 6px 8px;
+  margin-left: -8px;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  font-size: 17px;
+  line-height: 1.35;
+  transition: background 160ms var(--ease);
+}
+.social__caption::placeholder { color: rgba(255, 255, 255, 0.55); }
+.social__caption:hover { background: rgba(255, 255, 255, 0.08); }
+.social__caption:focus { outline: none; background: rgba(255, 255, 255, 0.14); }
+.social__row { display: flex; align-items: center; gap: 12px; }
+.social__reactions { display: flex; gap: 6px; }
+.social__reaction {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 44px;
+  height: 38px;
+  justify-content: center;
+  border: 1.5px solid transparent;
+  border-radius: 999px;
+  padding: 0 10px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font: inherit;
+  font-size: 19px;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: transform 160ms var(--ease), background 160ms var(--ease);
+}
+.social__reaction:active { transform: scale(0.92); }
+.social__reaction.is-mine { background: rgba(255, 255, 255, 0.3); border-color: rgba(255, 255, 255, 0.85); }
+.social__reaction.is-mine > span:first-child { animation: social-pop 320ms var(--ease); }
+.social__count { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.social__status { font-size: 13px; opacity: 0.7; }
+@keyframes social-pop { 40% { transform: scale(1.35); } }
+@media (prefers-reduced-motion: reduce) { .social__reaction.is-mine > span:first-child { animation: none; } }

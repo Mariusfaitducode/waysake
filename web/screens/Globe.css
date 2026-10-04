@@ -75,3 +75,17 @@
 }
 .globe__actions { display: flex; gap: 10px; align-items: center; }
 .globe__actions .icon-button { background: var(--veil); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); color: var(--autostrada); }
+
+.globe__play {
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: var(--signal);
+  color: #16191b;
+  font-family: var(--font-sign);
+  font-weight: 600;
+  font-size: 19px;
+  text-decoration: none;
+}

@@ -12,12 +12,16 @@ export function GetApp() {
   const [device] = useState(detect);
   const [qr, setQr] = useState("");
   const [apk, setApk] = useState<boolean | null>(null);
+  const [shortcut, setShortcut] = useState<boolean | null>(null);
   const [copied, setCopied] = useState(false);
   const host = location.host;
 
   useEffect(() => {
     QRCode.toString(`${location.origin}/app`, { type: "svg", margin: 1, color: { dark: "#16191b", light: "#ffffff" } }).then(setQr);
-    fetch("/waysake.apk", { method: "HEAD" }).then((r) => setApk(r.ok && !r.headers.get("content-type")?.includes("text/html")), () => setApk(false));
+    const exists = (url: string, set: (ok: boolean) => void) =>
+      fetch(url, { method: "HEAD" }).then((r) => set(r.ok && !r.headers.get("content-type")?.includes("text/html")), () => set(false));
+    exists("/waysake.apk", setApk);
+    exists("/waysake.shortcut", setShortcut);
   }, []);
 
   return (
@@ -65,7 +69,20 @@ export function GetApp() {
       {device !== "android" && (
         <section className="getapp__card">
           <h2>iPhone</h2>
-          <p>{t("getApp.iphone")}</p>
+          {shortcut ? (
+            <ol className="getapp__steps">
+              <li>
+                <a className="button" href="/waysake.shortcut">
+                  {t("getApp.iphone.install")}
+                </a>
+              </li>
+              <li>{t("getApp.iphone.add")}</li>
+              <li>{t("getApp.iphone.run")}</li>
+              <li>{t("getApp.iphone.allow")}</li>
+            </ol>
+          ) : (
+            <p>{t("getApp.iphone")}</p>
+          )}
         </section>
       )}
     </div>

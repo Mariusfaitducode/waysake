@@ -3,6 +3,7 @@ import type { User } from "../api.js";
 import { IconBook, IconGlobe, IconPhotos, IconPlus, IconTrips } from "./icons.js";
 import { useUpload } from "./upload.js";
 import { ErrorBoundary } from "../components/ErrorBoundary.js";
+import { LiveInvite } from "../components/LiveInvite.js";
 import { t } from "../i18n/index.js";
 import "./Shell.css";
 
@@ -17,7 +18,7 @@ export function Shell({ me, onSwitchProfile }: { me: User; onSwitchProfile: () =
   const { open } = useUpload();
   const { pathname } = useLocation();
   // Sur le globe (bandeau de voyages) et dans un voyage, l'écran appartient aux images : l'ajout passe par l'en-tête.
-  const showAdd = pathname !== "/" && !pathname.startsWith("/v/") && !pathname.startsWith("/import/") && pathname !== "/photos/a-localiser";
+  const showAdd = pathname !== "/" && !pathname.startsWith("/v/") && !pathname.startsWith("/import/") && pathname !== "/photos/a-localiser" && !pathname.startsWith("/jeu");
 
   // L'écran de validation a sa propre barre d'action : les onglets s'effacent.
   const focused = pathname.startsWith("/import/");
@@ -42,6 +43,7 @@ export function Shell({ me, onSwitchProfile }: { me: User; onSwitchProfile: () =
           <Outlet />
         </ErrorBoundary>
       </main>
+      <LiveInvite />
       {showAdd && (
         <button className="fab" onClick={open} aria-label={t("common.addPhotos")}>
           <IconPlus />

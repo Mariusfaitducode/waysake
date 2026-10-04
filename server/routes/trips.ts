@@ -3,6 +3,7 @@ import type { Db } from "../db.js";
 import { countriesGeoJson, countryName, distanceKm, flag, type GeoPlace } from "../geo.js";
 import { getTrip, listTrips, mergeChapterWithPrevious, renameChapter, renameTrip, setCover } from "../trips.js";
 import { mediaUrls } from "./media.js";
+import { tripFavorites, withSocial } from "../social.js";
 
 const cover = (id: number | null) => (id ? mediaUrls(id).thumb : null);
 const coverLarge = (id: number | null) => (id ? mediaUrls(id).preview : null);
@@ -22,7 +23,8 @@ export function tripRoutes(app: FastifyInstance, db: Db) {
       ...t,
       cover: cover(t.coverMediaId),
       coverLarge: coverLarge(t.coverMediaId),
-      chapters: t.chapters.map((c) => ({ ...c, media: c.media.map((m) => ({ ...m, ...mediaUrls(m.id) })) })),
+      chapters: t.chapters.map((c) => ({ ...c, media: withSocial(db, c.media.map((m) => ({ ...m, ...mediaUrls(m.id) }))) })),
+      favorites: tripFavorites(db, t.id),
       notes,
     };
   });

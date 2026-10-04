@@ -64,3 +64,15 @@ export const IconPin = () => (
     <circle cx="12" cy="10" r="2.3" />
   </svg>
 );
+export const IconPlay = () => (
+  <svg {...base} strokeWidth={2.2}>
+    <path d="M8 5.5v13l10.5-6.5z" fill="currentColor" />
+  </svg>
+);
+export const IconTogether = () => (
+  <svg {...base} strokeWidth={2}>
+    <circle cx="9" cy="9" r="3.2" />
+    <circle cx="16.5" cy="10" r="2.6" />
+    <path d="M3.5 19c.6-3 2.8-4.6 5.5-4.6s4.9 1.6 5.5 4.6M14.2 15.1c.7-.4 1.5-.6 2.3-.6 2.1 0 3.7 1.3 4.1 3.8" />
+  </svg>
+);

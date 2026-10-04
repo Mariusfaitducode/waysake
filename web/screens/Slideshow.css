@@ -1,0 +1,126 @@
+/* Diaporama : noir, plein écran, lisible de loin (télé à 3 m). */
+.slideshow {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  overflow: hidden;
+  background: #000;
+  color: #fff;
+  cursor: none;
+}
+.slideshow:not(.is-idle) { cursor: default; }
+
+.slideshow__photo { position: absolute; inset: 0; opacity: 0; transition: opacity 900ms var(--ease); }
+.slideshow__photo.is-loaded { opacity: 1; }
+.slideshow__blur { position: absolute; inset: -40px; width: calc(100% + 80px); height: calc(100% + 80px); object-fit: cover; filter: blur(40px) brightness(0.45); }
+.slideshow__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.slideshow__img.is-landscape { animation: slideshow-pan 6s linear both; }
+@keyframes slideshow-pan { from { transform: scale(1); } to { transform: scale(1.06); } }
+
+.slideshow__sign {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 18px;
+  padding: 40px;
+  text-align: center;
+  background: radial-gradient(circle at 50% 40%, #0f3d2a, #000 75%);
+  animation: slideshow-sign 700ms var(--ease) both;
+}
+.slideshow__sign .sign--lg { font-size: clamp(48px, 9vw, 120px); max-width: 90vw; }
+.slideshow__sign p { margin: 0; font-size: clamp(18px, 2.2vw, 30px); opacity: 0.85; max-width: 60ch; }
+.slideshow__exit {
+  font-family: var(--font-sign);
+  font-weight: 600;
+  font-size: clamp(18px, 2vw, 28px);
+  padding: 2px 14px;
+  border-radius: 8px;
+  background: var(--signal);
+  color: #16191b;
+}
+.slideshow__end { display: flex; gap: 12px; margin-top: 12px; }
+.slideshow__quiet { color: #fff; }
+@keyframes slideshow-sign { from { opacity: 0; transform: scale(0.96); } }
+
+.slideshow__caption {
+  position: absolute;
+  left: max(28px, 3vw);
+  bottom: max(28px, 4vh);
+  display: grid;
+  gap: 4px;
+  max-width: min(60vw, 900px);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
+}
+.slideshow__caption strong { font-family: var(--font-sign); font-weight: 600; font-size: clamp(26px, 3vw, 46px); line-height: 1; }
+.slideshow__caption span { font-size: clamp(15px, 1.5vw, 22px); opacity: 0.85; }
+.slideshow__caption .slideshow__note { font-size: clamp(18px, 1.9vw, 28px); opacity: 1; }
+
+.slideshow__map {
+  position: absolute;
+  right: max(24px, 3vw);
+  bottom: max(24px, 4vh);
+  width: clamp(150px, 16vw, 260px);
+  height: auto;
+  padding: 8px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.slideshow__route { fill: none; stroke: rgba(255, 255, 255, 0.45); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.slideshow__map circle { fill: rgba(255, 255, 255, 0.5); transition: r 400ms var(--ease); }
+.slideshow__map circle.is-done { fill: #19a266; stroke: #fff; stroke-width: 2; }
+
+.slideshow__progress { position: absolute; left: 0; right: 0; top: 0; height: 3px; background: rgba(255, 255, 255, 0.12); }
+.slideshow__progress span { display: block; height: 100%; background: #19a266; transition: width 400ms var(--ease); }
+
+.slideshow__bar,
+.slideshow__controls { position: absolute; transition: opacity 400ms var(--ease); }
+.is-idle .slideshow__bar,
+.is-idle .slideshow__controls { opacity: 0; pointer-events: none; }
+.slideshow__bar {
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: max(18px, 2.5vh) max(20px, 3vw);
+  background: linear-gradient(rgba(0, 0, 0, 0.55), transparent);
+}
+.slideshow__trip { flex: 1; min-width: 0; font-family: var(--font-sign); font-weight: 600; font-size: clamp(20px, 2vw, 30px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.slideshow__toggle {
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 18px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  font-size: clamp(14px, 1.2vw, 18px);
+  cursor: pointer;
+}
+.slideshow__controls { left: 50%; bottom: max(28px, 4vh); translate: -50% 0; display: flex; align-items: center; gap: 22px; }
+.slideshow__button { width: clamp(48px, 4.5vw, 72px); height: clamp(48px, 4.5vw, 72px); }
+.slideshow__next svg { transform: scaleX(-1); }
+.slideshow__play {
+  width: clamp(64px, 6vw, 96px);
+  height: clamp(64px, 6vw, 96px);
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.slideshow__pause-icon { width: 30%; height: 34%; border-inline: 7px solid #16191b; box-sizing: border-box; }
+.slideshow__play-icon { width: 0; height: 0; margin-left: 8%; border-block: 14px solid transparent; border-left: 24px solid #16191b; }
+/* Focus bien visible : la télécommande se déplace de bouton en bouton. */
+.slideshow button:focus-visible { outline: 4px solid var(--signal); outline-offset: 4px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .slideshow__img.is-landscape,
+  .slideshow__sign { animation: none; }
+}

@@ -1,0 +1,67 @@
+.live-invite {
+  position: fixed;
+  z-index: 70;
+  left: 50%;
+  top: calc(env(safe-area-inset-top, 0px) + 12px);
+  translate: -50% 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: min(560px, calc(100vw - 24px));
+  padding: 10px 12px 10px 16px;
+  border-radius: var(--r-md);
+  background: var(--ink);
+  color: var(--paper);
+  box-shadow: var(--shadow-float);
+  animation: live-drop 420ms var(--ease) both;
+}
+.live-invite p { flex: 1; margin: 0; font-size: 15px; line-height: 1.3; }
+.live-invite .button--quiet { color: var(--paper); }
+.live-invite__dot, .live-bar__dot { flex: none; width: 10px; height: 10px; border-radius: 50%; background: #19a266; }
+.live-invite__dot, .live-bar__dot.is-on { animation: live-pulse 1.6s ease-in-out infinite; }
+.live-bar__dot:not(.is-on) { background: var(--signal); }
+@keyframes live-drop { from { opacity: 0; transform: translateY(-12px); } }
+@keyframes live-pulse { 50% { box-shadow: 0 0 0 6px rgba(25, 162, 102, 0.25); } }
+
+.live-bar {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  top: calc(env(safe-area-inset-top, 0px) + 12px);
+  translate: -50% 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 6px 6px 14px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.live-bar__leave { border: 0; border-radius: 999px; padding: 6px 12px; background: rgba(255, 255, 255, 0.18); color: #fff; font: inherit; cursor: pointer; }
+
+.live-floats { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 1; }
+.live-float {
+  position: absolute;
+  left: var(--x);
+  bottom: 120px;
+  display: grid;
+  justify-items: center;
+  font-size: 54px;
+  animation: live-float 2.6s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+.live-float small { font-size: 13px; font-weight: 700; color: #fff; text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7); }
+@keyframes live-float {
+  0% { opacity: 0; transform: translateY(20px) scale(0.6); }
+  15% { opacity: 1; transform: translateY(0) scale(1.15); }
+  100% { opacity: 0; transform: translateY(-46vh) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .live-float { animation: live-fade 2.6s both; }
+  @keyframes live-fade { 0%, 100% { opacity: 0; } 15%, 70% { opacity: 1; } }
+  .live-invite__dot, .live-bar__dot.is-on { animation: none; }
+}

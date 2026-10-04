@@ -1,0 +1,29 @@
+/* Comme une photo glissée sous le titre : petite, inclinée d'un rien, jamais envahissante. */
+.memory {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 6px 14px 6px 6px;
+  max-width: 280px;
+  border: 0;
+  border-radius: var(--r-md);
+  background: var(--veil);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 10px 24px -14px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  rotate: -1.5deg;
+  transition: rotate 220ms var(--ease), transform 220ms var(--ease);
+  animation: memory-in 520ms var(--ease) 300ms both;
+}
+.memory:hover { rotate: 0deg; transform: translateY(-2px); }
+.memory__img { flex: none; width: 48px; height: 48px; border-radius: var(--r-sm); object-fit: cover; border: 2px solid #fff; }
+.memory__text { display: grid; min-width: 0; line-height: 1.25; }
+.memory__text strong { font-family: var(--font-sign); font-weight: 600; font-size: 19px; }
+.memory__text span { color: var(--muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@keyframes memory-in { from { opacity: 0; transform: translateY(-6px); } }
+@media (prefers-reduced-motion: reduce) { .memory { animation: none; rotate: 0deg; } }

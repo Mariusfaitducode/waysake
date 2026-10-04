@@ -1,4 +1,5 @@
 import type { FastifyInstance } from "fastify";
+import { withSocial } from "../social.js";
 import { createReadStream, existsSync } from "node:fs";
 import type { Db } from "../db.js";
 import { createHash } from "node:crypto";
@@ -37,7 +38,7 @@ export function parseHints(fields: Record<string, unknown>): Hints {
   return h;
 }
 
-type MediaRow = {
+export type MediaRow = {
   id: number; sha256: string; kind: "photo" | "video"; original_path: string; original_name: string; mime: string;
   width: number | null; height: number | null; taken_at: number | null; taken_at_local: string | null;
   lat: number | null; lon: number | null; uploaded_by: string; has_thumbs: number; geo: string | null;
@@ -46,7 +47,7 @@ type MediaRow = {
 
 export type LocationSource = "exif" | "phone" | "manual" | "game";
 
-export type MediaDto = ReturnType<typeof toDto>;
+export type MediaDto = ReturnType<typeof mediaDto>;
 
 export const mediaUrls = (id: number) => ({
   thumb: `/api/media/${id}/thumb`,
@@ -54,7 +55,7 @@ export const mediaUrls = (id: number) => ({
   original: `/api/media/${id}/original`,
 });
 
-function toDto(r: MediaRow) {
+export function mediaDto(r: MediaRow) {
   return {
     id: r.id,
     kind: r.kind,
@@ -127,7 +128,7 @@ export function mediaRoutes(app: FastifyInstance, db: Db, dataDir: string, onIng
       .prepare("SELECT * FROM media WHERE status = 'ready' ORDER BY taken_at IS NULL, taken_at, id LIMIT ? OFFSET ?")
       .all(limit + 1, offset) as MediaRow[];
     const hasMore = rows.length > limit;
-    return { items: rows.slice(0, limit).map(toDto), nextCursor: hasMore ? String(offset + limit) : null };
+    return { items: withSocial(db, rows.slice(0, limit).map(mediaDto)), nextCursor: hasMore ? String(offset + limit) : null };
   });
 
   app.get("/api/stats", async () => {

@@ -19,7 +19,39 @@ export type Media = {
   thumb: string;
   preview: string;
   original: string;
+  /** Qui a réagi, par réaction (identifiants de profils). */
+  reactions?: Partial<Record<Reaction, string[]>>;
+  /** Légende partagée. */
+  note?: string | null;
 };
+export const REACTIONS = ["❤️", "😂", "🤩", "😮"] as const;
+export type Reaction = (typeof REACTIONS)[number];
+export type MemoryGroup = { year: number; yearsAgo: number; count: number; trip: { slug: string; title: string } | null; media: Media[] };
+export type TripStats = {
+  km: number;
+  days: number;
+  countries: number;
+  photos: number;
+  topChapter: { id: number; title: string; count: number } | null;
+  topDay: { day: string; count: number } | null;
+  byUser: { userId: string; count: number; share: number }[];
+};
+export type GameMode = "defi" | "enquete";
+export type GameGuess = { userId: string; lat: number; lon: number; km: number | null; points: number };
+export type GameRound = {
+  index: number;
+  status: "open" | "proposed" | "agreed" | "disagreed";
+  media: { id: number; width: number | null; height: number | null; thumb: string; preview: string };
+  takenAtLocal: string | null;
+  momentSize: number;
+  answer: { lat: number; lon: number } | null;
+  guesses: GameGuess[];
+};
+export type GameScore = { userId: string; points: number; rounds: number };
+export type Game = { id: number; mode: GameMode; createdBy: string; createdAt: number; rounds: GameRound[]; scores: GameScore[] };
+export type GameSummary = { id: number; mode: GameMode; createdBy: string; createdAt: number; rounds: number; played: number; done: boolean; scores: GameScore[] };
+export type GuessResult = { status: GameRound["status"]; km: number | null; points: number; answer: { lat: number; lon: number } | null };
+export type Social = { reactions: Partial<Record<Reaction, string[]>>; note: string | null };
 export type TripSummary = {
   id: number;
   slug: string;
@@ -48,7 +80,7 @@ export type Chapter = {
   media: Media[];
 };
 export type Note = { chapterId: number | null; body: string; author: string; updatedAt: number };
-export type Trip = TripSummary & { route: [number, number][]; chapters: Chapter[]; notes: Note[] };
+export type Trip = TripSummary & { route: [number, number][]; chapters: Chapter[]; notes: Note[]; favorites: number[] };
 export type Country = { code: string; name: string; flag: string; trips: number; firstVisit: number; photos: number };
 export type Overview = { countries: number; trips: number; photos: number; videos: number; km: number };
 export type Wish = {
@@ -194,6 +226,17 @@ export const api = {
   overview: () => get<Overview>("/api/overview"),
   saveNote: (tripId: number, chapterId: number | null, body: string) => send("PUT", "/api/notes", { tripId, chapterId, body }),
   notes: () => get<JournalNote[]>("/api/notes"),
+  memories: (today: string) => get<{ groups: MemoryGroup[] }>(`/api/memories?today=${today}`),
+  tripStats: (slug: string) => get<TripStats>(`/api/trips/${encodeURIComponent(slug)}/stats`),
+  liveInvite: (slug: string) => send<{ invited: number }>("POST", `/api/live/${encodeURIComponent(slug)}/invite`),
+  liveShow: (slug: string, mediaId: number) => send<unknown>("POST", `/api/live/${encodeURIComponent(slug)}/show`, { mediaId }),
+  liveReact: (slug: string, emoji: Reaction, mediaId: number) => send<unknown>("POST", `/api/live/${encodeURIComponent(slug)}/react`, { emoji, mediaId }),
+  games: () => get<{ games: GameSummary[]; records: { userId: string; points: number; gameId: number }[] }>("/api/games"),
+  newGame: (mode: GameMode) => send<{ id: number }>("POST", "/api/games", { mode }),
+  game: (id: number) => get<Game>(`/api/games/${id}`),
+  guess: (id: number, round: number, lat: number, lon: number) => send<GuessResult>("POST", `/api/games/${id}/guess`, { round, lat, lon }),
+  react: (mediaId: number, emoji: Reaction, on: boolean) => send<Social>("POST", `/api/media/${mediaId}/reactions`, { emoji, on }),
+  photoNote: (mediaId: number, text: string) => send<Social>("PUT", `/api/media/${mediaId}/note`, { text }),
   unlocated: () => get<{ total: number; days: UnlocatedDay[] }>("/api/unlocated"),
   locate: (ids: number[], lat: number, lon: number) => send<{ updated: number }>("POST", "/api/media/locate", { ids, lat, lon }),
   wishes: () => get<Wish[]>("/api/wishes"),

@@ -1,5 +1,6 @@
 import type { LocationSource } from "./routes/media.js";
 import type { Db } from "./db.js";
+import { tripFavorites } from "./social.js";
 import { clusterTrips, detectHome, type ChapterDraft, type ClusterInput, type LatLon, type TripDraft } from "./clustering.js";
 import { reverseGeocode, type GeoPlace } from "./geo.js";
 
@@ -175,7 +176,24 @@ type TripRow = {
   country_codes: string; route: string; media_count: number;
 };
 
-function tripSummary(r: TripRow) {
+/** La photo la plus réagie de chaque voyage (couverture automatique tant qu'aucune n'est choisie). */
+function topFavorites(db: Db): Map<number, number> {
+  const rows = db
+    .prepare(
+      `SELECT trip_id, media_id FROM (
+         SELECT c.trip_id, r.media_id, ROW_NUMBER() OVER (PARTITION BY c.trip_id ORDER BY COUNT(*) DESC, MIN(m.taken_at), r.media_id) AS rank
+         FROM reaction r
+         JOIN media_chapter mc ON mc.media_id = r.media_id
+         JOIN chapter c ON c.id = mc.chapter_id
+         JOIN media m ON m.id = r.media_id
+         GROUP BY c.trip_id, r.media_id
+       ) WHERE rank = 1`,
+    )
+    .all() as { trip_id: number; media_id: number }[];
+  return new Map(rows.map((r) => [r.trip_id, r.media_id]));
+}
+
+function tripSummary(r: TripRow, favorite?: number) {
   return {
     id: r.id,
     slug: r.slug,
@@ -187,13 +205,14 @@ function tripSummary(r: TripRow) {
     centerLon: r.center_lon,
     countryCodes: JSON.parse(r.country_codes) as string[],
     mediaCount: r.media_count,
-    coverMediaId: r.cover_media_id ?? r.auto_cover_media_id,
+    coverMediaId: r.cover_media_id ?? favorite ?? r.auto_cover_media_id,
   };
 }
 export type TripSummary = ReturnType<typeof tripSummary>;
 
 export function listTrips(db: Db): TripSummary[] {
-  return (db.prepare("SELECT * FROM trip ORDER BY start_at DESC").all() as TripRow[]).map(tripSummary);
+  const favorites = topFavorites(db);
+  return (db.prepare("SELECT * FROM trip ORDER BY start_at DESC").all() as TripRow[]).map((r) => tripSummary(r, favorites.get(r.id)));
 }
 
 export function getTrip(db: Db, slug: string) {
@@ -205,7 +224,7 @@ export function getTrip(db: Db, slug: string) {
      FROM media_chapter mc JOIN media m ON m.id = mc.media_id WHERE mc.chapter_id = ? ORDER BY m.taken_at, m.id`,
   );
   return {
-    ...tripSummary(r),
+    ...tripSummary(r, tripFavorites(db, r.id, 1)[0]),
     route: JSON.parse(r.route) as [number, number][],
     chapters: chapters.map((c) => ({
       id: c.id as number,

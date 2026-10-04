@@ -119,6 +119,43 @@ const MIGRATIONS = [
   -- Sessions du mot de passe du foyer (ATLAS_PASSWORD) : seule l'empreinte SHA-256 du jeton est gardée.
   CREATE TABLE session (token_hash TEXT PRIMARY KEY, created_at INTEGER NOT NULL);
   `,
+  `
+  -- Réactions (une de chaque au plus par personne et par photo) et légende partagée d'une photo.
+  CREATE TABLE reaction (
+    media_id INTEGER NOT NULL REFERENCES media(id) ON DELETE CASCADE,
+    user_id TEXT NOT NULL REFERENCES user(id),
+    emoji TEXT NOT NULL CHECK (emoji IN ('❤️', '😂', '🤩', '😮')),
+    created_at INTEGER NOT NULL,
+    PRIMARY KEY (media_id, user_id, emoji)
+  );
+  CREATE TABLE media_note (
+    media_id INTEGER PRIMARY KEY REFERENCES media(id) ON DELETE CASCADE,
+    body TEXT NOT NULL,
+    author TEXT NOT NULL REFERENCES user(id),
+    updated_at INTEGER NOT NULL
+  );
+  `,
+  `
+  -- Jeu « Où était-ce ? » : une partie (Défi ou Enquête) et les épingles posées, une par manche et par personne.
+  CREATE TABLE game (
+    id INTEGER PRIMARY KEY,
+    mode TEXT NOT NULL CHECK (mode IN ('defi', 'enquete')),
+    created_by TEXT NOT NULL REFERENCES user(id),
+    created_at INTEGER NOT NULL,
+    rounds TEXT NOT NULL -- JSON : [{ mediaId, moment: [ids] }]
+  );
+  CREATE TABLE guess (
+    game_id INTEGER NOT NULL REFERENCES game(id) ON DELETE CASCADE,
+    round INTEGER NOT NULL,
+    user_id TEXT NOT NULL REFERENCES user(id),
+    lat REAL NOT NULL,
+    lon REAL NOT NULL,
+    km REAL,
+    points INTEGER NOT NULL,
+    created_at INTEGER NOT NULL,
+    PRIMARY KEY (game_id, round, user_id)
+  );
+  `,
 ];
 
 export type Profile = { id: string; name: string; color: string };

@@ -26,5 +26,5 @@ export default defineConfig({
   // MapLibre 6 charge son worker (module ES) par chemin relatif : le pré-empaquetage de Vite le casserait.
   optimizeDeps: { exclude: ["maplibre-gl"] },
   build: { outDir: "../dist", emptyOutDir: true },
-  server: { port: 5173, host: true, proxy: { "/api/": "http://localhost:8420" } },
+  server: { port: Number(process.env.WEB_PORT ?? 5173), host: true, proxy: { "/api/": `http://localhost:${process.env.ATLAS_PORT ?? 8420}` } },
 });

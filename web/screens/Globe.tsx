@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import { api } from "../api.js";
 import { useApi } from "../data.js";
 import { GlobeMap } from "../components/GlobeMap.js";
+import { MemoryCard } from "../components/MemoryCard.js";
 import { TripCard } from "../components/TripCard.js";
 import { useUpload } from "../shell/upload.js";
 import { useProfile } from "../profile.js";
@@ -41,8 +42,12 @@ export function GlobeScreen() {
               {t("globe.stats", { countries: t("count.countries", { count: overview.countries }), trips: t("count.trips", { count: overview.trips }), km: number(overview.km) })}
             </Link>
           )}
+          <MemoryCard />
         </div>
         <div className="globe__actions">
+          <Link to="/jeu" className="globe__play">
+            {t("game.entry")}
+          </Link>
           <button className="icon-button" onClick={openUpload} aria-label={t("common.addPhotos")}>
             <IconPlus />
           </button>

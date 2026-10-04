@@ -26,6 +26,11 @@ if [ -f web/public/waysake.apk ]; then
   scp -q web/public/waysake.apk "$TARGET:$DATA/app/waysake.apk"
 fi
 
+if [ -f web/public/waysake.shortcut ]; then
+  step "Envoi du raccourci iPhone"
+  scp -q web/public/waysake.shortcut "$TARGET:$DATA/app/waysake.shortcut"
+fi
+
 step "Construction et démarrage de Waysake (Docker) — quelques minutes la première fois"
 # En SSH, Windows n'ouvre pas le gestionnaire d'identifiants dont Docker Desktop a besoin : on lance la
 # construction dans la session Windows ouverte, via une tâche planifiée, et on suit son journal.

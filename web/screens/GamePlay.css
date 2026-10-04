@@ -1,0 +1,38 @@
+/* Une manche : la photo en haut, la carte dessous (côte à côte sur grand écran), la barre d'action en bas. */
+.play {
+  display: grid;
+  grid-template-rows: auto minmax(0, 38vh) minmax(240px, 1fr) auto;
+  gap: 10px;
+  height: calc(100dvh - 62px - var(--safe-bottom));
+  padding: calc(env(safe-area-inset-top, 0px) + 10px) 12px 10px;
+}
+.play__top { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.play__round { font-family: var(--font-sign); font-weight: 600; font-size: 22px; white-space: nowrap; }
+.play__chips { margin-left: auto; display: flex; gap: 6px; overflow: hidden; }
+.play__chip { display: inline-flex; gap: 6px; align-items: baseline; padding: 4px 10px; border-radius: 999px; background: var(--surface); box-shadow: inset 0 0 0 1.5px var(--c); font-size: 14px; white-space: nowrap; }
+.play__chip b { font-variant-numeric: tabular-nums; }
+.play__photo { margin: 0; min-height: 0; display: grid; place-items: center; border-radius: var(--r-md); overflow: hidden; background: #000; }
+.play__photo img { max-width: 100%; max-height: 100%; object-fit: contain; animation: fade 300ms var(--ease) both; }
+.play__map { min-height: 0; }
+.play__bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.play__hint, .play__result { flex: 1 1 220px; margin: 0; color: var(--muted); }
+.play__result { color: var(--ink); font-size: 17px; }
+.play__result b { font-family: var(--font-sign); font-size: 30px; color: var(--autostrada); margin-right: 6px; }
+.play__error { padding: 24px; }
+
+.play--end { display: grid; place-content: center; justify-items: center; gap: 18px; grid-template-rows: none; text-align: center; }
+.play__scores { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; min-width: min(360px, 80vw); }
+.play__scores li { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 18px; border-radius: var(--r-md); background: var(--surface); box-shadow: inset 4px 0 0 var(--c), inset 0 0 0 1px var(--hairline); }
+.play__scores b { font-family: var(--font-sign); font-size: 34px; font-variant-numeric: tabular-nums; }
+.play__verdict { margin: 0; font-family: var(--font-sign); font-weight: 600; font-size: 26px; }
+.play__end-actions { display: flex; gap: 10px; }
+
+@media (min-width: 900px) {
+  .play {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    height: 100dvh;
+    padding: 24px 40px;
+  }
+  .play__top, .play__bar { grid-column: 1 / -1; }
+}

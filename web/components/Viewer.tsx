@@ -6,6 +6,8 @@ import { PlacePicker } from "./PlacePicker.js";
 import { IconBack, IconClose } from "../shell/icons.js";
 import { t } from "../i18n/index.js";
 import { placeTitle } from "../i18n/places.js";
+import { PhotoSocial } from "./PhotoSocial.js";
+import { LiveOverlay } from "./LiveOverlay.js";
 import "./Viewer.css";
 
 type Props = {
@@ -15,10 +17,12 @@ type Props = {
   onClose: () => void;
   /** Action contextuelle, ex. « Utiliser comme couverture » dans un voyage. */
   action?: { label: string; run: (m: Media) => Promise<unknown> };
+  /** Mode « Regarder ensemble » : bandeau du salon et réactions de l'autre. */
+  live?: { onLeave: () => void };
 };
 
 /** Plein écran, dialog natif (focus piégé, Échap), flèches au clavier, balayage au doigt. */
-export function Viewer({ items, index, onIndex, onClose, action }: Props) {
+export function Viewer({ items, index, onIndex, onClose, action, live }: Props) {
   const m = items[index];
   const ref = useRef<HTMLDialogElement>(null);
   const touch = useRef<{ x: number; y: number } | null>(null);
@@ -35,6 +39,7 @@ export function Viewer({ items, index, onIndex, onClose, action }: Props) {
   }, []);
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
+      if ((e.target as HTMLElement | null)?.closest?.("input, textarea")) return; // on écrit une légende
       if (e.key === "ArrowRight") go(1);
       if (e.key === "ArrowLeft") go(-1);
     };
@@ -94,7 +99,9 @@ export function Viewer({ items, index, onIndex, onClose, action }: Props) {
           <IconBack />
         </button>
       )}
+      {live && <LiveOverlay mediaId={m.id} onLeave={live.onLeave} />}
       <footer className="viewer__info">
+        <PhotoSocial key={m.id} media={m} />
         <div>
           <p className="viewer__place">{meta}</p>
           <p className="viewer__who">{t("viewer.by", { name: who })}</p>

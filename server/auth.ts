@@ -19,7 +19,7 @@ const AUTH_REQUIRED = { error: "Mot de passe requis.", code: "AUTH_REQUIRED" };
 // Ce qui reste ouvert : l'état de la tour, la connexion, l'APK (une appli publique, sans aucune donnée) et le
 // site lui-même (HTML/JS/CSS, sinon pas d'écran de connexion). On juge la route reconnue par le routeur, jamais
 // l'adresse brute : toute nouvelle route est protégée d'office.
-const OPEN_ROUTES = new Set(["/api/health", "/api/login", "/waysake.apk", "/atlas.apk", "/*"]);
+const OPEN_ROUTES = new Set(["/api/health", "/api/login", "/waysake.apk", "/atlas.apk", "/waysake.shortcut", "/*"]);
 
 const sha256 = (s: string) => createHash("sha256").update(s).digest();
 const hashToken = (token: string) => sha256(token).toString("hex");

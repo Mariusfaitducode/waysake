@@ -34,3 +34,7 @@
 }
 @keyframes toast { 0% { opacity: 0; transform: translateY(10px); } 10%, 85% { opacity: 1; transform: none; } 100% { opacity: 0; } }
 @media (min-width: 900px) { .locate__days { padding-inline: 40px; } }
+
+.locate__game { display: inline-block; margin: 0 16px 16px; color: var(--autostrada); font-weight: 600; text-decoration: none; }
+.locate__game:hover { text-decoration: underline; }
+@media (min-width: 900px) { .locate__game { margin-inline: 40px; } }

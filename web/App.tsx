@@ -3,6 +3,10 @@ import { BrowserRouter, Route, Routes } from "react-router";
 import { api, AUTH_EVENT, AuthRequiredError, type User } from "./api.js";
 import { DataProvider } from "./data.js";
 import { ProfileCtx } from "./profile.js";
+import { LiveProvider } from "./live.js";
+import { Games } from "./screens/Games.js";
+import { GamePlay } from "./screens/GamePlay.js";
+import { Slideshow } from "./screens/Slideshow.js";
 import { Shell } from "./shell/Shell.js";
 import { UploadProvider } from "./shell/upload.js";
 import { ProfilePicker } from "./screens/ProfilePicker.js";
@@ -81,7 +85,9 @@ export function App() {
       <DataProvider key={locale}>
         <BrowserRouter>
           <UploadProvider>
+            <LiveProvider>
             <Routes>
+              <Route path="v/:slug/diaporama" element={<Slideshow />} />
               <Route element={<Shell me={me} onSwitchProfile={switchProfile} />}>
                 <Route index element={<GlobeScreen />} />
                 <Route path="voyages" element={<Trips />} />
@@ -92,9 +98,12 @@ export function App() {
                 <Route path="pays" element={<Countries />} />
                 <Route path="import/:id" element={<ImportReview />} />
                 <Route path="app" element={<GetApp />} />
+                <Route path="jeu" element={<Games />} />
+                <Route path="jeu/:id" element={<GamePlay />} />
                 <Route path="*" element={<NotFound />} />
               </Route>
             </Routes>
+            </LiveProvider>
           </UploadProvider>
         </BrowserRouter>
       </DataProvider>

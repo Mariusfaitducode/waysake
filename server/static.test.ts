@@ -45,6 +45,27 @@ describe("site statique", () => {
     expect((await app.inject({ url: "/atlas.apk" })).body).toBe("PK-neuf");
   });
 
+  it("sert le raccourci iPhone signé depuis le dossier de données, 404 sinon", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "atlas-"));
+    const app = await buildApp({ dataDir: join(dir, "data") });
+    expect((await app.inject({ url: "/waysake.shortcut" })).json()).toMatchObject({ code: "shortcut_missing" });
+    mkdirSync(join(dir, "data", "app"), { recursive: true });
+    writeFileSync(join(dir, "data", "app", "waysake.shortcut"), "AEA1-signed");
+    const res = await app.inject({ url: "/waysake.shortcut" });
+    expect(res.statusCode).toBe(200);
+    expect(res.headers["content-disposition"]).toContain("Importer dans Waysake.shortcut");
+    expect(res.body).toBe("AEA1-signed");
+  });
+
+  it("sert aussi le raccourci posé dans le site compilé (sortie de build-shortcut)", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "waysake-"));
+    mkdirSync(join(dir, "web"), { recursive: true });
+    writeFileSync(join(dir, "web", "index.html"), "<title>Waysake</title>");
+    writeFileSync(join(dir, "web", "waysake.shortcut"), "AEA1-web");
+    const app = await buildApp({ dataDir: join(dir, "data"), webDir: join(dir, "web") });
+    expect((await app.inject({ url: "/waysake.shortcut" })).body).toBe("AEA1-web");
+  });
+
   it("répond 404 pour l'APK quand il n'a pas été déposé", async () => {
     const app = await buildApp({ dataDir: mkdtempSync(join(tmpdir(), "waysake-")) });
     const res = await app.inject({ url: "/waysake.apk" });

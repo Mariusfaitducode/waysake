@@ -1,0 +1,27 @@
+.guess-map { width: 100%; height: 100%; min-height: 260px; border-radius: var(--r-md); overflow: hidden; background: var(--hairline); }
+.guess-map__canvas { width: 100%; height: 100%; }
+.guess-map.is-picking .maplibregl-canvas { cursor: crosshair; }
+.guess-pin { display: grid; justify-items: center; pointer-events: none; }
+.guess-pin span {
+  width: 22px;
+  height: 22px;
+  border-radius: 50% 50% 50% 0;
+  rotate: -45deg;
+  background: var(--c);
+  border: 3px solid #fff;
+  box-shadow: 0 4px 10px -2px rgba(0, 0, 0, 0.45);
+  animation: pin-drop 380ms var(--ease) both;
+}
+.guess-pin b {
+  order: -1;
+  margin-bottom: 4px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--c);
+  color: #fff;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.guess-pin.is-answer span { border-radius: 6px; rotate: 0deg; width: 26px; height: 26px; background: var(--autostrada); box-shadow: 0 0 0 3px var(--autostrada), 0 6px 14px -2px rgba(0, 0, 0, 0.5); }
+@keyframes pin-drop { from { transform: translateY(-14px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .guess-pin span { animation: none; } }

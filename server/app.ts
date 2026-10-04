@@ -13,6 +13,10 @@ import { tripRoutes } from "./routes/trips.js";
 import { journalRoutes } from "./routes/journal.js";
 import { importRoutes } from "./routes/imports.js";
 import { locateRoutes } from "./routes/locate.js";
+import { socialRoutes } from "./routes/social.js";
+import { souvenirRoutes } from "./routes/souvenirs.js";
+import { liveRoutes } from "./routes/live.js";
+import { gameRoutes } from "./routes/game.js";
 import { setupAuth } from "./auth.js";
 import { scheduleSnapshots } from "./backup.js";
 import { setting } from "./config.js";
@@ -103,12 +107,25 @@ export async function buildApp(opts: {
   };
   app.get("/waysake.apk", sendApk);
   app.get("/atlas.apk", sendApk);
+  // Le raccourci iPhone signé (scripts/build-shortcut.ts) : dans DATA_DIR/app/ comme l'APK, sinon dans le site compilé.
+  app.get("/waysake.shortcut", async (_req, reply) => {
+    const file = [resolve(opts.dataDir, "app"), ...(opts.webDir ? [resolve(opts.webDir)] : [])].map((d) => resolve(d, "waysake.shortcut")).find((f) => existsSync(f));
+    if (!file) return reply.code(404).send({ error: "Le raccourci iPhone n'a pas encore été déposé sur la tour.", code: "shortcut_missing" });
+    return reply
+      .type("application/octet-stream")
+      .header("Content-Disposition", "attachment; filename=\"Importer dans Waysake.shortcut\"")
+      .send(createReadStream(file));
+  });
   userRoutes(app, db);
   mediaRoutes(app, db, opts.dataDir, scheduleRebuild);
   tripRoutes(app, db);
   journalRoutes(app, db);
   importRoutes(app, db, opts.dataDir);
   locateRoutes(app, db);
+  socialRoutes(app, db);
+  souvenirRoutes(app, db, opts.dataDir);
+  liveRoutes(app, db);
+  gameRoutes(app, db);
 
   const webDir = opts.webDir && resolve(opts.webDir);
   if (webDir && existsSync(webDir)) {

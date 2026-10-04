@@ -128,6 +128,7 @@ describe("avec WAYSAKE_PASSWORD", () => {
     expect((await app.inject({ url: "/assets/index.js" })).statusCode).toBe(200);
     expect((await app.inject({ url: "/waysake.apk" })).body).toBe("PK-apk");
     expect((await app.inject({ url: "/atlas.apk" })).body).toBe("PK-apk");
+    expect((await app.inject({ url: "/waysake.shortcut" })).statusCode).not.toBe(401); // le raccourci ne contient aucune donnée
     expect((await app.inject({ url: "/api/inconnue" })).statusCode).toBe(404);
   });
 

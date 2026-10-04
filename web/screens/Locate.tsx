@@ -32,6 +32,9 @@ export function Locate() {
         }
       />
       {data?.total === 0 && <EmptyState title={t("locate.empty.title")} text={t("locate.empty.text")} />}
+      <Link to="/jeu" className="locate__game">
+        {t("game.locateHint")}
+      </Link>
       <div className="locate__days">
         {data?.days.map((d) => (
           <DayCard key={d.day} day={d} onLocate={(ids, preview) => setTarget({ ids, preview })} />

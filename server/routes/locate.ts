@@ -7,15 +7,21 @@ import { rebuildTrips } from "../trips.js";
 type Row = { id: number; taken_at: number; taken_at_local: string; lat: number | null; lon: number | null; width: number | null; height: number | null; has_thumbs: number; kind: string };
 
 /** Photos à localiser (aucun lieu, et aucune voisine localisée à moins de 2 h), et pose d'un lieu en lot. */
+/** Photos sans lieu (ni GPS, ni voisine localisée à moins de 2 h), groupées par journée et par moment. */
+export function findUnlocated(db: Db) {
+  const rows = db
+    .prepare("SELECT id, kind, taken_at, taken_at_local, lat, lon, width, height, has_thumbs FROM media WHERE status = 'ready' AND taken_at IS NOT NULL ORDER BY taken_at")
+    .all() as Row[];
+  const inferred = inferLocations(rows.map((r) => ({ id: r.id, takenAt: r.taken_at, lat: r.lat, lon: r.lon, geo: r.lat !== null ? ({} as never) : null })));
+  const lost = new Set(inferred.filter((i) => i.lat === null).map((i) => i.id));
+  const byId = new Map(rows.map((r) => [r.id, r]));
+  const days = groupMoments(rows.filter((r) => lost.has(r.id)).map((r) => ({ id: r.id, takenAt: r.taken_at, takenAtLocal: r.taken_at_local })));
+  return { lost, byId, days };
+}
+
 export function locateRoutes(app: FastifyInstance, db: Db) {
   app.get("/api/unlocated", async () => {
-    const rows = db
-      .prepare("SELECT id, kind, taken_at, taken_at_local, lat, lon, width, height, has_thumbs FROM media WHERE status = 'ready' AND taken_at IS NOT NULL ORDER BY taken_at")
-      .all() as Row[];
-    const inferred = inferLocations(rows.map((r) => ({ id: r.id, takenAt: r.taken_at, lat: r.lat, lon: r.lon, geo: r.lat !== null ? ({} as never) : null })));
-    const lost = new Set(inferred.filter((i) => i.lat === null).map((i) => i.id));
-    const byId = new Map(rows.map((r) => [r.id, r]));
-    const days = groupMoments(rows.filter((r) => lost.has(r.id)).map((r) => ({ id: r.id, takenAt: r.taken_at, takenAtLocal: r.taken_at_local })));
+    const { lost, byId, days } = findUnlocated(db);
     return {
       total: lost.size,
       days: days.map((d) => ({

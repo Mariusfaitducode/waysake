@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router";
+import { useLive } from "../live.js";
+import { useProfile } from "../profile.js";
 import { api, type Chapter, type Media, type Trip } from "../api.js";
 import { useApi, useDataVersion } from "../data.js";
 import { dateRange, days, flags } from "../format.js";
@@ -13,13 +15,16 @@ import { NoteEditor } from "../components/NoteEditor.js";
 import { BadgeSheet } from "../components/BadgeSheet.js";
 import { ActionSheet, PromptSheet, type Action } from "../components/Sheet.js";
 import { EmptyState } from "../components/EmptyState.js";
-import { IconBack, IconMore, IconNfc } from "../shell/icons.js";
+import { TripStatsPanel } from "../components/TripStatsPanel.js";
+import { IconBack, IconMore, IconNfc, IconPlay, IconTogether } from "../shell/icons.js";
+import { PostcardSheet } from "../components/PostcardSheet.js";
 import "./Trip.css";
 
 type Overlay =
   | { kind: "trip-menu" }
   | { kind: "rename-trip" }
   | { kind: "badge" }
+  | { kind: "postcard" }
   | { kind: "chapter-menu"; chapter: Chapter; index: number }
   | { kind: "rename-chapter"; chapter: Chapter }
   | { kind: "cover-help" };
@@ -36,6 +41,47 @@ export function TripScreen() {
   const chapterRefs = useRef<(HTMLElement | null)[]>([]);
 
   const flat = useMemo(() => trip?.chapters.flatMap((c) => c.media) ?? [], [trip]);
+  const live = useLive();
+  const { me } = useProfile();
+  const [params, setParams] = useSearchParams();
+  const together = live.room === slug;
+
+  // Invitation acceptée (/v/<voyage>?ensemble) : on entre dans le salon.
+  useEffect(() => {
+    if (!params.has("ensemble")) return;
+    live.join(slug);
+    setParams({}, { replace: true });
+  }, [slug, params]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Ensemble : on suit la photo du meneur ; seul dans le salon, on ouvre la première.
+  const leader = live.state?.leader;
+  const shown = live.state?.mediaId;
+  useEffect(() => {
+    if (!together || leader === undefined || !flat.length) return;
+    if (shown === null) {
+      if (leader === me.id) {
+        const i = viewer ?? 0;
+        setViewer(i);
+        live.show(flat[i].id);
+      }
+      return;
+    }
+    if (leader !== me.id) {
+      const i = flat.findIndex((m) => m.id === shown);
+      if (i >= 0) setViewer(i);
+    }
+  }, [together, leader, shown, flat]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const startTogether = () => {
+    live.join(slug);
+    void api.liveInvite(slug).catch(() => {});
+  };
+  const leaveTogether = () => {
+    live.leave();
+    setViewer(null);
+  };
+
+  const favorites = useMemo(() => (trip?.favorites ?? []).map((id) => flat.find((m) => m.id === id)).filter((m): m is Media => !!m), [trip, flat]);
   useEffect(() => {
     if (trip) document.title = `${trip.title} — Waysake`;
     return () => {
@@ -60,6 +106,9 @@ export function TripScreen() {
   const back = () => (history.length > 1 ? navigate(-1) : navigate("/voyages"));
 
   const tripActions: Action[] = [
+    { label: t("live.start"), hint: t("live.start.hint"), onSelect: startTogether },
+    { label: t("slideshow.open"), onSelect: () => navigate(`/v/${trip.slug}/diaporama`) },
+    { label: t("postcard.open"), hint: t("postcard.hint"), onSelect: () => setOverlay({ kind: "postcard" }) },
     { label: t("trip.rename"), onSelect: () => setOverlay({ kind: "rename-trip" }) },
     { label: t("trip.changeCover"), hint: t("trip.changeCover.hint"), onSelect: () => setOverlay({ kind: "cover-help" }) },
     { label: t("trip.badge"), hint: t("trip.badge.hint"), onSelect: () => setOverlay({ kind: "badge" }) },
@@ -75,6 +124,12 @@ export function TripScreen() {
             <IconBack />
           </button>
           <div className="trip-hero__actions">
+            <button className="icon-button icon-button--glass" onClick={startTogether} aria-label={t("live.start")}>
+              <IconTogether />
+            </button>
+            <button className="icon-button icon-button--glass" onClick={() => navigate(`/v/${trip.slug}/diaporama`)} aria-label={t("slideshow.open")}>
+              <IconPlay />
+            </button>
             <button className="icon-button icon-button--glass" onClick={() => setOverlay({ kind: "badge" })} aria-label={t("badge.title")}>
               <IconNfc />
             </button>
@@ -113,6 +168,27 @@ export function TripScreen() {
           <NoteEditor key={`t-${trip.id}`} tripId={trip.id} chapterId={null} initial={noteFor(null)} placeholder={t("trip.notePlaceholder")} />
         </section>
 
+        {favorites.length > 0 && (
+          <section className="favorites" aria-labelledby="favorites-title">
+            <div className="favorites__head">
+              <h2 id="favorites-title" className="chapter__title">{t("trip.favorites")}</h2>
+              <p className="chapter__meta">{t("trip.favorites.hint")}</p>
+            </div>
+            <ul className="favorites__strip">
+              {favorites.map((m) => (
+                <li key={m.id}>
+                  <button onClick={() => setViewer(flat.indexOf(m))} aria-label={t("grid.open")}>
+                    <img src={m.thumb} alt="" loading="lazy" />
+                    <span className="favorites__emoji" aria-hidden="true">
+                      {Object.entries(m.reactions ?? {}).flatMap(([emoji, who]) => (who ?? []).map(() => emoji)).slice(0, 4).join("")}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         {trip.chapters.map((c, i) => (
           <section key={c.id} className="chapter" ref={(el) => void (chapterRefs.current[i] = el)} aria-labelledby={`c-${c.id}`}>
             <div className="chapter__head">
@@ -132,19 +208,26 @@ export function TripScreen() {
             <ChapterNote trip={trip} chapter={c} initial={noteFor(c.id)} />
           </section>
         ))}
+
+        <TripStatsPanel slug={trip.slug} />
       </div>
 
       {viewer !== null && (
         <Viewer
           items={flat}
           index={viewer}
-          onIndex={setViewer}
-          onClose={() => setViewer(null)}
+          onIndex={(i) => {
+            setViewer(i);
+            if (together) live.show(flat[i].id);
+          }}
+          onClose={() => (together ? leaveTogether() : setViewer(null))}
+          live={together ? { onLeave: leaveTogether } : undefined}
           action={{ label: t("trip.useAsCover"), run: (m: Media) => api.updateTrip(trip.slug, { coverMediaId: m.id }).then(bump) }}
         />
       )}
 
       {overlay?.kind === "trip-menu" && <ActionSheet title={trip.title} actions={tripActions} onClose={() => setOverlay(null)} />}
+      {overlay?.kind === "postcard" && <PostcardSheet slug={trip.slug} title={trip.title} onClose={() => setOverlay(null)} />}
       {overlay?.kind === "badge" && <BadgeSheet slug={trip.slug} title={trip.title} onClose={() => setOverlay(null)} />}
       {overlay?.kind === "cover-help" && (
         <ActionSheet
