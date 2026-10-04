@@ -1,0 +1,7 @@
+.picker-preview { width: 100%; max-height: 180px; object-fit: cover; border-radius: 14px; margin-bottom: 12px; }
+.place-hits { list-style: none; margin: 8px 0 0; padding: 0; display: grid; }
+.place-hits button { width: 100%; display: flex; gap: 10px; align-items: center; padding: 12px 8px; border: 0; background: none; border-radius: 12px; text-align: left; cursor: pointer; font-size: 17px; }
+.place-hits button:hover { background: var(--hairline); }
+.place-hits svg { flex: none; width: 20px; height: 20px; color: var(--autostrada); }
+.place-hits small { display: block; color: var(--muted); font-size: 14px; }
+.place-confirm p { margin: 0 0 8px; font-size: 18px; }

@@ -1,0 +1,72 @@
+.picker {
+  min-height: 100dvh;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 10px;
+  padding: 32px 20px calc(32px + var(--safe-bottom));
+  text-align: center;
+}
+/* Le seul ornement : un panneau d'autoroute, la porte d'entrée du voyage. */
+.picker__sign {
+  background: var(--autostrada);
+  color: var(--autostrada-ink);
+  border-radius: 12px;
+  padding: 5px 7px;
+  margin-bottom: 28px;
+  animation: sign-in 700ms var(--ease) both;
+}
+.picker__sign span {
+  display: block;
+  border: 2.5px solid currentColor;
+  border-radius: 8px;
+  padding: 4px 22px 2px;
+  font-family: var(--font-sign);
+  font-weight: 600;
+  font-size: 30px;
+  letter-spacing: 0.02em;
+}
+.picker__title {
+  font-family: var(--font-sign);
+  font-weight: 600;
+  font-size: clamp(44px, 9vw, 72px);
+  line-height: 1;
+  margin: 0;
+}
+.picker__hint { margin: 0 0 36px; color: var(--muted); }
+.picker__people { display: flex; gap: clamp(24px, 8vw, 56px); }
+.picker__person {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: var(--r-lg);
+}
+.picker__avatar {
+  width: clamp(104px, 28vw, 148px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--c);
+  color: #fff;
+  font-family: var(--font-sign);
+  font-weight: 600;
+  font-size: clamp(48px, 13vw, 68px);
+  transition: transform 220ms var(--ease), box-shadow 220ms var(--ease);
+  box-shadow: 0 0 0 0 transparent;
+}
+.picker__person:hover .picker__avatar,
+.picker__person:focus-visible .picker__avatar {
+  transform: scale(1.04);
+  box-shadow: 0 0 0 5px var(--paper), 0 0 0 8px var(--c);
+}
+.picker__person:active .picker__avatar { transform: scale(0.97); }
+.picker__name { font-size: 19px; font-weight: 600; }
+.picker__error { color: var(--danger); }
+@keyframes sign-in {
+  from { opacity: 0; transform: translateY(-8px) rotate(-2deg); }
+}

@@ -1,0 +1,19 @@
+.trip-map { height: 340px; border-radius: 22px; overflow: hidden; background: var(--hairline); }
+.stop {
+  border: 0;
+  padding: 2.5px;
+  border-radius: 7px;
+  background: var(--autostrada);
+  color: #fff;
+  font-family: var(--font-sign);
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 4px 10px -3px rgba(0, 0, 0, 0.4);
+  transition: transform 200ms var(--ease);
+}
+.stop span { display: block; min-width: 22px; padding: 3px 5px 2px; border: 1.5px solid currentColor; border-radius: 5px; }
+.stop:hover { transform: scale(1.15); }
+@media (min-width: 900px) { .trip-map { height: 440px; } }
+.trip-map--compact { height: 200px; border-radius: 16px; }

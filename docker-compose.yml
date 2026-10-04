@@ -1,0 +1,14 @@
+# Sur la tour Windows : `docker compose up -d --build` dans ce dossier.
+services:
+  atlas:
+    build: .
+    container_name: atlas
+    restart: unless-stopped
+    environment:
+      # Les profils du foyer, ex. « Léa, Tom » ou « Léa:#0B7A4B, Tom:#1F6FB2 ». Vide : profils d'exemple.
+      - ATLAS_PROFILES=${ATLAS_PROFILES:-}
+    ports:
+      - "8420:8420"
+    volumes:
+      # Tes photos et la base. Change le chemin si besoin (ex. E:/Atlas).
+      - ${ATLAS_DATA:-D:/Atlas}:/data

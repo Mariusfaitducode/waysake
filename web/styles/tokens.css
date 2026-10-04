@@ -1,0 +1,36 @@
+/* Atlas — panneaux routiers d'Europe : vert autoroute, blanc neutre, les photos portent la couleur. */
+:root {
+  --paper: #fafaf8;
+  --surface: #ffffff;
+  --ink: #16191b;
+  --muted: #6a7074;
+  --hairline: rgba(22, 25, 27, 0.1);
+  --autostrada: #0b7a4b;
+  --autostrada-ink: #ffffff;
+  --signal: #f2c230;
+  --danger: #c4392b;
+  --veil: rgba(250, 250, 248, 0.78);
+
+  --font-ui: "Instrument Sans Variable", system-ui, -apple-system, sans-serif;
+  --font-sign: "Barlow Condensed", "Arial Narrow", sans-serif;
+
+  --r-sm: 10px;
+  --r-md: 16px;
+  --r-lg: 26px;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --shadow-float: 0 10px 30px -8px rgba(11, 60, 40, 0.45);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #101312;
+    --surface: #1a1e1d;
+    --ink: #eef0ee;
+    --muted: #949b98;
+    --hairline: rgba(238, 240, 238, 0.12);
+    --autostrada: #19a266;
+    --veil: rgba(16, 19, 18, 0.72);
+  }
+}

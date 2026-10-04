@@ -1,0 +1,77 @@
+.globe { position: fixed; inset: 0 0 calc(62px + var(--safe-bottom)) 0; overflow: hidden; background: var(--paper); }
+.globe__top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: calc(env(safe-area-inset-top, 0px) + 18px) 16px 0;
+  pointer-events: none;
+}
+.globe__top > * { pointer-events: auto; }
+.globe__title { margin: 0; font-family: var(--font-sign); font-weight: 600; font-size: 40px; line-height: 1; }
+.globe__stats {
+  display: inline-block;
+  margin-top: 6px;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 15px;
+  border-bottom: 1px solid transparent;
+}
+.globe__stats:hover { color: var(--ink); border-bottom-color: currentColor; }
+.globe__me {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--c);
+  color: #fff;
+  font-family: var(--font-sign);
+  font-weight: 600;
+  font-size: 19px;
+  cursor: pointer;
+}
+.globe .globe-map { bottom: 150px; }
+.globe__strip {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 14px;
+  display: flex;
+  gap: 12px;
+  padding: 4px 16px 10px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+.globe__strip::-webkit-scrollbar { display: none; }
+.globe__slot { flex: none; scroll-snap-align: center; border-radius: 20px; transition: transform 260ms var(--ease), box-shadow 260ms var(--ease); box-shadow: 0 12px 30px -14px rgba(0, 0, 0, 0.5); }
+.globe__slot.is-selected { transform: translateY(-6px); box-shadow: 0 0 0 3px var(--autostrada), 0 18px 34px -14px rgba(0, 0, 0, 0.55); }
+.globe__empty {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 24px;
+  max-width: 420px;
+  margin: auto;
+  padding: 20px;
+  border-radius: 22px;
+  background: var(--veil);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  text-align: center;
+}
+.globe__empty p { margin: 0 0 14px; }
+
+@media (min-width: 900px) {
+  .globe { inset: 0 0 0 92px; }
+  .globe__top { padding: 34px 40px 0; }
+  .globe__title { font-size: 54px; }
+  .globe__me { display: none; }
+  .globe__strip { padding-inline: 40px; bottom: 28px; }
+  .globe .globe-map { bottom: 0; }
+}
+.globe__actions { display: flex; gap: 10px; align-items: center; }
+.globe__actions .icon-button { background: var(--veil); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); color: var(--autostrada); }

@@ -1,0 +1,31 @@
+.trip-card {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: 22px;
+  background: var(--hairline);
+  color: #fff;
+  text-decoration: none;
+  isolation: isolate;
+  transition: transform 260ms var(--ease);
+  -webkit-tap-highlight-color: transparent;
+}
+.trip-card:active { transform: scale(0.98); }
+.trip-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; transition: transform 700ms var(--ease); }
+.trip-card:hover img { transform: scale(1.04); }
+.trip-card__shade { position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, transparent 35%, rgba(0, 0, 0, 0.62)); }
+.trip-card__text { position: absolute; left: 0; right: 0; bottom: 0; display: grid; gap: 2px; padding: 18px; }
+.trip-card__flags { font-size: 18px; letter-spacing: 2px; }
+.trip-card__title { font-family: var(--font-sign); font-weight: 600; font-size: 32px; line-height: 1; text-wrap: balance; }
+.trip-card__meta { font-size: 14px; opacity: 0.9; }
+.trip-card__count { opacity: 0.75; }
+.trip-card--lg { aspect-ratio: 4 / 5; }
+.trip-card--md { aspect-ratio: 4 / 3; }
+.trip-card--sm { width: 240px; aspect-ratio: 4 / 3; border-radius: 18px; }
+.trip-card--sm .trip-card__title { font-size: 24px; }
+.trip-card--sm .trip-card__text { padding: 14px; }
+@media (min-width: 900px) {
+  .trip-card--lg { aspect-ratio: 16 / 10; }
+  .trip-card--lg .trip-card__title { font-size: 44px; }
+  .trip-card--lg .trip-card__text { padding: 26px; }
+}

@@ -1,0 +1,36 @@
+.locate { max-width: 860px; }
+.locate__days { display: grid; gap: 14px; padding: 8px 16px 0; }
+.lday { min-width: 0; padding: 16px; border-radius: 22px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--hairline); }
+.lday__head > div { min-width: 0; }
+.lday__head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.lday__head h2 { margin: 0; font-family: var(--font-sign); font-weight: 600; font-size: 24px; line-height: 1.1; }
+.lday__head p { margin: 2px 0 0; color: var(--muted); font-size: 15px; }
+.lday__head .button { flex: none; }
+.lday__strip { display: flex; gap: 4px; margin-top: 12px; overflow-x: auto; scrollbar-width: none; align-items: center; }
+.lday__strip::-webkit-scrollbar { display: none; }
+.lday__strip img { flex: none; width: 64px; height: 64px; object-fit: cover; border-radius: 8px; }
+.lday__more { flex: none; padding: 0 10px; color: var(--muted); font-weight: 600; }
+.lday__toggle { margin-top: 10px; padding: 6px 0; border: 0; background: none; color: var(--autostrada); font-weight: 600; font-size: 15px; cursor: pointer; text-align: left; }
+.lday__moments { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 1px; border-radius: 14px; overflow: hidden; background: var(--hairline); }
+.lday__moments li { display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: var(--surface); }
+.lmoment__thumbs { display: flex; flex: none; }
+.lmoment__thumbs img { width: 40px; height: 40px; object-fit: cover; border-radius: 8px; box-shadow: 0 0 0 2px var(--surface); margin-left: -10px; }
+.lmoment__thumbs img:first-child { margin-left: 0; }
+.lmoment__text { flex: 1; display: grid; }
+.lmoment__text span { color: var(--muted); font-size: 14px; }
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(96px + var(--safe-bottom));
+  translate: -50% 0;
+  z-index: 60;
+  padding: 12px 18px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 600;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  animation: toast 3.2s var(--ease) both;
+}
+@keyframes toast { 0% { opacity: 0; transform: translateY(10px); } 10%, 85% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+@media (min-width: 900px) { .locate__days { padding-inline: 40px; } }

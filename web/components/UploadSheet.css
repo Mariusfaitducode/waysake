@@ -1,0 +1,32 @@
+.drop {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  text-align: center;
+  padding: 42px 20px;
+  border-radius: var(--r-md);
+  border: 2px dashed var(--hairline);
+  cursor: pointer;
+  transition: border-color 200ms var(--ease), background 200ms var(--ease);
+}
+.drop:hover, .drop.is-over, .drop:focus-within { border-color: var(--autostrada); background: color-mix(in srgb, var(--autostrada) 7%, transparent); }
+.drop__lead {
+  background: var(--autostrada);
+  color: var(--autostrada-ink);
+  padding: 13px 24px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+.drop__hint { color: var(--muted); font-size: 15px; max-width: 30ch; margin-top: 8px; }
+
+.progress { height: 8px; border-radius: 4px; background: var(--hairline); overflow: hidden; }
+.progress__bar {
+  height: 100%;
+  background: var(--autostrada);
+  transform-origin: left;
+  transition: transform 300ms var(--ease);
+}
+.failed { margin-top: 18px; font-size: 15px; }
+.failed ul { padding-left: 18px; color: var(--muted); }
+
+

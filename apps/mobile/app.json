@@ -1,0 +1,61 @@
+{
+  "expo": {
+    "name": "Atlas",
+    "slug": "atlas",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "backgroundColor": "#0B7A4B",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "fr.atlas.voyages"
+    },
+    "android": {
+      "package": "fr.atlas.voyages",
+      "adaptiveIcon": {
+        "backgroundColor": "#0B7A4B",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Atlas lit tes photos pour les envoyer à ta tour et les ranger par voyage.",
+          "savePhotosPermission": "Atlas n'enregistre rien dans ta photothèque.",
+          "isAccessMediaLocationEnabled": true,
+          "granularPermissions": [
+            "photo",
+            "video"
+          ]
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ],
+      "@react-native-community/datetimepicker",
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 160,
+          "backgroundColor": "#0B7A4B"
+        }
+      ],
+      "./plugins/withReleaseSigning"
+    ]
+  }
+}

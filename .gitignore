@@ -1,0 +1,7 @@
+node_modules/
+/data/
+dist/
+*.log
+.superpowers/
+.playwright-mcp/
+web/public/atlas.apk
