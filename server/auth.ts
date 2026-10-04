@@ -3,7 +3,7 @@ import { createHash, randomBytes, scryptSync, timingSafeEqual } from "node:crypt
 import type { Db } from "./db.js";
 
 /**
- * Mot de passe du foyer (ATLAS_PASSWORD), facultatif. Sans lui, Atlas reste ouvert comme avant.
+ * Mot de passe du foyer (WAYSAKE_PASSWORD), facultatif. Sans lui, Waysake reste ouvert comme avant.
  *
  * Avec lui, toute l'API et tous les fichiers (originaux, miniatures, vidéos) exigent :
  * - le cookie `atlas_session` (navigateur), obtenu par POST /api/login ;
@@ -19,7 +19,7 @@ const AUTH_REQUIRED = { error: "Mot de passe requis.", code: "AUTH_REQUIRED" };
 // Ce qui reste ouvert : l'état de la tour, la connexion, l'APK (une appli publique, sans aucune donnée) et le
 // site lui-même (HTML/JS/CSS, sinon pas d'écran de connexion). On juge la route reconnue par le routeur, jamais
 // l'adresse brute : toute nouvelle route est protégée d'office.
-const OPEN_ROUTES = new Set(["/api/health", "/api/login", "/atlas.apk", "/*"]);
+const OPEN_ROUTES = new Set(["/api/health", "/api/login", "/waysake.apk", "/atlas.apk", "/*"]);
 
 const sha256 = (s: string) => createHash("sha256").update(s).digest();
 const hashToken = (token: string) => sha256(token).toString("hex");

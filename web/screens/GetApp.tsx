@@ -7,7 +7,7 @@ import "./GetApp.css";
 type Device = "android" | "iphone" | "desktop";
 const detect = (): Device => (/android/i.test(navigator.userAgent) ? "android" : /iphone|ipad/i.test(navigator.userAgent) ? "iphone" : "desktop");
 
-/** Mettre Atlas sur son téléphone : APK Android, raccourci iPhone, ou QR code depuis l'ordinateur. */
+/** Mettre Waysake sur son téléphone : APK Android, raccourci iPhone, ou QR code depuis l'ordinateur. */
 export function GetApp() {
   const [device] = useState(detect);
   const [qr, setQr] = useState("");
@@ -17,7 +17,7 @@ export function GetApp() {
 
   useEffect(() => {
     QRCode.toString(`${location.origin}/app`, { type: "svg", margin: 1, color: { dark: "#16191b", light: "#ffffff" } }).then(setQr);
-    fetch("/atlas.apk", { method: "HEAD" }).then((r) => setApk(r.ok && !r.headers.get("content-type")?.includes("text/html")), () => setApk(false));
+    fetch("/waysake.apk", { method: "HEAD" }).then((r) => setApk(r.ok && !r.headers.get("content-type")?.includes("text/html")), () => setApk(false));
   }, []);
 
   return (
@@ -42,7 +42,7 @@ export function GetApp() {
               {apk === false ? (
                 <span>{t("getApp.android.missing")}</span>
               ) : (
-                <a className="button" href="/atlas.apk" download="Atlas.apk">
+                <a className="button" href="/waysake.apk" download="Waysake.apk">
                   {t("getApp.android.download")}
                 </a>
               )}

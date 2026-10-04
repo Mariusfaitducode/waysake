@@ -36,7 +36,7 @@ export function ProfilePicker({ onPick }: { onPick: (u: User) => void }) {
   return (
     <main className="picker">
       <div className="picker__sign" aria-hidden="true">
-        <span>Atlas</span>
+        <span>Waysake</span>
       </div>
       <h1 className="picker__title">{t("profile.who")}</h1>
       <p className="picker__hint">{t("profile.hint")}</p>

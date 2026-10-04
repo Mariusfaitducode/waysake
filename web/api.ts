@@ -112,9 +112,9 @@ export type UnlocatedMedia = { id: number; kind: "photo" | "video"; width: numbe
 export type UnlocatedDay = { day: string; count: number; moments: { start: string; end: string; ids: number[]; count: number }[]; media: UnlocatedMedia[] };
 export type PlaceHit = { kind: "country" | "region" | "place"; name: string; country: string; countryCode: string; lat: number; lon: number; flag: string };
 
-/** La tour demande le mot de passe du foyer (ATLAS_PASSWORD) : session absente, fermée ou mot de passe changé. */
+/** La tour demande le mot de passe du foyer (WAYSAKE_PASSWORD) : session absente, fermée ou mot de passe changé. */
 export class AuthRequiredError extends Error {}
-export const AUTH_EVENT = "atlas:auth-required";
+export const AUTH_EVENT = "waysake:auth-required";
 
 /**
  * La tour renvoie `{ error, code }` : `error` est un texte français, `code` un identifiant stable

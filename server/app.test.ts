@@ -6,7 +6,7 @@ import { buildApp } from "./app.js";
 
 describe("app", () => {
   it("répond sur /api/health", async () => {
-    const app = await buildApp({ dataDir: mkdtempSync(join(tmpdir(), "atlas-")) });
+    const app = await buildApp({ dataDir: mkdtempSync(join(tmpdir(), "waysake-")) });
     const res = await app.inject({ method: "GET", url: "/api/health" });
     expect(res.statusCode).toBe(200);
     expect(res.json()).toEqual({ ok: true });

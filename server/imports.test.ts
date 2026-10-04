@@ -13,7 +13,7 @@ const ROAD_START = Date.UTC(2026, 7, 1);
 const HOME_DAY = Date.UTC(2026, 5, 21);
 
 beforeEach(() => {
-  dir = mkdtempSync(join(tmpdir(), "atlas-"));
+  dir = mkdtempSync(join(tmpdir(), "waysake-"));
   db = openDb(dir);
   const rows = insertDemoMedia(db);
   mkdirSync(join(dir, "x"));
@@ -94,7 +94,7 @@ describe("confirmImport", () => {
 });
 
 describe("cancelImport / expireImports", () => {
-  it("annule tout ce qui est en attente sans toucher aux photos déjà dans Atlas", () => {
+  it("annule tout ce qui est en attente sans toucher aux photos déjà dans Waysake", () => {
     const readyBefore = (db.prepare("SELECT count(*) AS n FROM media WHERE status = 'ready'").get() as { n: number }).n;
     const pending = db.prepare("SELECT original_path FROM media WHERE import_id = 1").all() as { original_path: string }[];
     cancelImport(db, dir, 1);
@@ -112,7 +112,7 @@ describe("cancelImport / expireImports", () => {
 });
 
 describe("lastImportedAt", () => {
-  it("donne la date de la photo la plus récente déjà dans Atlas", () => {
+  it("donne la date de la photo la plus récente déjà dans Waysake", () => {
     expect(lastImportedAt(db)).toBe((db.prepare("SELECT max(taken_at) AS t FROM media WHERE status = 'ready'").get() as { t: number }).t);
   });
 });

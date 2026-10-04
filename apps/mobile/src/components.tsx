@@ -3,7 +3,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View, type ViewStyle } 
 import { font, useTheme } from "./theme";
 import { tr, type Locale } from "./i18n";
 
-/** Le panneau vert d'Atlas, liseré blanc. */
+/** Le panneau vert de Waysake, liseré blanc. */
 export function Sign({ children, size = 30 }: { children: ReactNode; size?: number }) {
   const t = useTheme();
   return (

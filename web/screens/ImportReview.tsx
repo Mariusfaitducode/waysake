@@ -13,7 +13,7 @@ import { EmptyState } from "../components/EmptyState.js";
 import { IconBack } from "../shell/icons.js";
 import "./ImportReview.css";
 
-/** L'écran où l'humain valide le tri proposé par Atlas. Identique sur l'app, l'ordinateur et Safari. */
+/** L'écran où l'humain valide le tri proposé par Waysake. Identique sur l'app, l'ordinateur et Safari. */
 export function ImportReview() {
   const id = Number(useParams().id);
   const navigate = useNavigate();
@@ -67,7 +67,7 @@ export function ImportReview() {
   return (
     <div className="review">
       <header className="review__head">
-        <Link to="/" className="back-link"><IconBack /> Atlas</Link>
+        <Link to="/" className="back-link"><IconBack /> Waysake</Link>
         <h1 className="review__title">{nothing ? t("review.waiting") : t("review.found")}</h1>
         <p className="review__lead">
           {nothing

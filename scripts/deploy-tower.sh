@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Installe ou met à jour Atlas sur la tour Windows, depuis le Mac, en une commande :
+# Installe ou met à jour Waysake sur la tour Windows, depuis le Mac, en une commande :
 #   scripts/deploy-tower.sh moi@tour            (nom Tailscale de la tour)
 #   scripts/deploy-tower.sh moi@tour E:/Atlas   (autre dossier de données)
 # Prérequis sur la tour : OpenSSH Server activé (voir README), Docker Desktop démarré, Tailscale connecté.
@@ -20,12 +20,13 @@ scp -q "$ARCHIVE" "$TARGET:C:/Atlas-app.tar"
 rm -f "$ARCHIVE"
 remote "New-Item -ItemType Directory -Force C:\\Atlas-app, $DATA\\app | Out-Null; tar -xf C:\\Atlas-app.tar -C C:\\Atlas-app; Remove-Item C:\\Atlas-app.tar"
 
-if [ -f web/public/atlas.apk ]; then
+# La tour sert waysake.apk en priorité, sinon l'ancien atlas.apk déjà déposé.
+if [ -f web/public/waysake.apk ]; then
   step "Envoi de l'app Android"
-  scp -q web/public/atlas.apk "$TARGET:$DATA/app/atlas.apk"
+  scp -q web/public/waysake.apk "$TARGET:$DATA/app/waysake.apk"
 fi
 
-step "Construction et démarrage d'Atlas (Docker) — quelques minutes la première fois"
+step "Construction et démarrage de Waysake (Docker) — quelques minutes la première fois"
 # En SSH, Windows n'ouvre pas le gestionnaire d'identifiants dont Docker Desktop a besoin : on lance la
 # construction dans la session Windows ouverte, via une tâche planifiée, et on suit son journal.
 remote "schtasks /Create /TN AtlasDeploy /TR 'powershell -NoProfile -ExecutionPolicy Bypass -File C:\\Atlas-app\\scripts\\tower-up.ps1 -Data $DATA' /SC ONCE /ST 00:00 /IT /F | Out-Null; Remove-Item -ErrorAction SilentlyContinue C:\\Atlas-app\\deploy.log; schtasks /Run /TN AtlasDeploy | Out-Null"
@@ -43,4 +44,4 @@ remote "tailscale serve --bg 8420 | Out-Null; tailscale serve status"
 step "Vérification"
 remote 'Start-Sleep 5; (Invoke-WebRequest -UseBasicParsing http://127.0.0.1:8420/api/health).Content'
 echo
-echo "Atlas est en ligne. Sur le téléphone (Tailscale activé), ouvre l'adresse https://… affichée ci-dessus, puis /app."
+echo "Waysake est en ligne. Sur le téléphone (Tailscale activé), ouvre l'adresse https://… affichée ci-dessus, puis /app."

@@ -3,4 +3,4 @@ import { config } from "./config.js";
 
 const app = await buildApp({ dataDir: config.dataDir, webDir: "dist", snapshots: true });
 await app.listen({ port: config.port, host: "0.0.0.0" });
-console.log(`Atlas → http://localhost:${config.port}`);
+console.log(`Waysake → http://localhost:${config.port}`);

@@ -6,7 +6,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useFonts, BarlowCondensed_500Medium, BarlowCondensed_600SemiBold } from "@expo-google-fonts/barlow-condensed";
 import { clearSettings, loadLang, loadSettings, saveLang, type Settings } from "./src/storage";
 import { SetupScreen } from "./src/screens/SetupScreen";
-import { AtlasScreen } from "./src/screens/AtlasScreen";
+import { WaysakeScreen } from "./src/screens/WaysakeScreen";
 import { useTheme } from "./src/theme";
 import { locale, setLocale, type Locale } from "./src/i18n";
 
@@ -18,7 +18,7 @@ export default function App() {
   const [settings, setSettings] = useState<Settings | null | undefined>(undefined);
   const [editing, setEditing] = useState(false);
   // Langue du téléphone, sauf choix fait dans l'app. `tr` lit la langue courante : un nouveau rendu suffit.
-  // Atlas (la WebView) la reçoit à son ouverture, qui suit toujours l'écran de réglages.
+  // Waysake (la WebView) la reçoit à son ouverture, qui suit toujours l'écran de réglages.
   const [lang, setLang] = useState<Locale | undefined>(undefined);
 
   useEffect(() => {
@@ -56,7 +56,7 @@ export default function App() {
           }}
         />
       ) : (
-        <AtlasScreen
+        <WaysakeScreen
           settings={settings}
           onReset={() => {
             clearSettings();

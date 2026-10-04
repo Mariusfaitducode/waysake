@@ -1,18 +1,20 @@
-# `docker compose up -d` : télécharge l'image publiée (amd64 et arm64) et démarre Atlas.
+# `docker compose up -d` : télécharge l'image publiée (amd64 et arm64) et démarre Waysake.
 # `docker compose up -d --build` : construit l'image depuis ce dossier (c'est ce que fait scripts/tower-up.ps1).
+# Les anciens noms ATLAS_* restent acceptés. Le service et le conteneur gardent le nom « atlas » : les
+# renommer créerait un second conteneur à côté de celui des installations existantes.
 services:
   atlas:
-    image: ghcr.io/mariusfaitducode/atlas:latest
+    image: ghcr.io/mariusfaitducode/waysake:latest
     build: .
     container_name: atlas
     restart: unless-stopped
     environment:
       # Les profils du foyer, ex. « Léa, Tom » ou « Léa:#0B7A4B, Tom:#1F6FB2 ». Vide : profils d'exemple.
-      - ATLAS_PROFILES=${ATLAS_PROFILES:-}
+      - WAYSAKE_PROFILES=${WAYSAKE_PROFILES:-${ATLAS_PROFILES:-}}
       # Mot de passe du foyer (recommandé). Vide : pas de mot de passe. Le changer déconnecte tous les appareils.
-      - ATLAS_PASSWORD=${ATLAS_PASSWORD:-}
+      - WAYSAKE_PASSWORD=${WAYSAKE_PASSWORD:-${ATLAS_PASSWORD:-}}
     ports:
       - "8420:8420"
     volumes:
-      # Tes photos et la base : ./atlas-data à côté de ce fichier, ou ATLAS_DATA (ex. D:/Atlas, /mnt/photos/atlas).
-      - ${ATLAS_DATA:-./atlas-data}:/data
+      # Tes photos et la base : ./atlas-data à côté de ce fichier, ou WAYSAKE_DATA (ex. D:/Waysake, /mnt/photos/waysake).
+      - ${WAYSAKE_DATA:-${ATLAS_DATA:-./atlas-data}}:/data

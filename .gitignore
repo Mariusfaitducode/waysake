@@ -4,5 +4,6 @@ dist/
 *.log
 .superpowers/
 .playwright-mcp/
+web/public/waysake.apk
 web/public/atlas.apk
 atlas-data/

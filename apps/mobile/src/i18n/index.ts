@@ -22,7 +22,7 @@ export function deviceLocale(): Locale {
 let current: Locale = deviceLocale();
 let translate = createTranslator(current, dicts[current]);
 
-/** Langue courante, pour Intl et pour la transmettre à Atlas dans la WebView. */
+/** Langue courante, pour Intl et pour la transmettre à Waysake dans la WebView. */
 export const locale = (): Locale => current;
 
 /** `null` : suivre la langue du téléphone. L'app remonte ses écrans après un changement. */

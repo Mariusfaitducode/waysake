@@ -11,7 +11,7 @@ import react from "@vitejs/plugin-react";
 function maplibreWorker(): Plugin {
   const dist = dirname(createRequire(import.meta.url).resolve("maplibre-gl/package.json")) + "/dist";
   return {
-    name: "atlas:maplibre-worker",
+    name: "waysake:maplibre-worker",
     apply: "build",
     generateBundle() {
       for (const f of ["maplibre-gl-worker.mjs", "maplibre-gl-shared.mjs"])

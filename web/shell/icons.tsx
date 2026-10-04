@@ -1,4 +1,4 @@
-/** Icônes au trait, 24 px, dessinées pour Atlas (pas de bibliothèque). */
+/** Icônes au trait, 24 px, dessinées pour Waysake (pas de bibliothèque). */
 const base = { width: 24, height: 24, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round" as const, strokeLinejoin: "round" as const, "aria-hidden": true };
 
 export const IconGlobe = () => (

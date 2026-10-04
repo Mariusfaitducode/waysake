@@ -11,17 +11,17 @@ import { locale, tr } from "../i18n";
 import { ImportScreen } from "./ImportScreen";
 
 /**
- * Atlas lui-même (l'interface web de la tour) en plein écran. L'app ajoute ce que le web ne peut pas :
- * le bouton « + » d'Atlas ouvre ici l'import natif, qui lit la photothèque avec les lieux intacts.
+ * Waysake lui-même (l'interface web de la tour) en plein écran. L'app ajoute ce que le web ne peut pas :
+ * le bouton « + » de Waysake ouvre ici l'import natif, qui lit la photothèque avec les lieux intacts.
  */
-export function AtlasScreen({ settings, onReset }: { settings: Settings; onReset: () => void }) {
+export function WaysakeScreen({ settings, onReset }: { settings: Settings; onReset: () => void }) {
   const t = useTheme();
   const web = useRef<WebView>(null);
   const [importing, setImporting] = useState(false);
   const [failed, setFailed] = useState(false);
   const [canGoBack, setCanGoBack] = useState(false);
 
-  // Le bouton retour d'Android remonte dans Atlas avant de quitter l'app.
+  // Le bouton retour d'Android remonte dans Waysake avant de quitter l'app.
   useEffect(() => {
     const sub = BackHandler.addEventListener("hardwareBackPress", () => {
       if (canGoBack) {
@@ -33,7 +33,7 @@ export function AtlasScreen({ settings, onReset }: { settings: Settings; onReset
     return () => sub.remove();
   }, [canGoBack]);
 
-  // Atlas sait qu'il tourne dans l'app, et pour qui — seulement sur les pages de la tour. Le mot de passe du
+  // Waysake sait qu'il tourne dans l'app, et pour qui — seulement sur les pages de la tour. Le mot de passe du
   // foyer lui permet d'ouvrir sa session (cookie) sans le redemander : la WebView n'envoie pas d'en-tête
   // Authorization sur les images ni les appels de la page.
   const origin = new URL(settings.server).origin;
@@ -53,11 +53,11 @@ export function AtlasScreen({ settings, onReset }: { settings: Settings; onReset
   if (failed)
     return (
       <SafeAreaView style={[styles.fallback, { backgroundColor: t.paper }]}>
-        <Sign size={30}>Atlas</Sign>
-        <Text style={[styles.title, { color: t.ink }]}>{tr("atlas.down.title")}</Text>
-        <Text style={[styles.lead, { color: t.muted }]}>{tr("atlas.down.text")}{"\n"}{tr("atlas.down.address", { url: settings.server })}</Text>
-        <Button title={tr("atlas.retry")} onPress={() => setFailed(false)} />
-        <Button title={tr("atlas.changeAddress")} kind="quiet" onPress={onReset} />
+        <Sign size={30}>Waysake</Sign>
+        <Text style={[styles.title, { color: t.ink }]}>{tr("waysake.down.title")}</Text>
+        <Text style={[styles.lead, { color: t.muted }]}>{tr("waysake.down.text")}{"\n"}{tr("waysake.down.address", { url: settings.server })}</Text>
+        <Button title={tr("waysake.retry")} onPress={() => setFailed(false)} />
+        <Button title={tr("waysake.changeAddress")} kind="quiet" onPress={onReset} />
       </SafeAreaView>
     );
 
@@ -93,7 +93,7 @@ export function AtlasScreen({ settings, onReset }: { settings: Settings; onReset
         onClose={() => setImporting(false)}
         onSent={(id) => {
           setImporting(false);
-          // L'écran de validation d'Atlas prend le relais.
+          // L'écran de validation de Waysake prend le relais.
           web.current?.injectJavaScript(`window.location.assign('/import/${id}'); true;`);
         }}
       />

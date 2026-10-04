@@ -21,7 +21,7 @@ type Step =
   | { kind: "sending"; importId: number; items: Found[] }
   | { kind: "error"; message: string };
 
-/** Import par période : choisir, voir ce qui a été trouvé, envoyer. Le tri et la validation se font ensuite dans Atlas. */
+/** Import par période : choisir, voir ce qui a été trouvé, envoyer. Le tri et la validation se font ensuite dans Waysake. */
 export function ImportScreen({ settings, visible, onClose, onSent }: { settings: Settings; visible: boolean; onClose: () => void; onSent: (importId: number) => void }) {
   const t = useTheme();
   const [step, setStep] = useState<Step>({ kind: "permission" });

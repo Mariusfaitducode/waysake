@@ -12,7 +12,7 @@ export function SetupScreen({ initial, onDone, onLang }: { initial: Settings | n
   const t = useTheme();
   const [address, setAddress] = useState(initial?.server.replace(/^https?:\/\//, "") ?? "");
   const [server, setServer] = useState<string | null>(null);
-  // La tour est protégée (ATLAS_PASSWORD) : on demande le mot de passe avant les profils.
+  // La tour est protégée (WAYSAKE_PASSWORD) : on demande le mot de passe avant les profils.
   const [askPassword, setAskPassword] = useState(false);
   const [password, setPassword] = useState(initial?.password ?? "");
   const [people, setPeople] = useState<Person[] | null>(null);
@@ -25,7 +25,7 @@ export function SetupScreen({ initial, onDone, onLang }: { initial: Settings | n
     setError(null);
     try {
       const { auth } = await tower.health({ server: url, user: "" });
-      // Les profils viennent de la tour (réglage ATLAS_PROFILES).
+      // Les profils viennent de la tour (réglage WAYSAKE_PROFILES).
       const found = auth ? null : await tower.users({ server: url, user: "" });
       setAskPassword(!!auth);
       setPeople(found);
@@ -60,7 +60,7 @@ export function SetupScreen({ initial, onDone, onLang }: { initial: Settings | n
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <View style={styles.top}>
-            <Sign size={34}>Atlas</Sign>
+            <Sign size={34}>Waysake</Sign>
             <LanguageSwitch value={locale()} onChange={onLang} />
           </View>
           {!server ? (

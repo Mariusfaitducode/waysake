@@ -2,19 +2,19 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { buildApp, type AtlasApp } from "../app.js";
+import { buildApp, type WaysakeApp } from "../app.js";
 import { insertDemoMedia } from "../../test/demo-db.js";
 
-let app: AtlasApp;
+let app: WaysakeApp;
 const cookie = { cookie: "atlas_user=sam" };
 beforeEach(async () => {
-  const dir = mkdtempSync(join(tmpdir(), "atlas-"));
+  const dir = mkdtempSync(join(tmpdir(), "waysake-"));
   const web = join(dir, "web");
   mkdirSync(web);
-  writeFileSync(join(web, "index.html"), "<!doctype html><title>Atlas</title>");
+  writeFileSync(join(web, "index.html"), "<!doctype html><title>Waysake</title>");
   app = await buildApp({ dataDir: join(dir, "data"), webDir: web });
-  insertDemoMedia(app.atlas.db);
-  app.atlas.rebuild();
+  insertDemoMedia(app.waysake.db);
+  app.waysake.rebuild();
 });
 const get = async (url: string) => (await app.inject({ url, headers: cookie })).json();
 const send = (method: "POST" | "PATCH" | "PUT" | "DELETE", url: string, payload?: object) =>
@@ -121,7 +121,7 @@ describe("carnet", () => {
     expect((await send("POST", "/api/wishes", { title: { a: 1 } })).statusCode).toBe(400);
     expect((await send("POST", "/api/wishes", { title: "X", note: 42 })).statusCode).toBe(400);
     // même une ligne corrompue en base n'empêche pas d'afficher les envies
-    app.atlas.db.prepare("INSERT INTO wish (title, country_code, author, created_at) VALUES ('Y', '??', 'alex', 0)").run();
+    app.waysake.db.prepare("INSERT INTO wish (title, country_code, author, created_at) VALUES ('Y', '??', 'alex', 0)").run();
     const res = await app.inject({ url: "/api/wishes" });
     expect(res.statusCode).toBe(200);
     expect(res.json()[0].flag).toBeNull();
@@ -146,6 +146,6 @@ describe("liens courts (badges NFC)", () => {
   it("/v/:slug sert l'application", async () => {
     const res = await app.inject({ url: "/v/italie-slovenie-croatie-2026" });
     expect(res.statusCode).toBe(200);
-    expect(res.body).toContain("<title>Atlas</title>");
+    expect(res.body).toContain("<title>Waysake</title>");
   });
 });

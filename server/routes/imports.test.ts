@@ -3,16 +3,16 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import sharp from "sharp";
-import { buildApp, type AtlasApp } from "../app.js";
+import { buildApp, type WaysakeApp } from "../app.js";
 import { makeJpeg } from "../../test/fixtures.js";
 
-let app: AtlasApp;
+let app: WaysakeApp;
 beforeEach(async () => {
-  app = await buildApp({ dataDir: mkdtempSync(join(tmpdir(), "atlas-")) });
+  app = await buildApp({ dataDir: mkdtempSync(join(tmpdir(), "waysake-")) });
 });
 
 function multipart(name: string, data: Buffer, fields: Record<string, string> = {}) {
-  const b = "----atlas" + Math.random().toString(16).slice(2);
+  const b = "----waysake" + Math.random().toString(16).slice(2);
   const parts = Object.entries(fields).map(([k, v]) => Buffer.from(`--${b}\r\nContent-Disposition: form-data; name="${k}"\r\n\r\n${v}\r\n`));
   // Les champs arrivent avant le fichier, comme le font l'app et le raccourci.
   const head = Buffer.from(`--${b}\r\nContent-Disposition: form-data; name="file"; filename="${name}"\r\nContent-Type: application/octet-stream\r\n\r\n`);
@@ -24,7 +24,7 @@ const send = (importId: number, name: string, data: Buffer, fields: Record<strin
   const { payload, headers } = multipart(name, data, fields);
   return app.inject({ method: "POST", url: `/api/media?import=${importId}`, payload, headers: { ...headers, "x-atlas-user": "sam" } });
 };
-const row = (id: number) => app.atlas.db.prepare("SELECT * FROM media WHERE id = ?").get(id) as any;
+const row = (id: number) => app.waysake.db.prepare("SELECT * FROM media WHERE id = ?").get(id) as any;
 
 describe("sessions d'import", () => {
   it("se crée avec l'en-tête ou le cookie, et exige une identité", async () => {
@@ -67,7 +67,7 @@ describe("métadonnées envoyées par le téléphone", () => {
   it("sont lus même quand ils arrivent après le fichier", async () => {
     const { id } = (await newImport()).json();
     const png = await sharp({ create: { width: 30, height: 20, channels: 3, background: "#654" } }).png().toBuffer();
-    const b = "----atlas-after";
+    const b = "----waysake-after";
     const payload = Buffer.concat([
       Buffer.from(`--${b}\r\nContent-Disposition: form-data; name="file"; filename="IMG.png"\r\nContent-Type: image/png\r\n\r\n`),
       png,
@@ -93,7 +93,7 @@ describe("métadonnées envoyées par le téléphone", () => {
     expect(row(res.json().id)).toMatchObject({ lat: null, lon: null, taken_at: null, taken_at_local: null });
   });
 
-  it("une photo déjà dans Atlas est un doublon compté, jamais dupliquée", async () => {
+  it("une photo déjà dans Waysake est un doublon compté, jamais dupliquée", async () => {
     const data = await makeJpeg({ takenAt: "2026:09:01 10:00:00" });
     const { payload, headers } = multipart("old.jpg", data);
     const first = await app.inject({ method: "POST", url: "/api/media", payload, headers: { ...headers, cookie: "atlas_user=alex" } });
@@ -101,7 +101,7 @@ describe("métadonnées envoyées par le téléphone", () => {
     const again = await send(id, "same.jpg", data);
     expect(again.json()).toEqual({ id: first.json().id, duplicate: true });
     expect(row(first.json().id)).toMatchObject({ status: "ready", import_id: null });
-    expect(app.atlas.db.prepare("SELECT duplicates FROM import WHERE id = ?").get(id)).toEqual({ duplicates: 1 });
+    expect(app.waysake.db.prepare("SELECT duplicates FROM import WHERE id = ?").get(id)).toEqual({ duplicates: 1 });
   });
 });
 

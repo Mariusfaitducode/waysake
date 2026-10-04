@@ -2,28 +2,28 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { buildApp, type AtlasApp } from "./app.js";
+import { buildApp, type WaysakeApp } from "./app.js";
 import { insertDemoMedia } from "../test/demo-db.js";
 
 const PASSWORD = "carnet de route 2026";
 
 let dir: string;
-let app: AtlasApp;
+let app: WaysakeApp;
 async function start(password?: string) {
   await app?.close();
   app = await buildApp({ dataDir: join(dir, "data"), webDir: join(dir, "web"), password });
   return app;
 }
 beforeEach(async () => {
-  dir = mkdtempSync(join(tmpdir(), "atlas-auth-"));
+  dir = mkdtempSync(join(tmpdir(), "waysake-auth-"));
   mkdirSync(join(dir, "web", "assets"), { recursive: true });
-  writeFileSync(join(dir, "web", "index.html"), "<!doctype html><title>Atlas</title>");
+  writeFileSync(join(dir, "web", "index.html"), "<!doctype html><title>Waysake</title>");
   writeFileSync(join(dir, "web", "assets", "index.js"), "console.log(1)");
   mkdirSync(join(dir, "data", "x"), { recursive: true });
   writeFileSync(join(dir, "data", "x", "1.jpg"), "JPEG-original");
   mkdirSync(join(dir, "data", "app"), { recursive: true });
   writeFileSync(join(dir, "data", "app", "atlas.apk"), "PK-apk");
-  app = undefined as unknown as AtlasApp;
+  app = undefined as unknown as WaysakeApp;
 });
 afterEach(async () => {
   await app?.close();
@@ -59,10 +59,10 @@ const PROTECTED = [
   "/api/media/1/place",
 ];
 
-describe("sans ATLAS_PASSWORD : rien ne change", () => {
+describe("sans WAYSAKE_PASSWORD : rien ne change", () => {
   beforeEach(async () => {
     await start(undefined);
-    insertDemoMedia(app.atlas.db);
+    insertDemoMedia(app.waysake.db);
   });
 
   it("l'API et les originaux restent ouverts", async () => {
@@ -86,10 +86,10 @@ describe("sans ATLAS_PASSWORD : rien ne change", () => {
   });
 });
 
-describe("avec ATLAS_PASSWORD", () => {
+describe("avec WAYSAKE_PASSWORD", () => {
   beforeEach(async () => {
     await start(PASSWORD);
-    insertDemoMedia(app.atlas.db);
+    insertDemoMedia(app.waysake.db);
   });
 
   it("/api/health reste ouvert et annonce le mot de passe", async () => {
@@ -111,7 +111,7 @@ describe("avec ATLAS_PASSWORD", () => {
     expect((await app.inject({ method: "POST", url: "/api/me", payload: { userId: "alex" } })).statusCode).toBe(401);
     const r = await app.inject({ method: "POST", url: "/api/imports", headers: { "x-atlas-user": "alex", cookie: "atlas_user=alex" } });
     expect(r.statusCode).toBe(401);
-    expect(app.atlas.db.prepare("SELECT COUNT(*) AS n FROM import").get()).toEqual({ n: 0 });
+    expect(app.waysake.db.prepare("SELECT COUNT(*) AS n FROM import").get()).toEqual({ n: 0 });
   });
 
   it("ne se laisse pas contourner par une adresse encodée", async () => {
@@ -123,9 +123,10 @@ describe("avec ATLAS_PASSWORD", () => {
   });
 
   it("laisse passer le site lui-même (sinon pas d'écran de connexion) et l'APK", async () => {
-    expect((await app.inject({ url: "/" })).body).toContain("<title>Atlas</title>");
-    expect((await app.inject({ url: "/v/un-voyage" })).body).toContain("<title>Atlas</title>");
+    expect((await app.inject({ url: "/" })).body).toContain("<title>Waysake</title>");
+    expect((await app.inject({ url: "/v/un-voyage" })).body).toContain("<title>Waysake</title>");
     expect((await app.inject({ url: "/assets/index.js" })).statusCode).toBe(200);
+    expect((await app.inject({ url: "/waysake.apk" })).body).toBe("PK-apk");
     expect((await app.inject({ url: "/atlas.apk" })).body).toBe("PK-apk");
     expect((await app.inject({ url: "/api/inconnue" })).statusCode).toBe(404);
   });
@@ -233,7 +234,7 @@ describe("avec ATLAS_PASSWORD", () => {
     expect((await app.inject({ method: "POST", url: "/api/logout" })).statusCode).toBe(401);
   });
 
-  it("changer ATLAS_PASSWORD invalide toutes les sessions", async () => {
+  it("changer WAYSAKE_PASSWORD invalide toutes les sessions", async () => {
     const cookie = await login();
     await start(PASSWORD); // simple redémarrage : la session survit
     expect((await app.inject({ url: "/api/trips", headers: { cookie } })).statusCode).toBe(200);

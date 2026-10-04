@@ -9,7 +9,7 @@ import { ingest, derivedPath, UnreadableImageError } from "./ingest.js";
 import { makeVideo } from "../test/video.js";
 
 const tmpFile = (data: Buffer) => {
-  const p = join(mkdtempSync(join(tmpdir(), "atlas-")), "v.mov");
+  const p = join(mkdtempSync(join(tmpdir(), "waysake-")), "v.mov");
   writeFileSync(p, data);
   return p;
 };
@@ -44,7 +44,7 @@ describe("readVideo", () => {
 
 describe("sécurité", () => {
   it("n'interprète jamais une fausse vidéo comme une liste de lecture (lecture de fichiers locaux)", async () => {
-    const secretDir = mkdtempSync(join(tmpdir(), "atlas-secret-"));
+    const secretDir = mkdtempSync(join(tmpdir(), "waysake-secret-"));
     const secret = join(secretDir, "secret.mov");
     writeFileSync(secret, makeVideo());
     const playlist = `#EXTM3U\n#EXT-X-TARGETDURATION:2\n#EXTINF:2.0,\nfile://${secret}\n#EXT-X-ENDLIST\n`;
@@ -54,7 +54,7 @@ describe("sécurité", () => {
       expect(v.frame).toBeNull();
     }
     // Variante réaliste : chemin relatif depuis data/tmp vers data/originals.
-    const root = mkdtempSync(join(tmpdir(), "atlas-data-"));
+    const root = mkdtempSync(join(tmpdir(), "waysake-data-"));
     mkdirSync(join(root, "originals"));
     mkdirSync(join(root, "tmp"));
     writeFileSync(join(root, "originals", "x.mov"), makeVideo());
@@ -71,7 +71,7 @@ describe("sécurité", () => {
 
 describe("ingest vidéo", () => {
   it("crée la miniature et enregistre date et lieu", async () => {
-    const dir = mkdtempSync(join(tmpdir(), "atlas-"));
+    const dir = mkdtempSync(join(tmpdir(), "waysake-"));
     const db = openDb(dir);
     const data = makeVideo({ creationTime: "2026-09-02T18:30:00Z", location: "+46.3683+014.1146/" });
     const { id } = await ingest(db, dir, { name: "IMG_0042.MOV", data, userId: "alex" });
@@ -83,7 +83,7 @@ describe("ingest vidéo", () => {
   });
 
   it("refuse une vidéo illisible", async () => {
-    const dir = mkdtempSync(join(tmpdir(), "atlas-"));
+    const dir = mkdtempSync(join(tmpdir(), "waysake-"));
     await expect(ingest(openDb(dir), dir, { name: "clip.mp4", data: randomBytes(4096), userId: "alex" })).rejects.toBeInstanceOf(UnreadableImageError);
   });
 });

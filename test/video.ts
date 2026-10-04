@@ -6,7 +6,7 @@ import ffmpeg from "ffmpeg-static";
 
 /** Une vraie petite vidéo QuickTime (2 s), avec date et position comme un iPhone. */
 export function makeVideo(opts: { creationTime?: string; location?: string; seconds?: number; ext?: "mov" | "mp4" } = {}): Buffer {
-  const out = join(mkdtempSync(join(tmpdir(), "atlas-vid-")), `clip.${opts.ext ?? "mov"}`);
+  const out = join(mkdtempSync(join(tmpdir(), "waysake-vid-")), `clip.${opts.ext ?? "mov"}`);
   const meta = [
     ...(opts.creationTime ? ["-metadata", `creation_time=${opts.creationTime}`] : []),
     ...(opts.location ? ["-metadata", `location=${opts.location}`] : []),

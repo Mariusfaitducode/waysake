@@ -2,15 +2,15 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { buildApp, type AtlasApp } from "./app.js";
+import { buildApp, type WaysakeApp } from "./app.js";
 import { insertDemoMedia } from "../test/demo-db.js";
 
-let app: AtlasApp;
+let app: WaysakeApp;
 beforeEach(async () => {
-  app = await buildApp({ dataDir: mkdtempSync(join(tmpdir(), "atlas-")) });
-  insertDemoMedia(app.atlas.db);
-  app.atlas.rebuild();
-  app.atlas.db.prepare("INSERT INTO import (id, user_id, created_at) VALUES (1, 'alex', ?)").run(Date.now());
+  app = await buildApp({ dataDir: mkdtempSync(join(tmpdir(), "waysake-")) });
+  insertDemoMedia(app.waysake.db);
+  app.waysake.rebuild();
+  app.waysake.db.prepare("INSERT INTO import (id, user_id, created_at) VALUES (1, 'alex', ?)").run(Date.now());
 });
 
 describe("toute modification exige une identité (protection CSRF)", () => {
@@ -32,7 +32,7 @@ describe("toute modification exige une identité (protection CSRF)", () => {
       const res = await app.inject({ method: "POST", url });
       expect([401, 404]).toContain(res.statusCode);
     }
-    expect(app.atlas.db.prepare("SELECT status FROM import WHERE id = 1").get()).toEqual({ status: "pending" });
+    expect(app.waysake.db.prepare("SELECT status FROM import WHERE id = 1").get()).toEqual({ status: "pending" });
   });
 
   it("laisse passer le cookie et l'en-tête de l'app", async () => {

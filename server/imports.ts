@@ -8,7 +8,7 @@ import { derivedPath } from "./ingest.js";
 import { THUMB_SIZES } from "./thumbs.js";
 
 /**
- * Le sas d'import : ce qui arrive du téléphone reste en attente. Atlas propose un tri (nouveaux voyages,
+ * Le sas d'import : ce qui arrive du téléphone reste en attente. Waysake propose un tri (nouveaux voyages,
  * voyages complétés, mis de côté), l'humain valide ou annule.
  */
 
@@ -41,7 +41,7 @@ function classify(db: Db, importId: number) {
   const pending = db.prepare("SELECT * FROM media WHERE import_id = ? AND status = 'pending' ORDER BY taken_at IS NULL, taken_at, id").all(importId) as PendingRow[];
   const byId = new Map(pending.map((m) => [m.id, m]));
 
-  // Le regroupement voit tout ce qui est déjà dans Atlas, plus ce qui arrive (sauf captures et photos décochées).
+  // Le regroupement voit tout ce qui est déjà dans Waysake, plus ce qui arrive (sauf captures et photos décochées).
   const { rows, items } = clusterInputs(db, "status = 'ready' OR (import_id = ? AND status = 'pending' AND screenshot = 0)", importId);
   const home = homeOf(db, items.filter((i) => !byId.has(i.id) || byId.get(i.id)!.excluded === 0));
   const { trips } = clusterTrips(items, { home });
@@ -164,7 +164,7 @@ export function confirmImport(db: Db, dataDir: string, importId: number): { trip
   return { trips: trips.map((t) => t.slug) };
 }
 
-/** Annule : tout ce qui est en attente dans cette session disparaît (fichiers compris). Les photos déjà dans Atlas ne bougent pas. */
+/** Annule : tout ce qui est en attente dans cette session disparaît (fichiers compris). Les photos déjà dans Waysake ne bougent pas. */
 export function cancelImport(db: Db, dataDir: string, importId: number) {
   const rows = db.prepare("SELECT sha256, original_path FROM media WHERE import_id = ? AND status = 'pending'").all(importId) as { sha256: string; original_path: string }[];
   db.transaction(() => {
@@ -180,7 +180,7 @@ export function expireImports(db: Db, dataDir: string): number {
   return stale.length;
 }
 
-/** Pour « Depuis le dernier import » : la photo la plus récente déjà dans Atlas. */
+/** Pour « Depuis le dernier import » : la photo la plus récente déjà dans Waysake. */
 export function lastImportedAt(db: Db): number | null {
   return (db.prepare("SELECT max(taken_at) AS t FROM media WHERE status = 'ready'").get() as { t: number | null }).t;
 }

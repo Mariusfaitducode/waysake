@@ -10,7 +10,7 @@ const day = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
 /**
- * Copie cohérente de la base (API de sauvegarde de SQLite, sans arrêter Atlas) dans
+ * Copie cohérente de la base (API de sauvegarde de SQLite, sans arrêter Waysake) dans
  * DATA_DIR/backups/atlas-AAAA-MM-JJ.db, puis supprime les instantanés au-delà des 7 derniers.
  * Protège notes, lieux posés à la main et voyages renommés d'une erreur ou d'une base abîmée ;
  * les originaux, eux, se sauvegardent en copiant le dossier de données sur un autre disque.

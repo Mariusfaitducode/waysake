@@ -11,11 +11,11 @@ import { makeVideo } from "../../test/video.js";
 
 let app: FastifyInstance;
 beforeEach(async () => {
-  app = await buildApp({ dataDir: mkdtempSync(join(tmpdir(), "atlas-")) });
+  app = await buildApp({ dataDir: mkdtempSync(join(tmpdir(), "waysake-")) });
 });
 
 function multipart(name: string, data: Buffer) {
-  const boundary = "----atlas" + Math.random().toString(16).slice(2);
+  const boundary = "----waysake" + Math.random().toString(16).slice(2);
   const head = Buffer.from(
     `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="${name}"\r\nContent-Type: application/octet-stream\r\n\r\n`,
   );

@@ -1,6 +1,6 @@
 import { useColorScheme } from "react-native";
 
-/** Les couleurs d'Atlas (identiques au site) : vert autoroute, blanc neutre, nuit. */
+/** Les couleurs de Waysake (identiques au site) : vert autoroute, blanc neutre, nuit. */
 export const green = "#0B7A4B";
 export function useTheme() {
   const dark = useColorScheme() === "dark";

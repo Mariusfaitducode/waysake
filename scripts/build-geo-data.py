@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build Atlas's compact offline GeoNames index from the official GeoNames dumps."""
+"""Build Waysake's compact offline GeoNames index from the official GeoNames dumps."""
 
 import argparse
 import csv

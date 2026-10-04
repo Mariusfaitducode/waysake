@@ -30,7 +30,7 @@ export const fr = {
   "profile.hint": "On s'en souviendra sur cet appareil.",
   "profile.lock": "Verrouiller cet appareil",
 
-  // Mot de passe du foyer (ATLAS_PASSWORD)
+  // Mot de passe du foyer (WAYSAKE_PASSWORD)
   "login.title": "Mot de passe",
   "login.hint": "Celui du foyer. On s'en souviendra sur cet appareil.",
   "login.label": "Mot de passe du foyer",
@@ -60,7 +60,7 @@ export const fr = {
   "trips.title": "Voyages",
   "trips.subtitle": "{trips}, rangés tout seuls.",
   "trips.empty.title": "Aucun voyage pour l'instant.",
-  "trips.empty.text": "Ajoute vos photos : Atlas reconnaît les voyages, les pays et les étapes grâce à la date et au lieu de chaque photo.",
+  "trips.empty.text": "Ajoute vos photos : Waysake reconnaît les voyages, les pays et les étapes grâce à la date et au lieu de chaque photo.",
 
   // Photos
   "library.title": "Photos",
@@ -69,7 +69,7 @@ export const fr = {
   "library.unlocated": { one: "{count} photo sans lieu", other: "{count} photos sans lieu" },
   "library.unlocatedHint": "Ajoute les lieux en quelques gestes : les voyages se rangeront tout seuls.",
   "library.empty.title": "Le premier voyage commence ici.",
-  "library.empty.text": "Ajoute les photos d'un voyage : Atlas les range toutes seules par date et par lieu.",
+  "library.empty.text": "Ajoute les photos d'un voyage : Waysake les range toutes seules par date et par lieu.",
   "grid.keep": "Garder cette photo",
   "grid.open": "Ouvrir la photo",
 
@@ -107,7 +107,7 @@ export const fr = {
   "badge.lead": "Ce lien ouvre directement <b>{title}</b>. Il ne change jamais, même si tu renommes le voyage.",
   "badge.copy": "Copier le lien",
   "badge.copied": "Lien copié",
-  "badge.localAddress": "Tu utilises Atlas via une adresse locale. Pour un badge qui marche partout, ouvre Atlas avec son adresse Tailscale (https://…ts.net), puis reviens ici.",
+  "badge.localAddress": "Tu utilises Waysake via une adresse locale. Pour un badge qui marche partout, ouvre Waysake avec son adresse Tailscale (https://…ts.net), puis reviens ici.",
   "badge.nfc.waiting": "Approche le badge du téléphone…",
   "badge.nfc.done": "Badge écrit",
   "badge.nfc.write": "Écrire sur un badge NFC",
@@ -118,9 +118,9 @@ export const fr = {
 
   // Envoi
   "upload.choose": "Choisir des photos",
-  "upload.dropHint": "ou glisse-les ici, autant que tu veux. Atlas les trie, tu valides ensuite.",
+  "upload.dropHint": "ou glisse-les ici, autant que tu veux. Waysake les trie, tu valides ensuite.",
   "upload.phone.before": "Sur téléphone, les navigateurs retirent le lieu des photos.",
-  "upload.phone.link": "Installe l'app Atlas",
+  "upload.phone.link": "Installe l'app Waysake",
   "upload.phone.after": " pour tout importer avec les lieux.",
   "upload.received": { one: "{count} photo reçue", other: "{count} photos reçues" },
   "upload.nothingNew": "Rien de nouveau",
@@ -128,14 +128,14 @@ export const fr = {
   "upload.progress": "{done} sur {total}",
   "upload.duplicates": { one: "{count} déjà présente", other: "{count} déjà présentes" },
   "upload.failed": { one: "{count} fichier n'a pas pu être ajouté :", other: "{count} fichiers n'ont pas pu être ajoutés :" },
-  "upload.sorted": "Atlas a trié vos photos. Il ne reste qu'à vérifier et valider.",
+  "upload.sorted": "Waysake a trié vos photos. Il ne reste qu'à vérifier et valider.",
   "upload.review": "Voir le tri proposé",
 
   // À localiser
   "locate.title": "À localiser",
   "locate.subtitle": {
-    one: "{count} photo n'a pas de lieu. Choisis une journée et dis où vous étiez : Atlas range le reste.",
-    other: "{count} photos n'ont pas de lieu. Choisis une journée et dis où vous étiez : Atlas range le reste.",
+    one: "{count} photo n'a pas de lieu. Choisis une journée et dis où vous étiez : Waysake range le reste.",
+    other: "{count} photos n'ont pas de lieu. Choisis une journée et dis où vous étiez : Waysake range le reste.",
   },
   "locate.empty.title": "Toutes vos photos ont un lieu.",
   "locate.empty.text": "Bravo. Les voyages, les étapes et les itinéraires sont complets.",
@@ -197,22 +197,22 @@ export const fr = {
 
   // Validation d'un import
   "review.notFound": "Cet import est introuvable.",
-  "review.confirmed.title": "Cet import est déjà dans Atlas.",
+  "review.confirmed.title": "Cet import est déjà dans Waysake.",
   "review.confirmed.text": "Ses photos sont rangées dans vos voyages.",
   "review.cancelled.title": "Cet import a été annulé.",
   "review.cancelled.text": "Aucune de ses photos n'a été gardée.",
   "review.seeTrips": "Voir les voyages",
   "review.waiting": "En attente des photos…",
   "review.waiting.text": "Les photos apparaîtront ici dès qu'elles arrivent sur la tour.",
-  "review.found": "Voici ce qu'Atlas a trouvé",
+  "review.found": "Voici ce que Waysake a trouvé",
   "review.analyzed": { one: "{count} photo analysée", other: "{count} photos analysées" },
-  "review.duplicates": { one: ", {count} était déjà dans Atlas", other: ", {count} étaient déjà dans Atlas" },
+  "review.duplicates": { one: ", {count} était déjà dans Waysake", other: ", {count} étaient déjà dans Waysake" },
   "review.instructions": ". Vérifie, décoche ce que tu ne veux pas garder, puis importe.",
   "review.extended": "Viennent compléter un voyage",
   "review.other": { one: "{count} photo hors voyage", other: "{count} photos hors voyage" },
   "review.other.hint": "Sans lieu ni date de voyage : elles iront dans Photos.",
   "review.setAside": "Mises de côté",
-  "review.setAside.hint": "Atlas ne les importera pas, sauf si tu changes d'avis.",
+  "review.setAside.hint": "Waysake ne les importera pas, sauf si tu changes d'avis.",
   "review.home": { one: "{count} photo prise à la maison", other: "{count} photos prises à la maison" },
   "review.home.hint": "Le quotidien, pas un voyage.",
   "review.screenshots": { one: "{count} capture d'écran", other: "{count} captures d'écran" },
@@ -236,18 +236,18 @@ export const fr = {
   "note.error": "Non enregistré — vérifie la connexion",
 
   // App Android
-  "getApp.title": "Atlas sur ton téléphone",
+  "getApp.title": "Waysake sur ton téléphone",
   "getApp.subtitle": "Pour importer tes photos avec leurs lieux, directement depuis la photothèque.",
   "getApp.scan.title": "Scanne avec ton téléphone",
   "getApp.scan.text": "L'appareil photo du téléphone ouvre cette page, avec le bon lien à télécharger. Tailscale doit être activé sur le téléphone.",
   "getApp.android.missing": "L'app n'est pas encore disponible sur cette tour.",
-  "getApp.android.download": "Télécharger l'app Atlas",
+  "getApp.android.download": "Télécharger l'app Waysake",
   "getApp.android.install": "Ouvre le fichier téléchargé. Android demande d'autoriser l'installation depuis Chrome : accepte, une seule fois.",
   "getApp.android.address": "Dans l'app, tape l'adresse de la tour :",
   "getApp.android.permission": "Autorise l'accès aux photos (accès complet) : c'est ce qui garde les lieux de tes photos.",
   "getApp.copy": "Copier",
   "getApp.copied": "Copiée",
-  "getApp.iphone": "Le raccourci « Importer dans Atlas » arrive bientôt. En attendant, depuis un ordinateur, glisse les photos exportées dans Atlas : leurs lieux sont conservés.",
+  "getApp.iphone": "Le raccourci « Importer dans Waysake » arrive bientôt. En attendant, depuis un ordinateur, glisse les photos exportées dans Waysake : leurs lieux sont conservés.",
 
   // Erreurs générales
   "error.screen.title": "Cet écran n'a pas pu s'afficher.",

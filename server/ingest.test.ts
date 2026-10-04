@@ -12,7 +12,7 @@ import { makeJpeg } from "../test/fixtures.js";
 let dir: string;
 let db: Db;
 beforeEach(() => {
-  dir = mkdtempSync(join(tmpdir(), "atlas-"));
+  dir = mkdtempSync(join(tmpdir(), "waysake-"));
   db = openDb(dir);
 });
 

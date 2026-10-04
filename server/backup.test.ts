@@ -6,7 +6,7 @@ import Database from "better-sqlite3";
 import { openDb } from "./db.js";
 import { snapshotDb, SNAPSHOT_KEEP } from "./backup.js";
 
-const tmp = () => mkdtempSync(join(tmpdir(), "atlas-backup-"));
+const tmp = () => mkdtempSync(join(tmpdir(), "waysake-backup-"));
 
 describe("instantanés de la base", () => {
   it("écrit une copie lisible de la base, datée du jour", async () => {

@@ -8,7 +8,7 @@ import { insertDemoMedia } from "../test/demo-db.js";
 
 let db: Db;
 beforeEach(() => {
-  db = openDb(mkdtempSync(join(tmpdir(), "atlas-")));
+  db = openDb(mkdtempSync(join(tmpdir(), "waysake-")));
 });
 const road = () => listTrips(db).find((t) => t.countryCodes.includes("HR"))!;
 

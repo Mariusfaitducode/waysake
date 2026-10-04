@@ -25,7 +25,7 @@ export function Shell({ me, onSwitchProfile }: { me: User; onSwitchProfile: () =
     <div className={`shell${focused ? " shell--focused" : ""}`}>
       <nav className="tabs" aria-label={t("nav.main")} hidden={focused}>
         <div className="tabs__brand" aria-hidden="true">
-          <span>Atlas</span>
+          <span>Waysake</span>
         </div>
         {TABS.map(({ to, label, icon: Icon, end }) => (
           <NavLink key={to} to={to} end={end} className={({ isActive }) => `tabs__item${isActive || (to === "/voyages" && pathname.startsWith("/v/")) ? " is-active" : ""}`}>

@@ -37,9 +37,9 @@ export function TripScreen() {
 
   const flat = useMemo(() => trip?.chapters.flatMap((c) => c.media) ?? [], [trip]);
   useEffect(() => {
-    if (trip) document.title = `${trip.title} — Atlas`;
+    if (trip) document.title = `${trip.title} — Waysake`;
     return () => {
-      document.title = "Atlas";
+      document.title = "Waysake";
     };
   }, [trip?.title]);
   useEffect(() => {

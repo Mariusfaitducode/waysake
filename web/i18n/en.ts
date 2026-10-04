@@ -34,7 +34,7 @@ export const en: Translation<typeof fr> = {
   "profile.hint": "We'll remember it on this device.",
   "profile.lock": "Lock this device",
 
-  // Household password (ATLAS_PASSWORD)
+  // Household password (WAYSAKE_PASSWORD)
   "login.title": "Password",
   "login.hint": "Your household password. We'll remember it on this device.",
   "login.label": "Household password",
@@ -64,7 +64,7 @@ export const en: Translation<typeof fr> = {
   "trips.title": "Trips",
   "trips.subtitle": "{trips}, sorted all by themselves.",
   "trips.empty.title": "No trips yet.",
-  "trips.empty.text": "Add your photos: Atlas finds the trips, countries and stops from when and where each photo was taken.",
+  "trips.empty.text": "Add your photos: Waysake finds the trips, countries and stops from when and where each photo was taken.",
 
   // Photos
   "library.title": "Photos",
@@ -73,7 +73,7 @@ export const en: Translation<typeof fr> = {
   "library.unlocated": { one: "{count} photo without a place", other: "{count} photos without a place" },
   "library.unlocatedHint": "Add the places in a few taps: your trips will sort themselves out.",
   "library.empty.title": "Your first trip starts here.",
-  "library.empty.text": "Add the photos from a trip: Atlas sorts them by date and place on its own.",
+  "library.empty.text": "Add the photos from a trip: Waysake sorts them by date and place on its own.",
   "grid.keep": "Keep this photo",
   "grid.open": "Open photo",
 
@@ -111,7 +111,7 @@ export const en: Translation<typeof fr> = {
   "badge.lead": "This link opens <b>{title}</b> directly. It never changes, even if you rename the trip.",
   "badge.copy": "Copy link",
   "badge.copied": "Link copied",
-  "badge.localAddress": "You're using Atlas through a local address. For a badge that works everywhere, open Atlas with its Tailscale address (https://…ts.net), then come back here.",
+  "badge.localAddress": "You're using Waysake through a local address. For a badge that works everywhere, open Waysake with its Tailscale address (https://…ts.net), then come back here.",
   "badge.nfc.waiting": "Hold the badge to your phone…",
   "badge.nfc.done": "Badge written",
   "badge.nfc.write": "Write to an NFC badge",
@@ -122,9 +122,9 @@ export const en: Translation<typeof fr> = {
 
   // Upload
   "upload.choose": "Choose photos",
-  "upload.dropHint": "or drop them here, as many as you like. Atlas sorts them, then you check.",
+  "upload.dropHint": "or drop them here, as many as you like. Waysake sorts them, then you check.",
   "upload.phone.before": "On phones, browsers strip the place from your photos.",
-  "upload.phone.link": "Install the Atlas app",
+  "upload.phone.link": "Install the Waysake app",
   "upload.phone.after": " to import everything with places.",
   "upload.received": { one: "{count} photo received", other: "{count} photos received" },
   "upload.nothingNew": "Nothing new",
@@ -132,14 +132,14 @@ export const en: Translation<typeof fr> = {
   "upload.progress": "{done} of {total}",
   "upload.duplicates": { one: "{count} already there", other: "{count} already there" },
   "upload.failed": { one: "{count} file couldn't be added:", other: "{count} files couldn't be added:" },
-  "upload.sorted": "Atlas sorted your photos. All that's left is to check and confirm.",
+  "upload.sorted": "Waysake sorted your photos. All that's left is to check and confirm.",
   "upload.review": "See the suggested sorting",
 
   // To place
   "locate.title": "To place",
   "locate.subtitle": {
-    one: "{count} photo has no place. Pick a day and tell us where you were: Atlas sorts out the rest.",
-    other: "{count} photos have no place. Pick a day and tell us where you were: Atlas sorts out the rest.",
+    one: "{count} photo has no place. Pick a day and tell us where you were: Waysake sorts out the rest.",
+    other: "{count} photos have no place. Pick a day and tell us where you were: Waysake sorts out the rest.",
   },
   "locate.empty.title": "Every photo has a place.",
   "locate.empty.text": "Nice work. Your trips, stops and routes are complete.",
@@ -201,22 +201,22 @@ export const en: Translation<typeof fr> = {
 
   // Import review
   "review.notFound": "We can't find this import.",
-  "review.confirmed.title": "This import is already in Atlas.",
+  "review.confirmed.title": "This import is already in Waysake.",
   "review.confirmed.text": "Its photos are sorted into your trips.",
   "review.cancelled.title": "This import was cancelled.",
   "review.cancelled.text": "None of its photos were kept.",
   "review.seeTrips": "See trips",
   "review.waiting": "Waiting for photos…",
   "review.waiting.text": "Photos will show up here as soon as they reach your server.",
-  "review.found": "Here's what Atlas found",
+  "review.found": "Here's what Waysake found",
   "review.analyzed": { one: "{count} photo looked at", other: "{count} photos looked at" },
-  "review.duplicates": { one: ", {count} was already in Atlas", other: ", {count} were already in Atlas" },
+  "review.duplicates": { one: ", {count} was already in Waysake", other: ", {count} were already in Waysake" },
   "review.instructions": ". Check them, untick what you don't want to keep, then import.",
   "review.extended": "Adding to an existing trip",
   "review.other": { one: "{count} photo outside a trip", other: "{count} photos outside a trip" },
   "review.other.hint": "No trip place or date: they'll go to Photos.",
   "review.setAside": "Set aside",
-  "review.setAside.hint": "Atlas won't import these, unless you change your mind.",
+  "review.setAside.hint": "Waysake won't import these, unless you change your mind.",
   "review.home": { one: "{count} photo taken at home", other: "{count} photos taken at home" },
   "review.home.hint": "Everyday life, not a trip.",
   "review.screenshots": { one: "{count} screenshot", other: "{count} screenshots" },
@@ -240,18 +240,18 @@ export const en: Translation<typeof fr> = {
   "note.error": "Not saved — check your connection",
 
   // Android app
-  "getApp.title": "Atlas on your phone",
+  "getApp.title": "Waysake on your phone",
   "getApp.subtitle": "Import your photos with their places, straight from your photo library.",
   "getApp.scan.title": "Scan with your phone",
   "getApp.scan.text": "Your phone's camera opens this page with the right download link. Make sure Tailscale is running on your phone.",
   "getApp.android.missing": "The app isn't available on this server yet.",
-  "getApp.android.download": "Download the Atlas app",
+  "getApp.android.download": "Download the Waysake app",
   "getApp.android.install": "Open the downloaded file. Android asks you to allow installs from Chrome: say yes, just this once.",
   "getApp.android.address": "In the app, type your server's address:",
   "getApp.android.permission": "Allow access to your photos (full access): that's what keeps the places on your photos.",
   "getApp.copy": "Copy",
   "getApp.copied": "Copied",
-  "getApp.iphone": "An “Import to Atlas” shortcut is coming soon. Until then, drag your exported photos into Atlas from a computer: their places are kept.",
+  "getApp.iphone": "An “Import to Waysake” shortcut is coming soon. Until then, drag your exported photos into Waysake from a computer: their places are kept.",
 
   // General errors
   "error.screen.title": "This screen couldn't load.",

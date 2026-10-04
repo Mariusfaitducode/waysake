@@ -5,7 +5,7 @@ import { LanguageSwitch } from "../components/LanguageSwitch.js";
 import "./ProfilePicker.css";
 import "./Login.css";
 
-/** La tour est protégée par le mot de passe du foyer (ATLAS_PASSWORD) : on le demande avant le choix du profil. */
+/** La tour est protégée par le mot de passe du foyer (WAYSAKE_PASSWORD) : on le demande avant le choix du profil. */
 export function Login({ onDone }: { onDone: () => void }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<Error | null>(null);
@@ -28,7 +28,7 @@ export function Login({ onDone }: { onDone: () => void }) {
   return (
     <main className="picker">
       <div className="picker__sign" aria-hidden="true">
-        <span>Atlas</span>
+        <span>Waysake</span>
       </div>
       <h1 className="picker__title">{t("login.title")}</h1>
       <p className="picker__hint">{t("login.hint")}</p>

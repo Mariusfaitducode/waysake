@@ -13,7 +13,7 @@ export function currentUser(db: Db, cookies: Record<string, string | undefined>)
 /**
  * Qui envoie ? Le navigateur a un cookie (SameSite=Lax) ; l'app et le raccourci envoient l'en-tête
  * `X-Atlas-User`. Jamais d'identité dans l'adresse : un site tiers pourrait la forger (CSRF), alors
- * qu'il ne peut pas poser d'en-tête personnalisé sans CORS, qu'Atlas n'autorise pas.
+ * qu'il ne peut pas poser d'en-tête personnalisé sans CORS, que Waysake n'autorise pas.
  */
 export function identify(db: Db, req: { cookies: Record<string, string | undefined>; headers: Record<string, unknown> }): User | null {
   const header = req.headers["x-atlas-user"];

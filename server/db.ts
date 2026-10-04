@@ -1,6 +1,7 @@
 import Database from "better-sqlite3";
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
+import { setting } from "./config.js";
 
 export type Db = Database.Database;
 
@@ -142,7 +143,7 @@ export function parseProfiles(spec: string): Profile[] {
 }
 
 /**
- * Profils du foyer. `ATLAS_PROFILES` crée ou renomme les profils listés (jamais de suppression :
+ * Profils du foyer. `WAYSAKE_PROFILES` crée ou renomme les profils listés (jamais de suppression :
  * les photos y sont rattachées). Sans réglage, une base vide reçoit deux profils d'exemple.
  */
 export function syncProfiles(db: Db, spec: string | undefined) {
@@ -156,7 +157,7 @@ export function syncProfiles(db: Db, spec: string | undefined) {
   })();
 }
 
-export function openDb(dataDir: string, profiles = process.env.ATLAS_PROFILES): Db {
+export function openDb(dataDir: string, profiles = setting("PROFILES")): Db {
   mkdirSync(dataDir, { recursive: true });
   const db = new Database(join(dataDir, "atlas.sqlite"));
   db.pragma("journal_mode = WAL");

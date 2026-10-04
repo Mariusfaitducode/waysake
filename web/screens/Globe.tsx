@@ -35,7 +35,7 @@ export function GlobeScreen() {
 
       <div className="globe__top">
         <div>
-          <h1 className="globe__title">Atlas</h1>
+          <h1 className="globe__title">Waysake</h1>
           {overview && overview.trips > 0 && (
             <Link to="/pays" className="globe__stats">
               {t("globe.stats", { countries: t("count.countries", { count: overview.countries }), trips: t("count.trips", { count: overview.trips }), km: number(overview.km) })}

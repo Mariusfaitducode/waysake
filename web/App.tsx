@@ -23,7 +23,7 @@ import { useLocale } from "./i18n/index.js";
 export function App() {
   const locale = useLocale();
   const [me, setMe] = useState<User | null | undefined>(undefined);
-  // La tour demande le mot de passe du foyer (ATLAS_PASSWORD) : écran de connexion avant le choix du profil.
+  // La tour demande le mot de passe du foyer (WAYSAKE_PASSWORD) : écran de connexion avant le choix du profil.
   const [locked, setLocked] = useState(false);
   const starting = useRef(false);
 

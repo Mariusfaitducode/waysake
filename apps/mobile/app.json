@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Atlas",
+    "name": "Waysake",
     "slug": "atlas",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -28,8 +28,8 @@
       [
         "expo-media-library",
         {
-          "photosPermission": "Atlas lit tes photos pour les envoyer à ta tour et les ranger par voyage.",
-          "savePhotosPermission": "Atlas n'enregistre rien dans ta photothèque.",
+          "photosPermission": "Waysake lit tes photos pour les envoyer à ta tour et les ranger par voyage.",
+          "savePhotosPermission": "Waysake n'enregistre rien dans ta photothèque.",
           "isAccessMediaLocationEnabled": true,
           "granularPermissions": [
             "photo",

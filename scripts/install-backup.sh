@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Programme la sauvegarde nocturne d'Atlas sur un autre disque de la tour, depuis le Mac :
+# Programme la sauvegarde nocturne de Waysake sur un autre disque de la tour, depuis le Mac :
 #   scripts/install-backup.sh moi@tour E:/            (disque externe E:)
 #   scripts/install-backup.sh moi@tour E:/ C:/Atlas   (dossier de données, C:/Atlas par défaut)
 # Chaque nuit à 3 h 30, la tour copie ses photos et l'instantané du jour de la base dans E:\Atlas.

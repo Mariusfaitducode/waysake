@@ -1,4 +1,4 @@
-# Atlas — API Fastify + site compilé. Données dans /data (volume).
+# Waysake — API Fastify + site compilé. Données dans /data (volume).
 
 # 1. Construction : outils de compilation pour les modules natifs (better-sqlite3), puis le site.
 FROM node:22-slim AS build
@@ -21,7 +21,7 @@ RUN for d in node_modules/.pnpm/onnxruntime-node@*/node_modules/onnxruntime-node
 
 # 2. Exécution : seulement ce qui sert.
 FROM node:22-slim
-ENV NODE_ENV=production ATLAS_DATA_DIR=/data ATLAS_PORT=8420
+ENV NODE_ENV=production WAYSAKE_DATA_DIR=/data WAYSAKE_PORT=8420
 WORKDIR /app
 COPY --from=build /app/package.json ./
 COPY --from=build /app/node_modules ./node_modules

@@ -26,7 +26,7 @@ function palette() {
 }
 
 /**
- * Le globe d'Atlas : dessiné à partir des contours de pays servis par la tour (aucune tuile, aucun réseau),
+ * Le globe de Waysake : dessiné à partir des contours de pays servis par la tour (aucune tuile, aucun réseau),
  * pays visités en vert autoroute, une vignette photo par voyage, un anneau par envie.
  */
 export function GlobeMap({ trips, wishes, visited, selected, onSelect }: Props) {

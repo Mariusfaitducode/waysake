@@ -15,7 +15,7 @@ export type Person = { id: string; name: string; color: string };
 
 /**
  * Appels à la tour. L'identité passe par l'en-tête X-Atlas-User (jamais dans l'adresse) ; le mot de passe du
- * foyer (ATLAS_PASSWORD), s'il y en a un, par `Authorization: Bearer`, téléversements compris.
+ * foyer (WAYSAKE_PASSWORD), s'il y en a un, par `Authorization: Bearer`, téléversements compris.
  */
 const headers = (s: Settings): Record<string, string> => ({
   "X-Atlas-User": s.user,

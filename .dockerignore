@@ -8,6 +8,7 @@ scripts
 .superpowers
 .playwright-mcp
 .git
+web/public/waysake.apk
 web/public/atlas.apk
 atlas-data
 .github

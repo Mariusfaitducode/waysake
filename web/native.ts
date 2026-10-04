@@ -1,4 +1,4 @@
-/** Pont avec l'app Android : présent seulement quand Atlas tourne dans l'app (WebView). */
+/** Pont avec l'app Android : présent seulement quand Waysake tourne dans l'app (WebView). */
 declare global {
   interface Window {
     /** `lang` : langue choisie dans l'app (celle du téléphone par défaut), « fr » ou « en ». */
