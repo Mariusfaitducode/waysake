@@ -11,6 +11,8 @@ export type Media = {
   takenAtLocal: string | null;
   lat: number | null;
   lon: number | null;
+  /** D'où vient le lieu : on ne peut poser ou corriger que « manual » et « game », ou une photo sans lieu. */
+  locationSource?: "exif" | "phone" | "manual" | "game" | null;
   uploadedBy: string;
   hasThumbs: boolean;
   place?: string | null;

@@ -1,0 +1,30 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/assets/bulk-upload-check"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json; charset=utf-8",
+      "content-length": "171",
+      "etag": "\"ab-iSkwQACgW5bROizFXAHPP1hJHts\"",
+      "vary": "Accept-Encoding"
+    },
+    "body": {
+      "results": [
+        {
+          "id": "local-1",
+          "action": "reject",
+          "reason": "duplicate",
+          "assetId": "215ffbd1-74c4-4748-bc71-f8df5c407528",
+          "isTrashed": false
+        },
+        {
+          "id": "local-2",
+          "action": "accept"
+        }
+      ]
+    }
+  }
+}

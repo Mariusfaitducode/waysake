@@ -82,6 +82,8 @@ export const fr = {
   "viewer.by": "Par {name}",
   "viewer.done": "C'est fait",
   "viewer.download": "Télécharger",
+  "viewer.addPlace": "Ajouter un lieu",
+  "viewer.editPlace": "Corriger le lieu",
 
   // Cartes
   "map.zoomWindows": "Ctrl + molette pour zoomer",

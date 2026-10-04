@@ -16,7 +16,7 @@ export function Sheet({ title, onClose, children, dismissable = true }: { title?
       onCancel={(e) => {
         if (!dismissable) e.preventDefault();
       }}
-      onClose={onClose}
+      onClose={(e) => e.target === e.currentTarget && onClose()}
       onClick={(e) => {
         if (dismissable && e.target === ref.current) ref.current.close();
       }}

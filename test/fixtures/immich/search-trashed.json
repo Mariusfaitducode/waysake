@@ -1,0 +1,70 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/search/metadata",
+    "body": {
+      "size": 1000,
+      "filter": {
+        "trashedAt": {
+          "gt": "2000-01-01T00:00:00.000Z"
+        }
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json; charset=utf-8",
+      "content-length": "986",
+      "etag": "\"3da-Qk20DbSq6vmc1AIxuehcmHpqdvA\"",
+      "vary": "Accept-Encoding"
+    },
+    "body": {
+      "albums": {
+        "total": 0,
+        "count": 0,
+        "items": [],
+        "facets": []
+      },
+      "assets": {
+        "total": 1,
+        "count": 1,
+        "items": [
+          {
+            "id": "f56630ad-f7fc-437c-885d-80b3d35aa808",
+            "createdAt": "2026-10-04T03:44:28.762Z",
+            "ownerId": "482d6416-91b4-4852-ad22-461686ff98d5",
+            "libraryId": null,
+            "type": "IMAGE",
+            "originalPath": "/data/upload/482d6416-91b4-4852-ad22-461686ff98d5/8c/ac/8caca120-6e20-41f1-bc71-0a9c9d166a67.jpg",
+            "originalFileName": "new-york.jpg",
+            "originalMimeType": "image/jpeg",
+            "thumbhash": "IQkDBYCIh4iIiIeGeId4j4d4cIj4",
+            "fileCreatedAt": "2026-01-20T20:00:00.000Z",
+            "fileModifiedAt": "2026-10-04T00:00:00.000Z",
+            "localDateTime": "2026-01-20T15:00:00.000Z",
+            "updatedAt": "2026-10-04T03:45:41.080Z",
+            "isFavorite": false,
+            "isArchived": false,
+            "isTrashed": true,
+            "visibility": "timeline",
+            "duration": null,
+            "livePhotoVideoId": null,
+            "people": [],
+            "checksum": "KNln0eNhmyZLWTqqUzwovhfuUZI=",
+            "isOffline": false,
+            "hasMetadata": true,
+            "duplicateId": null,
+            "resized": true,
+            "width": 800,
+            "height": 600,
+            "isEdited": false
+          }
+        ],
+        "facets": [],
+        "nextPage": null,
+        "nextCursor": null
+      }
+    }
+  }
+}

@@ -80,6 +80,9 @@ describe("médias", () => {
     expect(list.items.map((m: any) => m.takenAtLocal)).toEqual(["2026-09-01T10:00:00", "2026-09-05T10:00:00", null]);
     const item = list.items[1];
     expect(item).toMatchObject({ kind: "photo", lat: expect.any(Number), uploadedBy: "alex", width: 64, height: 48 });
+    // L'origine du lieu dit à la visionneuse si l'on peut le poser ou le corriger (jamais un GPS d'origine).
+    expect(item.locationSource).toBe("exif");
+    expect(list.items[0].locationSource).toBeNull();
 
     const thumb = await app.inject({ url: item.thumb });
     expect(thumb.headers["content-type"]).toBe("image/webp");

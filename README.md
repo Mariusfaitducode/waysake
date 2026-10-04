@@ -71,8 +71,19 @@ prises à la maison), propose les voyages et les étapes, et vous validez.
 
 ## Sauvegarder
 
-Tout est dans le dossier `ATLAS_DATA` : les originaux, les miniatures et la base SQLite. Le copier sur un disque
-externe suffit.
+Tout est dans le dossier `ATLAS_DATA` : les originaux (jamais modifiés), les miniatures et la base SQLite.
+
+- **Chaque jour**, Atlas fait un instantané de sa base dans `ATLAS_DATA/backups` (les 7 derniers jours sont
+  gardés). Il protège vos notes, lieux posés et titres d'une erreur, sans protéger contre une panne du disque.
+- **Sur un autre disque** (indispensable : une seule copie de vos photos, c'est zéro copie). Sur une tour
+  Windows, branchez un disque externe, puis depuis l'ordinateur de développement :
+  ```bash
+  scripts/install-backup.sh moi@tour E:/            # E: = le disque externe
+  ```
+  Chaque nuit à 3 h 30, la tour copie les nouvelles photos et l'instantané du jour dans `E:\Atlas`, même sans
+  session ouverte. Rien n'est jamais supprimé de la sauvegarde. Journal : `ATLAS_DATA\backup.log`.
+- **Restaurer** : copier `E:\Atlas` vers le dossier de données, puis renommer le dernier
+  `backups/atlas-AAAA-MM-JJ.db` en `atlas.sqlite` (Atlas arrêté).
 
 ## Développer
 

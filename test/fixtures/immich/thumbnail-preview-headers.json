@@ -1,0 +1,21 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/assets/{id}/thumbnail?size=preview"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "image/jpeg",
+      "content-length": "6341",
+      "cache-control": "private, max-age=86400, no-transform, stale-while-revalidate=2592000, stale-if-error=2592000",
+      "etag": "W/\"18c5-1a105039f7e\"",
+      "last-modified": "Sun, 04 Oct 2026 03:44:45 GMT",
+      "accept-ranges": "bytes",
+      "content-disposition": "inline; filename*=UTF-8''tokyo_preview.jpeg"
+    },
+    "body": {
+      "binaryBytes": 6341
+    }
+  }
+}

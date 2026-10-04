@@ -1,0 +1,19 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/assets"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json; charset=utf-8",
+      "content-length": "66",
+      "etag": "\"42-GRz+yGE4HnGnTgzBhfTU69crgnA\"",
+      "vary": "Accept-Encoding"
+    },
+    "body": {
+      "status": "duplicate",
+      "id": "215ffbd1-74c4-4748-bc71-f8df5c407528"
+    }
+  }
+}

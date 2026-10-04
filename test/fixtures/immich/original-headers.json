@@ -1,0 +1,21 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/assets/{id}/original"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "image/heic",
+      "content-length": "1265",
+      "cache-control": "private, max-age=86400, no-transform, stale-while-revalidate=2592000, stale-if-error=2592000",
+      "etag": "W/\"4f1-1a10435d800\"",
+      "last-modified": "Sun, 04 Oct 2026 00:00:00 GMT",
+      "accept-ranges": "bytes",
+      "content-disposition": "inline; filename*=UTF-8''sample.heic"
+    },
+    "body": {
+      "binaryBytes": 1265
+    }
+  }
+}

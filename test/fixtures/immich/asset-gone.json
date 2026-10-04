@@ -1,0 +1,18 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/assets/{id}"
+  },
+  "response": {
+    "status": 400,
+    "headers": {
+      "content-type": "application/json; charset=utf-8",
+      "content-length": "47",
+      "etag": "\"2f-g4y9p2Y1o+CxYBnvL5ehKtP0V5s\"",
+      "vary": "Accept-Encoding"
+    },
+    "body": {
+      "message": "Not found or no asset.read access"
+    }
+  }
+}

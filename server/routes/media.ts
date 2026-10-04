@@ -41,7 +41,10 @@ type MediaRow = {
   id: number; sha256: string; kind: "photo" | "video"; original_path: string; original_name: string; mime: string;
   width: number | null; height: number | null; taken_at: number | null; taken_at_local: string | null;
   lat: number | null; lon: number | null; uploaded_by: string; has_thumbs: number; geo: string | null;
+  location_source: LocationSource | null;
 };
+
+export type LocationSource = "exif" | "phone" | "manual" | "game";
 
 export type MediaDto = ReturnType<typeof toDto>;
 
@@ -61,6 +64,7 @@ function toDto(r: MediaRow) {
     takenAtLocal: r.taken_at_local,
     lat: r.lat,
     lon: r.lon,
+    locationSource: r.location_source,
     uploadedBy: r.uploaded_by,
     hasThumbs: r.has_thumbs === 1,
     place: r.geo ? ((JSON.parse(r.geo) as { place: string | null }).place ?? null) : null,

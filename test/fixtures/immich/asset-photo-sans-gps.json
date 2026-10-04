@@ -1,0 +1,78 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/assets/{id}"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json; charset=utf-8",
+      "etag": "\"5d7-DJ65UlvikHI8xOC9zoQ0Y8oUNCs\"",
+      "vary": "Accept-Encoding"
+    },
+    "body": {
+      "id": "a077b736-e207-40cd-93e7-1cd047f015e0",
+      "createdAt": "2026-10-04T03:44:28.917Z",
+      "ownerId": "482d6416-91b4-4852-ad22-461686ff98d5",
+      "owner": {
+        "id": "482d6416-91b4-4852-ad22-461686ff98d5",
+        "email": "alex@atlas.test",
+        "name": "Alex",
+        "profileImagePath": "",
+        "avatarColor": "gray",
+        "profileChangedAt": "2026-10-04T03:44:27.233342+00:00"
+      },
+      "libraryId": null,
+      "type": "IMAGE",
+      "originalPath": "/data/upload/482d6416-91b4-4852-ad22-461686ff98d5/38/97/3897aee3-0c87-4135-95a7-7faa3efe0a3d.jpg",
+      "originalFileName": "capture.jpg",
+      "originalMimeType": "image/jpeg",
+      "thumbhash": "lQkDBYCHiIh3h4h/iIeIe4d4cIj4",
+      "fileCreatedAt": "2026-03-03T03:03:03.000Z",
+      "fileModifiedAt": "2026-03-03T03:03:03.000Z",
+      "localDateTime": "2026-03-03T03:03:03.000Z",
+      "updatedAt": "2026-10-04T03:44:46.812Z",
+      "isFavorite": false,
+      "isArchived": false,
+      "isTrashed": false,
+      "visibility": "timeline",
+      "duration": null,
+      "exifInfo": {
+        "make": null,
+        "model": null,
+        "exifImageWidth": 640,
+        "exifImageHeight": 480,
+        "fileSizeInByte": 2069,
+        "orientation": null,
+        "dateTimeOriginal": "2026-03-03T03:03:03+00:00",
+        "modifyDate": "2026-03-03T03:03:03+00:00",
+        "timeZone": null,
+        "lensModel": null,
+        "fNumber": null,
+        "focalLength": null,
+        "iso": null,
+        "exposureTime": null,
+        "latitude": null,
+        "longitude": null,
+        "city": null,
+        "state": null,
+        "country": null,
+        "description": "",
+        "projectionType": null,
+        "rating": null
+      },
+      "livePhotoVideoId": null,
+      "tags": [],
+      "people": [],
+      "checksum": "X+wiRpyFvxH3KNGrX3KR0N40Q2k=",
+      "stack": null,
+      "isOffline": false,
+      "hasMetadata": true,
+      "duplicateId": null,
+      "resized": true,
+      "width": 640,
+      "height": 480,
+      "isEdited": false
+    }
+  }
+}

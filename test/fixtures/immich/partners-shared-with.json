@@ -1,0 +1,26 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/partners?direction=shared-with"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json; charset=utf-8",
+      "content-length": "209",
+      "etag": "\"d1-gxbevaWla05DdpzUxYbH7kcMut4\"",
+      "vary": "Accept-Encoding"
+    },
+    "body": [
+      {
+        "id": "1a9c22f5-69f7-487a-a4fd-f6862cf91703",
+        "email": "sam@atlas.test",
+        "name": "Sam",
+        "profileImagePath": "",
+        "avatarColor": "amber",
+        "profileChangedAt": "2026-10-04T03:44:27.57907+00:00",
+        "inTimeline": false
+      }
+    ]
+  }
+}

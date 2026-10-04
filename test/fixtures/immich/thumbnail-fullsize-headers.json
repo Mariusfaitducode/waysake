@@ -1,0 +1,21 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/assets/{id}/thumbnail?size=fullsize"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "image/jpeg",
+      "content-length": "3358",
+      "cache-control": "private, max-age=86400, no-transform, stale-while-revalidate=2592000, stale-if-error=2592000",
+      "etag": "W/\"d1e-1a10435d800\"",
+      "last-modified": "Sun, 04 Oct 2026 00:00:00 GMT",
+      "accept-ranges": "bytes",
+      "content-disposition": "inline; filename*=UTF-8''tokyo.jpg"
+    },
+    "body": {
+      "binaryBytes": 3358
+    }
+  }
+}

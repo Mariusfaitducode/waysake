@@ -1,0 +1,21 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/server/version"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json; charset=utf-8",
+      "content-length": "49",
+      "etag": "\"31-qezHkXJgKd+om+HsrN1pbnshRuU\"",
+      "vary": "Accept-Encoding"
+    },
+    "body": {
+      "major": 3,
+      "minor": 2,
+      "patch": 4,
+      "prerelease": null
+    }
+  }
+}

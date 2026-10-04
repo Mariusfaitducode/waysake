@@ -1,0 +1,78 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/assets/{id}"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json; charset=utf-8",
+      "etag": "\"5f7-Pg0hA4hHjD9GUaP1bBbm4qzU8r8\"",
+      "vary": "Accept-Encoding"
+    },
+    "body": {
+      "id": "741c6f1d-a950-4af5-ab9e-2d36f527e46a",
+      "createdAt": "2026-10-04T03:44:29.017Z",
+      "ownerId": "482d6416-91b4-4852-ad22-461686ff98d5",
+      "owner": {
+        "id": "482d6416-91b4-4852-ad22-461686ff98d5",
+        "email": "alex@atlas.test",
+        "name": "Alex",
+        "profileImagePath": "",
+        "avatarColor": "gray",
+        "profileChangedAt": "2026-10-04T03:44:27.233342+00:00"
+      },
+      "libraryId": null,
+      "type": "VIDEO",
+      "originalPath": "/data/upload/482d6416-91b4-4852-ad22-461686ff98d5/2b/51/2b51907e-52f8-42c2-8637-5577fc8f5d79.mov",
+      "originalFileName": "clip.mov",
+      "originalMimeType": "video/quicktime",
+      "thumbhash": "3+cNPIZzgHF3Z2doiIigSFicrw==",
+      "fileCreatedAt": "2026-06-13T12:00:00.000Z",
+      "fileModifiedAt": "2026-06-13T12:00:00.000Z",
+      "localDateTime": "2026-06-13T13:00:00.000Z",
+      "updatedAt": "2026-10-04T03:44:49.744Z",
+      "isFavorite": false,
+      "isArchived": false,
+      "isTrashed": false,
+      "visibility": "timeline",
+      "duration": 3000,
+      "exifInfo": {
+        "make": null,
+        "model": null,
+        "exifImageWidth": 320,
+        "exifImageHeight": 180,
+        "fileSizeInByte": 61308,
+        "orientation": "1",
+        "dateTimeOriginal": "2026-06-13T12:00:00+00:00",
+        "modifyDate": "2026-06-13T12:00:00+00:00",
+        "timeZone": "Europe/Lisbon",
+        "lensModel": null,
+        "fNumber": null,
+        "focalLength": null,
+        "iso": null,
+        "exposureTime": null,
+        "latitude": 38.7139,
+        "longitude": -9.1394,
+        "city": "Baixa",
+        "state": "Lisbon",
+        "country": "Portugal",
+        "description": "",
+        "projectionType": null,
+        "rating": null
+      },
+      "livePhotoVideoId": null,
+      "tags": [],
+      "people": [],
+      "checksum": "/jPndrhYPRnbk9JC0GG3kQkhVHo=",
+      "stack": null,
+      "isOffline": false,
+      "hasMetadata": true,
+      "duplicateId": null,
+      "resized": true,
+      "width": 320,
+      "height": 180,
+      "isEdited": false
+    }
+  }
+}

@@ -86,6 +86,8 @@ export const en: Translation<typeof fr> = {
   "viewer.by": "By {name}",
   "viewer.done": "Done",
   "viewer.download": "Download",
+  "viewer.addPlace": "Add a place",
+  "viewer.editPlace": "Fix the place",
 
   // Maps
   "map.zoomWindows": "Ctrl + scroll to zoom",

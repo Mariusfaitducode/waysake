@@ -1,0 +1,78 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/assets/{id}"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json; charset=utf-8",
+      "etag": "\"5fc-GkiiQhtVSCrLcb4oFbblQa49drk\"",
+      "vary": "Accept-Encoding"
+    },
+    "body": {
+      "id": "3ced3edc-0dba-4164-8218-9b08746b872f",
+      "createdAt": "2026-10-04T03:44:28.739Z",
+      "ownerId": "482d6416-91b4-4852-ad22-461686ff98d5",
+      "owner": {
+        "id": "482d6416-91b4-4852-ad22-461686ff98d5",
+        "email": "alex@atlas.test",
+        "name": "Alex",
+        "profileImagePath": "",
+        "avatarColor": "gray",
+        "profileChangedAt": "2026-10-04T03:44:27.233342+00:00"
+      },
+      "libraryId": null,
+      "type": "IMAGE",
+      "originalPath": "/data/upload/482d6416-91b4-4852-ad22-461686ff98d5/41/95/41956827-b98b-41b0-a6f7-c3b981cfb19c.jpg",
+      "originalFileName": "tokyo.jpg",
+      "originalMimeType": "image/jpeg",
+      "thumbhash": "5cUDBYCHh4iIeIiPd4iHeHh4cJj4",
+      "fileCreatedAt": "2026-04-03T12:30:00.000Z",
+      "fileModifiedAt": "2026-10-04T00:00:00.000Z",
+      "localDateTime": "2026-04-03T21:30:00.000Z",
+      "updatedAt": "2026-10-04T03:44:46.007Z",
+      "isFavorite": false,
+      "isArchived": false,
+      "isTrashed": false,
+      "visibility": "timeline",
+      "duration": null,
+      "exifInfo": {
+        "make": "Apple",
+        "model": "iPhone 15",
+        "exifImageWidth": 800,
+        "exifImageHeight": 600,
+        "fileSizeInByte": 3358,
+        "orientation": null,
+        "dateTimeOriginal": "2026-04-03T12:30:00+00:00",
+        "modifyDate": "2026-10-04T00:00:00+00:00",
+        "timeZone": "UTC+9",
+        "lensModel": null,
+        "fNumber": null,
+        "focalLength": null,
+        "iso": null,
+        "exposureTime": null,
+        "latitude": 35.6595,
+        "longitude": 139.7005,
+        "city": "Sakuragaokachō",
+        "state": "Tokyo",
+        "country": "Japan",
+        "description": "",
+        "projectionType": null,
+        "rating": null
+      },
+      "livePhotoVideoId": null,
+      "tags": [],
+      "people": [],
+      "checksum": "/Rwpq8hqZLSHKg40nw1RGBcYfrI=",
+      "stack": null,
+      "isOffline": false,
+      "hasMetadata": true,
+      "duplicateId": null,
+      "resized": true,
+      "width": 800,
+      "height": 600,
+      "isEdited": false
+    }
+  }
+}

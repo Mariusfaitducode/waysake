@@ -1,0 +1,52 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/api-keys",
+    "body": {
+      "name": "atlas-lecture",
+      "permissions": [
+        "asset.read",
+        "asset.view",
+        "asset.download",
+        "user.read",
+        "partner.read"
+      ]
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json; charset=utf-8",
+      "content-length": "411",
+      "etag": "\"19b-ZJXY08+cm+Fn22uKP8kxWtMPPDU\"",
+      "vary": "Accept-Encoding"
+    },
+    "body": {
+      "id": "39ff57db-87e6-4ccb-b3ce-09018d603ccd",
+      "name": "atlas-lecture",
+      "createdAt": "2026-10-04T03:44:53.308Z",
+      "updatedAt": "2026-10-04T03:44:53.308Z",
+      "permissions": [
+        "asset.read",
+        "asset.view",
+        "asset.download",
+        "user.read",
+        "partner.read"
+      ],
+      "secret": "<secret>",
+      "apiKey": {
+        "id": "39ff57db-87e6-4ccb-b3ce-09018d603ccd",
+        "name": "atlas-lecture",
+        "createdAt": "2026-10-04T03:44:53.308Z",
+        "updatedAt": "2026-10-04T03:44:53.308Z",
+        "permissions": [
+          "asset.read",
+          "asset.view",
+          "asset.download",
+          "user.read",
+          "partner.read"
+        ]
+      }
+    }
+  }
+}

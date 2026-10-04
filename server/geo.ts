@@ -215,6 +215,8 @@ const enRegion = new Intl.DisplayNames(["en"], { type: "region" });
 const englishCountry = new Map(countries.map((c) => [c.code, fold(enRegion.of(c.code) ?? c.code)]));
 // Tous les lieux, du plus peuplé au plus petit : on doit trouver Sirmione ou Braies, pas seulement Rome.
 const placesByPop = [...index.places].sort((a, b) => b[5] - a[5]);
+// Noms normalisés (français, puis d'origine) calculés une fois, au premier appel : la recherche suit chaque frappe.
+let foldedNames: [string, string][] | undefined;
 
 // Régions touristiques comme réponses possibles (« Dolomites »), centrées sur leur cercle ou leur plus grande ville.
 const regionHits: PlaceHit[] = TOURIST_REGIONS.map((r) => {
@@ -235,13 +237,20 @@ export function searchPlaces(q: string, limit = 8): PlaceHit[] {
     ...regionHits.filter((r) => fold(r.name).startsWith(needle)).slice(0, 2),
     ...countryHits.filter((c) => fold(c.name).startsWith(needle) || englishCountry.get(c.countryCode)?.startsWith(needle)).slice(0, 3),
   ];
-  for (const p of placesByPop) {
-    if (out.length >= limit) break;
-    const fr = frenchPlace(p[0]);
-    if (fold(fr).startsWith(needle) || fold(p[0]).startsWith(needle))
-      out.push({ kind: "place", name: fr, country: countryName(p[3]), countryCode: p[3], lat: p[1], lon: p[2] });
+  // Par population, mais un nom exact (« Bled ») passe devant les noms plus longs (« Blédi Diéya »).
+  const exact: PlaceHit[] = [];
+  const prefix: PlaceHit[] = [];
+  const room = limit - out.length;
+  foldedNames ??= placesByPop.map((p) => [fold(frenchPlace(p[0])), fold(p[0])]);
+  for (let i = 0; i < placesByPop.length && exact.length < room; i++) {
+    const p = placesByPop[i];
+    const [a, b] = foldedNames[i];
+    if (!a.startsWith(needle) && !b.startsWith(needle)) continue;
+    const hit: PlaceHit = { kind: "place", name: frenchPlace(p[0]), country: countryName(p[3]), countryCode: p[3], lat: p[1], lon: p[2] };
+    if (a === needle || b === needle) exact.push(hit);
+    else if (prefix.length < room) prefix.push(hit);
   }
-  return out;
+  return [...out, ...exact, ...prefix].slice(0, limit);
 }
 
 export function countriesGeoJson() {

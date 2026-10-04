@@ -56,7 +56,8 @@ describe("searchPlaces", () => {
   });
   it("trouve aussi les petits lieux (pour localiser des photos)", () => {
     expect(searchPlaces("sirmione")[0]).toMatchObject({ countryCode: "IT" });
-    expect(searchPlaces("bled").map((h) => h.countryCode)).toContain("SI");
+    // Le nom exact passe devant les noms plus longs, même plus peuplés (« Blédi Diéya »).
+    expect(searchPlaces("bled")[0]).toMatchObject({ name: "Bled", countryCode: "SI" });
     expect(searchPlaces("hvar").map((h) => h.countryCode)).toContain("HR");
   });
   it("propose les régions touristiques", () => {

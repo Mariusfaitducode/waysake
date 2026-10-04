@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import type { Media } from "../api.js";
-import { useAuthorName } from "../data.js";
-import { fullDate } from "../format.js";
+import { useAuthorName, useDataVersion } from "../data.js";
+import { fullDate, hitName } from "../format.js";
+import { PlacePicker } from "./PlacePicker.js";
 import { IconBack, IconClose } from "../shell/icons.js";
 import { t } from "../i18n/index.js";
 import { placeTitle } from "../i18n/places.js";
@@ -22,7 +23,11 @@ export function Viewer({ items, index, onIndex, onClose, action }: Props) {
   const ref = useRef<HTMLDialogElement>(null);
   const touch = useRef<{ x: number; y: number } | null>(null);
   const [done, setDone] = useState<number | null>(null);
+  const [placing, setPlacing] = useState(false);
+  // Lieu posé depuis la visionneuse, affiché tout de suite (la liste se recharge en arrière-plan).
+  const [placed, setPlaced] = useState<Record<number, string>>({});
   const authorName = useAuthorName();
+  const { bump } = useDataVersion();
   const go = (d: number) => onIndex(Math.min(Math.max(index + d, 0), items.length - 1));
 
   useEffect(() => {
@@ -43,14 +48,19 @@ export function Viewer({ items, index, onIndex, onClose, action }: Props) {
   }, [index, items]);
 
   const who = authorName(m.uploadedBy);
-  const meta = [m.place && placeTitle(m.place), m.takenAtLocal ? fullDate(m.takenAtLocal) : t("common.unknownDate")].filter(Boolean).join(", ");
+  // Un GPS d'origine ne se remplace jamais ; un lieu posé à la main ou au jeu se corrige.
+  const located = m.lat != null || placed[m.id] !== undefined;
+  const canPlace = !located || m.locationSource === "manual" || m.locationSource === "game" || placed[m.id] !== undefined;
+  const placeName = placed[m.id] ?? (m.place && placeTitle(m.place));
+  const meta = [placeName, m.takenAtLocal ? fullDate(m.takenAtLocal) : t("common.unknownDate")].filter(Boolean).join(", ");
 
   return (
     <dialog
       ref={ref}
       className="viewer"
       aria-label={t("viewer.label")}
-      onClose={onClose}
+      // En React, la fermeture d'une feuille ouverte depuis la visionneuse remonte jusqu'ici : on l'ignore.
+      onClose={(e) => e.target === e.currentTarget && onClose()}
       onTouchStart={(e) => (touch.current = { x: e.touches[0].clientX, y: e.touches[0].clientY })}
       onTouchEnd={(e) => {
         if (!touch.current) return;
@@ -90,6 +100,11 @@ export function Viewer({ items, index, onIndex, onClose, action }: Props) {
           <p className="viewer__who">{t("viewer.by", { name: who })}</p>
         </div>
         <div className="viewer__actions">
+          {canPlace && (
+            <button className="viewer__action" onClick={() => setPlacing(true)}>
+              {located ? t("viewer.editPlace") : t("viewer.addPlace")}
+            </button>
+          )}
           {action && (
             <button className="viewer__action" onClick={() => action.run(m).then(() => setDone(m.id))} disabled={done === m.id}>
               {done === m.id ? t("viewer.done") : action.label}
@@ -100,6 +115,17 @@ export function Viewer({ items, index, onIndex, onClose, action }: Props) {
           </a>
         </div>
       </footer>
+      {placing && (
+        <PlacePicker
+          photos={[m.id]}
+          preview={m.thumb}
+          onDone={(place) => {
+            setPlaced((p) => ({ ...p, [m.id]: hitName(place) }));
+            bump();
+          }}
+          onClose={() => setPlacing(false)}
+        />
+      )}
     </dialog>
   );
 }

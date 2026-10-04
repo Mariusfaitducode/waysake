@@ -14,6 +14,7 @@ import { journalRoutes } from "./routes/journal.js";
 import { importRoutes } from "./routes/imports.js";
 import { locateRoutes } from "./routes/locate.js";
 import { setupAuth } from "./auth.js";
+import { scheduleSnapshots } from "./backup.js";
 
 export type AtlasApp = FastifyInstance & { atlas: { db: Db; rebuild: () => void; scheduleRebuild: () => void } };
 
@@ -23,6 +24,8 @@ export async function buildApp(opts: {
   rebuildDelayMs?: number;
   /** Mot de passe du foyer ; absent ou vide : Atlas reste ouvert (ATLAS_PASSWORD par défaut). */
   password?: string;
+  /** Instantané quotidien de la base dans DATA_DIR/backups (activé par main.ts). */
+  snapshots?: boolean;
 }): Promise<AtlasApp> {
   const app = Fastify({ logger: false, bodyLimit: 1024 * 1024 });
   const db = openDb(opts.dataDir);
@@ -46,8 +49,10 @@ export async function buildApp(opts: {
     }, opts.rebuildDelayMs ?? 4000);
   };
   app.decorate("atlas", { db, rebuild, scheduleRebuild });
+  const stopSnapshots = opts.snapshots ? scheduleSnapshots(db, opts.dataDir, (err) => app.log.error(err)) : () => {};
   app.addHook("onClose", async () => {
     clearTimeout(timer);
+    stopSnapshots();
     db.close();
   });
 

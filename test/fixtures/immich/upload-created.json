@@ -1,0 +1,20 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/assets",
+    "body": "multipart: assetData, fileCreatedAt, fileModifiedAt"
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "content-type": "application/json; charset=utf-8",
+      "content-length": "64",
+      "etag": "\"40-biLwlA+PGZYGs0yuIx7qYSfNLvY\"",
+      "vary": "Accept-Encoding"
+    },
+    "body": {
+      "id": "215ffbd1-74c4-4748-bc71-f8df5c407528",
+      "status": "created"
+    }
+  }
+}

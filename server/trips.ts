@@ -1,3 +1,4 @@
+import type { LocationSource } from "./routes/media.js";
 import type { Db } from "./db.js";
 import { clusterTrips, detectHome, type ChapterDraft, type ClusterInput, type LatLon, type TripDraft } from "./clustering.js";
 import { reverseGeocode, type GeoPlace } from "./geo.js";
@@ -200,7 +201,7 @@ export function getTrip(db: Db, slug: string) {
   if (!r) return null;
   const chapters = db.prepare("SELECT * FROM chapter WHERE trip_id = ? ORDER BY sort").all(r.id) as any[];
   const mediaStmt = db.prepare(
-    `SELECT m.id, m.kind, m.width, m.height, m.taken_at, m.taken_at_local, m.lat, m.lon, m.uploaded_by, m.has_thumbs, m.geo
+    `SELECT m.id, m.kind, m.width, m.height, m.taken_at, m.taken_at_local, m.lat, m.lon, m.location_source, m.uploaded_by, m.has_thumbs, m.geo
      FROM media_chapter mc JOIN media m ON m.id = mc.media_id WHERE mc.chapter_id = ? ORDER BY m.taken_at, m.id`,
   );
   return {
@@ -225,6 +226,7 @@ export function getTrip(db: Db, slug: string) {
         takenAtLocal: m.taken_at_local as string | null,
         lat: m.lat as number | null,
         lon: m.lon as number | null,
+        locationSource: m.location_source as LocationSource | null,
         uploadedBy: m.uploaded_by as string,
         hasThumbs: m.has_thumbs === 1,
         place: m.geo ? ((JSON.parse(m.geo) as GeoPlace).place ?? null) : null,

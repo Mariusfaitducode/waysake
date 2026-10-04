@@ -1,0 +1,50 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/albums",
+    "body": {
+      "albumName": "Road trip Portugal 2026",
+      "description": "Créé par Atlas",
+      "assetIds": [
+        "{id}"
+      ]
+    }
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "content-type": "application/json; charset=utf-8",
+      "content-length": "653",
+      "etag": "\"28d-hD87i6DgmaXIaT7jXhmi7Oq2YrQ\"",
+      "vary": "Accept-Encoding"
+    },
+    "body": {
+      "albumName": "Road trip Portugal 2026",
+      "description": "Créé par Atlas",
+      "albumThumbnailAssetId": "215ffbd1-74c4-4748-bc71-f8df5c407528",
+      "createdAt": "2026-10-04T03:45:39.743Z",
+      "updatedAt": "2026-10-04T03:45:39.743Z",
+      "id": "6cd5ca03-4d7e-4c4c-95d2-5d7f09c24547",
+      "albumUsers": [
+        {
+          "user": {
+            "id": "482d6416-91b4-4852-ad22-461686ff98d5",
+            "email": "alex@atlas.test",
+            "name": "Alex",
+            "profileImagePath": "",
+            "avatarColor": "gray",
+            "profileChangedAt": "2026-10-04T03:44:27.233342+00:00"
+          },
+          "role": "owner"
+        }
+      ],
+      "shared": false,
+      "hasSharedLink": false,
+      "startDate": "2026-06-12T10:15:00+00:00",
+      "endDate": "2026-06-12T10:15:00+00:00",
+      "assetCount": 1,
+      "isActivityEnabled": true,
+      "order": "desc"
+    }
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/search/metadata",
+    "body": {
+      "size": 2
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json; charset=utf-8",
+      "etag": "\"724-ESKlOr8VNlceMsZ/3S55fmJPcdY\"",
+      "vary": "Accept-Encoding"
+    },
+    "body": {
+      "albums": {
+        "total": 0,
+        "count": 0,
+        "items": [],
+        "facets": []
+      },
+      "assets": {
+        "total": 2,
+        "count": 2,
+        "items": [
+          {
+            "id": "bc5a9777-4d66-487e-a4e2-246aebca1f75",
+            "createdAt": "2026-10-04T03:44:28.979Z",
+            "ownerId": "482d6416-91b4-4852-ad22-461686ff98d5",
+            "libraryId": null,
+            "type": "IMAGE",
+            "originalPath": "/data/upload/482d6416-91b4-4852-ad22-461686ff98d5/6e/dd/6eddf92a-0960-4f28-82c6-afd873327a6d.heic",
+            "originalFileName": "sample.heic",
+            "originalMimeType": "image/heic",
+            "thumbhash": "JIoCBYCHh4h3h4ePh4eIeId3YIj3",
+            "fileCreatedAt": "2026-09-10T16:30:00.000Z",
+            "fileModifiedAt": "2026-10-04T00:00:00.000Z",
+            "localDateTime": "2026-09-10T18:30:00.000Z",
+            "updatedAt": "2026-10-04T03:44:47.018Z",
+            "isFavorite": false,
+            "isArchived": false,
+            "isTrashed": false,
+            "visibility": "timeline",
+            "duration": null,
+            "livePhotoVideoId": null,
+            "people": [],
+            "checksum": "bFbP9I9IimXIvDHETl8zqHXOHPs=",
+            "isOffline": false,
+            "hasMetadata": true,
+            "duplicateId": null,
+            "resized": true,
+            "width": 300,
+            "height": 200,
+            "isEdited": false
+          },
+          {
+            "id": "3819c113-77ea-47a1-a643-07bdf00ae770",
+            "createdAt": "2026-10-04T03:44:28.703Z",
+            "ownerId": "482d6416-91b4-4852-ad22-461686ff98d5",
+            "libraryId": null,
+            "type": "IMAGE",
+            "originalPath": "/data/upload/482d6416-91b4-4852-ad22-461686ff98d5/46/6d/466d150d-f1aa-4edb-8bc2-28912c3bd9e9.jpg",
+            "originalFileName": "paris.jpg",
+            "originalMimeType": "image/jpeg",
+            "thumbhash": "9BYCBYCHiIiIeIh3d4iHcHh1f4gI",
+            "fileCreatedAt": "2026-08-02T07:05:00.000Z",
+            "fileModifiedAt": "2026-10-04T00:00:00.000Z",
+            "localDateTime": "2026-08-02T09:05:00.000Z",
+            "updatedAt": "2026-10-04T03:44:46.077Z",
+            "isFavorite": false,
+            "isArchived": false,
+            "isTrashed": false,
+            "visibility": "timeline",
+            "duration": null,
+            "livePhotoVideoId": null,
+            "people": [],
+            "checksum": "VfS8vNtQ0AyeT22Iky4yKx9fH10=",
+            "isOffline": false,
+            "hasMetadata": true,
+            "duplicateId": null,
+            "resized": true,
+            "width": 800,
+            "height": 600,
+            "isEdited": false
+          }
+        ],
+        "facets": [],
+        "nextPage": "2",
+        "nextCursor": null
+      }
+    }
+  }
+}

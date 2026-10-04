@@ -1,4 +1,4 @@
-# Démarre / met à jour Atlas sur la tour. Lancé par scripts/deploy-tower.sh via une tâche planifiée,
+﻿# Démarre / met à jour Atlas sur la tour. Lancé par scripts/deploy-tower.sh via une tâche planifiée,
 # pour s'exécuter dans la session Windows ouverte (Docker Desktop y a accès aux identifiants).
 param([string]$Data = "C:/Atlas")
 $log = "C:\Atlas-app\deploy.log"

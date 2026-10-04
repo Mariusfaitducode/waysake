@@ -1,0 +1,44 @@
+{
+  "request": {
+    "method": "PUT",
+    "path": "/albums/{id}/assets",
+    "body": {
+      "ids": [
+        "porto",
+        "lisbonne (déjà présent)",
+        "photo de Sam (non partagée)",
+        "id inconnu"
+      ]
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json; charset=utf-8",
+      "content-length": "316",
+      "etag": "\"13c-8fO1FjJTB+ItCDMl4BnciJIoMb8\"",
+      "vary": "Accept-Encoding"
+    },
+    "body": [
+      {
+        "id": "1c1cfb7a-1a8e-4d84-972a-002f767aa07d",
+        "success": true
+      },
+      {
+        "id": "215ffbd1-74c4-4748-bc71-f8df5c407528",
+        "success": false,
+        "error": "duplicate"
+      },
+      {
+        "id": "bc144d12-67b8-49e6-81e3-bfbef06dc51d",
+        "success": false,
+        "error": "no_permission"
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000000",
+        "success": false,
+        "error": "no_permission"
+      }
+    ]
+  }
+}
