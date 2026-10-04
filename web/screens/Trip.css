@@ -29,6 +29,8 @@
 .trip-cover { position: relative; isolation: isolate; }
 .trip-cover--loading { height: min(118vw, 72svh); border-radius: 0; }
 .trip-cover__photo { position: relative; isolation: isolate; overflow: hidden; height: min(118vw, 72svh); min-height: 300px; background: var(--surface-sunken); }
+/* Le bas de la photo s'efface dans la page (quelle que soit sa teinte) : pas de bord net sous le titre. */
+.trip-cover__photo { -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 72px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 72px), transparent); }
 .trip-cover__img { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; object-position: 50% 45%; animation: cover-in var(--dur-slow) var(--ease) both; }
 /* Flou progressif, sur le bas seulement : la photo se fond dans la page sans voile noir. */
 .trip-cover__veil {
@@ -93,7 +95,7 @@
 }
 
 /* ---------- Corps ---------- */
-.trip__body { position: relative; isolation: isolate; padding: var(--sp-4) 0 var(--sp-12); display: grid; gap: var(--sp-8); }
+.trip__body { position: relative; isolation: isolate; padding: var(--sp-4) 0 var(--sp-12); display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-8); }
 .trip__section { padding: 0 var(--gutter); }
 
 /* Actions : un bouton Encre, deux boutons ronds teintés (libellé visible dès qu'il y a la place). Même hauteur. */

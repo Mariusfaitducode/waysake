@@ -23,7 +23,7 @@
 .stats__panel {
   margin: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(130px, calc(50% - var(--sp-4))), 1fr));
   gap: var(--sp-4);
 }
 .stats__panel > div { display: flex; flex-direction: column-reverse; }
