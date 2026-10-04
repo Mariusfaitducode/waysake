@@ -1,3 +1,4 @@
+import { isDarkTheme, tripColorHex, type TripColorId } from "../trip-colors.js";
 import { useEffect, useRef } from "react";
 import * as maplibregl from "maplibre-gl";
 import type { Map as MlMap } from "maplibre-gl";
@@ -6,12 +7,14 @@ type Stop = { title: string; centerLat: number; centerLon: number };
 import { locale, t } from "../i18n/index.js";
 import "./TripMap.css";
 
-const dark = () => matchMedia("(prefers-color-scheme: dark)").matches;
+// Thème effectif (data-theme d'abord, sinon le système).
+const dark = isDarkTheme;
 // Tuiles OpenFreeMap : gratuites, sans clé ni compte.
 const styleUrl = () => `https://tiles.openfreemap.org/styles/${dark() ? "dark" : "positron"}`;
 
-/** L'itinéraire : la route jour par jour en vert autoroute, les étapes en panneaux numérotés. */
-export function TripMap({ route, chapters, onChapter, compact }: { route: [number, number][]; chapters: Stop[]; onChapter?: (index: number) => void; compact?: boolean }) {
+/** L'itinéraire : la route jour par jour à la couleur du voyage, les étapes en pastilles numérotées. */
+export function TripMap({ route, chapters, onChapter, compact, color }: { route: [number, number][]; chapters: Stop[]; onChapter?: (index: number) => void; compact?: boolean; color?: TripColorId }) {
+  // Ligne d'itinéraire : couleur du voyage (MapLibre ne lit pas le CSS), sinon Encre.
   const el = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -46,11 +49,14 @@ export function TripMap({ route, chapters, onChapter, compact }: { route: [numbe
           m.setLayoutProperty(layer.id, "text-field", ["coalesce", ["get", `name:${locale()}`], ["get", "name"]]);
       }
     });
-    const color = getComputedStyle(document.documentElement).getPropertyValue("--autostrada").trim() || "#0b7a4b";
+    const css = getComputedStyle(document.documentElement);
+    const lineColor = color ? tripColorHex(color, dark()) : css.getPropertyValue("--accent").trim();
+    // Liseré de la ligne : la couleur de fond (--bg), comme sur le globe.
+    const casing = css.getPropertyValue("--bg").trim() || "#ffffff";
     m.on("load", () => {
       m.addSource("route", { type: "geojson", data: { type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: route } } });
-      m.addLayer({ id: "route-casing", type: "line", source: "route", layout: { "line-join": "round", "line-cap": "round" }, paint: { "line-color": "#ffffff", "line-width": 7, "line-opacity": dark() ? 0.15 : 0.9 } });
-      m.addLayer({ id: "route", type: "line", source: "route", layout: { "line-join": "round", "line-cap": "round" }, paint: { "line-color": color, "line-width": 3.5 } });
+      m.addLayer({ id: "route-casing", type: "line", source: "route", layout: { "line-join": "round", "line-cap": "round" }, paint: { "line-color": casing, "line-width": 7.5, "line-opacity": 0.9 } });
+      m.addLayer({ id: "route", type: "line", source: "route", layout: { "line-join": "round", "line-cap": "round" }, paint: { "line-color": lineColor, "line-width": 3.5 } });
     });
     chapters.forEach((c, i) => {
       const holder = document.createElement("div");

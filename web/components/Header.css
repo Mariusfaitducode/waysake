@@ -1,22 +1,21 @@
-.header { padding: calc(env(safe-area-inset-top, 0px) + 18px) 16px 6px; }
-.header__row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.header__title { margin: 0; font-family: var(--font-sign); font-weight: 600; font-size: 40px; line-height: 1; }
-.header__subtitle { margin: 6px 0 0; color: var(--muted); }
-.header__actions { display: flex; align-items: center; gap: 10px; }
-.header__me {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 0;
-  background: var(--c);
-  color: #fff;
-  font-family: var(--font-sign);
-  font-weight: 600;
-  font-size: 19px;
-  cursor: pointer;
+/* Grand titre : Geist 650 serré, sous-titre discret. Pas d'ornement. */
+.header { padding: calc(env(safe-area-inset-top, 0px) + var(--sp-5)) var(--gutter) var(--sp-2); }
+.header__row { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); }
+.header__title {
+  margin: 0;
+  min-width: 0;
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-3xl);
+  letter-spacing: var(--tracking-tighter);
+  line-height: 1.02;
+  text-wrap: balance;
 }
+.header__subtitle { margin: var(--sp-2) 0 0; max-width: 62ch; color: var(--text-muted); font-size: var(--fs-md); line-height: 1.45; }
+.header__actions { display: flex; flex: none; align-items: center; gap: var(--sp-2); }
+.header__me { display: grid; padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer; transition: transform var(--dur-fast) var(--ease); }
+.header__me:active { transform: scale(0.95); }
 @media (min-width: 900px) {
-  .header { padding: 34px 40px 8px; }
-  .header__title { font-size: 54px; }
+  .header { padding: var(--sp-10) var(--sp-10) var(--sp-2); }
   .header__me { display: none; }
 }

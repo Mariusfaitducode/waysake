@@ -1,5 +1,9 @@
-/* Diaporama : noir, plein écran, lisible de loin (télé à 3 m). */
+/*
+ * Diaporama : noir, plein écran, lisible de loin (télé à 3 m). Blanc et noir en dur (fond toujours sombre) ;
+ * la couleur du voyage (--tint, teinte sombre de la palette) ne sert qu'à la route et à la progression.
+ */
 .slideshow {
+  --tint: #9BA6B1;
   position: fixed;
   inset: 0;
   z-index: 100;
@@ -17,32 +21,100 @@
 .slideshow__img.is-landscape { animation: slideshow-pan 6s linear both; }
 @keyframes slideshow-pan { from { transform: scale(1); } to { transform: scale(1.06); } }
 
+/* Entre deux étapes : un titre Horizon posé sur la première photo de l'étape, très floutée. */
 .slideshow__sign {
   position: absolute;
   inset: 0;
   display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 18px;
-  padding: 40px;
-  text-align: center;
-  background: radial-gradient(circle at 50% 40%, #0f3d2a, #000 75%);
+  align-items: end;
+  /* En bas, de quoi laisser passer les commandes (lecture, précédent, suivant) sous la route. */
+  padding: max(40px, 7vh) max(28px, 6vw) calc(max(28px, 4vh) + clamp(60px, 5.6vw, 92px) + max(28px, 4vh));
+  background: radial-gradient(circle at 30% 30%, #26262B, #000 75%);
   animation: slideshow-sign 700ms var(--ease) both;
 }
-.slideshow__sign .sign--lg { font-size: clamp(48px, 9vw, 120px); max-width: 90vw; }
-.slideshow__sign p { margin: 0; font-size: clamp(18px, 2.2vw, 30px); opacity: 0.85; max-width: 60ch; }
-.slideshow__exit {
-  font-family: var(--font-sign);
-  font-weight: 600;
-  font-size: clamp(18px, 2vw, 28px);
-  padding: 2px 14px;
-  border-radius: 8px;
-  background: var(--signal);
-  color: #16191b;
+.slideshow__sign-bg {
+  position: absolute;
+  inset: -60px;
+  width: calc(100% + 120px);
+  height: calc(100% + 120px);
+  object-fit: cover;
+  filter: blur(48px) saturate(1.15) brightness(0.62);
+  animation: slideshow-pan 3.2s linear both;
 }
-.slideshow__end { display: flex; gap: 12px; margin-top: 12px; }
-.slideshow__quiet { color: #fff; }
-@keyframes slideshow-sign { from { opacity: 0; transform: scale(0.96); } }
+.slideshow__sign::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 30%, rgba(0, 0, 0, 0.55) 100%);
+  pointer-events: none;
+}
+.slideshow__sign-text { position: relative; z-index: 1; display: grid; justify-items: start; gap: clamp(10px, 1.4vw, 20px); max-width: min(90vw, 1400px); }
+.slideshow__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55em;
+  font-size: clamp(16px, 1.6vw, 24px);
+  font-weight: var(--fw-medium);
+  letter-spacing: 0.01em;
+  color: rgba(255, 255, 255, 0.82);
+}
+.slideshow__eyebrow i { width: 0.6em; height: 0.6em; border-radius: 50%; background: var(--tint); }
+.slideshow__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  font-size: clamp(52px, 9vw, 140px);
+  letter-spacing: -0.05em;
+  line-height: 0.95;
+  text-wrap: balance;
+}
+.slideshow__sign p { margin: 0; font-size: clamp(18px, 2vw, 30px); font-weight: var(--fw-medium); color: rgba(255, 255, 255, 0.8); max-width: 60ch; }
+
+/* Route sous le titre : étapes en cercles évidés, celles déjà vues pleines, l'étape en cours plus grande. */
+.slideshow__route {
+  list-style: none;
+  margin: clamp(6px, 1vw, 14px) 0 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  row-gap: 10px;
+  font-size: clamp(13px, 1.25vw, 19px);
+  font-weight: var(--fw-medium);
+  color: var(--text-on-photo-muted);
+}
+.slideshow__route li { display: flex; align-items: center; gap: 0.5em; white-space: nowrap; }
+.slideshow__route li::before {
+  content: "";
+  flex: none;
+  width: 0.62em;
+  height: 0.62em;
+  border-radius: 50%;
+  border: 1.8px solid var(--tint);
+  background: #000;
+}
+.slideshow__route li.is-done::before { background: var(--tint); }
+.slideshow__route li.is-current { color: #fff; font-weight: var(--fw-semibold); }
+.slideshow__route li.is-current::before { width: 0.85em; height: 0.85em; background: var(--tint); box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.18); }
+.slideshow__route li:not(:last-child)::after {
+  content: "";
+  width: clamp(18px, 3vw, 56px);
+  height: 1.8px;
+  margin: 0 0.5em;
+  background: var(--tint);
+  opacity: 0.7;
+}
+@media (max-width: 760px) {
+  .slideshow__route li:not(.is-current) span { display: none; }
+}
+
+.slideshow__sign--end { align-items: center; justify-items: center; text-align: center; }
+.slideshow__sign--end .slideshow__sign-text { justify-items: center; }
+.slideshow__end { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 12px; }
+/* Sur noir, l'action principale est blanche (l'Encre claire serait invisible). */
+.slideshow__primary, .slideshow__primary:hover { background: #fff; color: #141416; }
+.slideshow__quiet, .slideshow__quiet:hover { background: rgba(255, 255, 255, 0.16); color: #fff; }
+@keyframes slideshow-sign { from { opacity: 0; } }
 
 .slideshow__caption {
   position: absolute;
@@ -53,7 +125,7 @@
   max-width: min(60vw, 900px);
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
 }
-.slideshow__caption strong { font-family: var(--font-sign); font-weight: 600; font-size: clamp(26px, 3vw, 46px); line-height: 1; }
+.slideshow__caption strong { font-family: var(--font-display); font-weight: var(--fw-bold); font-size: clamp(26px, 3vw, 46px); letter-spacing: var(--tracking-tighter); line-height: 1; }
 .slideshow__caption span { font-size: clamp(15px, 1.5vw, 22px); opacity: 0.85; }
 .slideshow__caption .slideshow__note { font-size: clamp(18px, 1.9vw, 28px); opacity: 1; }
 
@@ -64,20 +136,20 @@
   width: clamp(150px, 16vw, 260px);
   height: auto;
   padding: 8px;
-  border-radius: 16px;
+  border-radius: var(--r-lg);
   background: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px) saturate(1.4);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
 }
-.slideshow__route { fill: none; stroke: rgba(255, 255, 255, 0.45); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
-.slideshow__map circle { fill: rgba(255, 255, 255, 0.5); transition: r 400ms var(--ease); }
-.slideshow__map circle.is-done { fill: #19a266; stroke: #fff; stroke-width: 2; }
+.slideshow__map-route { fill: none; stroke: var(--tint); stroke-opacity: 0.75; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.slideshow__map circle { fill: #000; stroke: var(--tint); stroke-width: 1.8; transition: r 400ms var(--ease); }
+.slideshow__map circle.is-done { fill: var(--tint); }
 
 .slideshow__progress { position: absolute; left: 0; right: 0; top: 0; height: 3px; background: rgba(255, 255, 255, 0.12); }
-.slideshow__progress span { display: block; height: 100%; background: #19a266; transition: width 400ms var(--ease); }
+.slideshow__progress span { display: block; height: 100%; background: var(--tint); transition: width 400ms var(--ease); }
 
 .slideshow__bar,
-.slideshow__controls { position: absolute; transition: opacity 400ms var(--ease); }
+.slideshow__controls { position: absolute; z-index: 2; transition: opacity 400ms var(--ease); }
 .is-idle .slideshow__bar,
 .is-idle .slideshow__controls { opacity: 0; pointer-events: none; }
 .slideshow__bar {
@@ -90,37 +162,50 @@
   padding: max(18px, 2.5vh) max(20px, 3vw);
   background: linear-gradient(rgba(0, 0, 0, 0.55), transparent);
 }
-.slideshow__trip { flex: 1; min-width: 0; font-family: var(--font-sign); font-weight: 600; font-size: clamp(20px, 2vw, 30px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.slideshow__trip { flex: 1; min-width: 0; font-family: var(--font-display); font-weight: var(--fw-semibold); font-size: clamp(17px, 1.6vw, 26px); letter-spacing: var(--tracking-tight); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .slideshow__toggle {
   border: 0;
-  border-radius: 999px;
-  padding: 10px 18px;
-  background: rgba(255, 255, 255, 0.16);
+  border-radius: var(--r-full);
+  padding: 9px 16px;
+  background: rgba(255, 255, 255, 0.14);
   color: #fff;
   font: inherit;
-  font-weight: 600;
-  font-size: clamp(14px, 1.2vw, 18px);
+  font-weight: var(--fw-medium);
+  font-size: clamp(13px, 1.1vw, 17px);
   cursor: pointer;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: background-color var(--dur-fast) var(--ease);
 }
+.slideshow__toggle:hover { background: rgba(255, 255, 255, 0.24); }
+.slideshow__toggle[aria-pressed="true"] { background: #fff; color: #141416; }
 .slideshow__controls { left: 50%; bottom: max(28px, 4vh); translate: -50% 0; display: flex; align-items: center; gap: 22px; }
 .slideshow__button { width: clamp(48px, 4.5vw, 72px); height: clamp(48px, 4.5vw, 72px); }
 .slideshow__next svg { transform: scaleX(-1); }
 .slideshow__play {
-  width: clamp(64px, 6vw, 96px);
-  height: clamp(64px, 6vw, 96px);
+  width: clamp(60px, 5.6vw, 92px);
+  height: clamp(60px, 5.6vw, 92px);
   border: 0;
   border-radius: 50%;
   background: #fff;
   cursor: pointer;
   display: grid;
   place-items: center;
+  transition: transform var(--dur-fast) var(--ease);
 }
-.slideshow__pause-icon { width: 30%; height: 34%; border-inline: 7px solid #16191b; box-sizing: border-box; }
-.slideshow__play-icon { width: 0; height: 0; margin-left: 8%; border-block: 14px solid transparent; border-left: 24px solid #16191b; }
+.slideshow__play:active { transform: scale(0.94); }
+.slideshow__pause-icon { width: 30%; height: 34%; border-inline: 6px solid #141416; box-sizing: border-box; }
+.slideshow__play-icon { width: 0; height: 0; margin-left: 8%; border-block: 13px solid transparent; border-left: 22px solid #141416; }
 /* Focus bien visible : la télécommande se déplace de bouton en bouton. */
-.slideshow button:focus-visible { outline: 4px solid var(--signal); outline-offset: 4px; }
+.slideshow button:focus-visible { outline: 4px solid #fff; outline-offset: 4px; }
 
 @media (prefers-reduced-motion: reduce) {
   .slideshow__img.is-landscape,
+  .slideshow__sign-bg,
   .slideshow__sign { animation: none; }
+}
+
+/* Téléphone : la mini-carte chevaucherait les commandes ; la route du haut montre déjà où on en est. */
+@media (max-width: 600px) {
+  .slideshow__map { display: none; }
 }

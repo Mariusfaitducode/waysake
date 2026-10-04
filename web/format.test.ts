@@ -43,3 +43,4 @@ describe("mois, nombres et pays selon la langue", () => {
     expect(countryName("de", "de", "en")).toBe("Germany");
   });
 });
+

@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import type { Db } from "../db.js";
-import { cancelImport, confirmImport, lastImportedAt, proposal, setExclusions } from "../imports.js";
+import { cancelImport, confirmImport, lastImportedAt, proposal, proposalWithColors, setExclusions } from "../imports.js";
 import { identify } from "./users.js";
 
 const ids = (v: unknown) => v === undefined || (Array.isArray(v) && v.every((x) => Number.isInteger(x)));
@@ -16,7 +16,7 @@ export function importRoutes(app: FastifyInstance, db: Db, dataDir: string) {
   app.get("/api/imports/last", async () => ({ since: lastImportedAt(db) }));
 
   app.get<{ Params: { id: string } }>("/api/imports/:id", async (req, reply) => {
-    const p = proposal(db, Number(req.params.id));
+    const p = await proposalWithColors(db, dataDir, Number(req.params.id));
     return p ?? reply.code(404).send({ error: "Cet import n'existe pas.", code: "import_not_found" });
   });
 

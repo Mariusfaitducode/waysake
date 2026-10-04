@@ -1,36 +1,274 @@
-/* Waysake — panneaux routiers d'Europe : vert autoroute, blanc neutre, les photos portent la couleur. */
+/*
+ * Waysake — jetons de design, direction Horizon, marque Encre.
+ * L'interface reste en noir et blanc (Encre) ; la couleur vient des voyages (10 teintes) et des photos.
+ * Mode d'emploi : docs/design/README.md. Ne jamais écrire une couleur en dur dans un écran : un jeton.
+ *
+ * Thème : suit le système (prefers-color-scheme) ; <html data-theme="light|dark"> force l'un ou l'autre.
+ * Les valeurs sombres sont écrites deux fois (média + attribut) : les garder identiques.
+ */
 :root {
-  --paper: #fafaf8;
-  --surface: #ffffff;
-  --ink: #16191b;
-  --muted: #6a7074;
-  --hairline: rgba(22, 25, 27, 0.1);
-  --autostrada: #0b7a4b;
-  --autostrada-ink: #ffffff;
-  --signal: #f2c230;
-  --danger: #c4392b;
-  --veil: rgba(250, 250, 248, 0.78);
+  /* ---- Surfaces ---- */
+  --bg: #f6f6f4; /* fond de page, gris neutre (ni bleu ni crème) */
+  --surface: #ffffff; /* cartes, feuilles, menus */
+  --surface-raised: #ffffff; /* surface posée sur une surface (menu sur carte) */
+  --surface-sunken: #efefec; /* champs, puits, segments */
+  --glass: rgba(255, 255, 255, 0.72); /* barres translucides (avec backdrop-filter) */
+  --overlay: rgba(12, 12, 14, 0.42); /* fond derrière une feuille ou un dialogue */
+  --scrim: rgba(10, 12, 14, 0.32); /* bouton rond posé sur une photo (texte blanc) */
 
-  --font-ui: "Instrument Sans Variable", system-ui, -apple-system, sans-serif;
-  --font-sign: "Barlow Condensed", "Arial Narrow", sans-serif;
+  /* ---- Texte ---- */
+  --text: #141416;
+  --text-muted: #606369; /* 5,9:1 sur --bg */
+  --text-faint: #8b8e93; /* indications, jamais pour un texte utile seul */
+  --text-on-photo: #ffffff;
+  --text-on-photo-muted: rgba(255, 255, 255, 0.7); /* métadonnées sur photo, diaporama, visionneuse */
+  /* Monogramme (Avatar) : dégradé gris neutre, teinté par la couleur du profil. */
+  --avatar-top: #9a9da4;
+  --avatar-bottom: #6b6e76;
 
-  --r-sm: 10px;
-  --r-md: 16px;
-  --r-lg: 26px;
-  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
-  --shadow-float: 0 10px 30px -8px rgba(11, 60, 40, 0.45);
+  /* ---- Traits ---- */
+  --line: rgba(20, 20, 22, 0.09);
+  --line-strong: rgba(20, 20, 22, 0.15);
+
+  /* ---- Marque : Encre (action principale, onglet actif, focus) ---- */
+  --accent: #1b1b1e;
+  --accent-hover: #2c2c31;
+  --on-accent: #ffffff;
+  --brand-pin: #e87162; /* l'épingle corail du logo : rien d'autre */
+  --focus: #141416;
+
+  /* ---- États (messages, jamais décoratifs) ---- */
+  --danger: #b4321f;
+  --success: #1f7a4a;
+  --warning: #9a6400;
+
+  /* ---- Globe (MapLibre lit ces valeurs : web/components/GlobeMap.tsx) ---- */
+  --globe-ocean: #e3e5e6;
+  --globe-land: #fbfbfa;
+  --globe-visited: #d9d9d6;
+  --globe-border: #c8cacc;
+  --globe-sky: #ffffff;
+  --globe-horizon: #dfe1e3;
+
+  /*
+   * ---- Couleurs de voyage ----
+   * Source unique : server/trip-palette.ts (web/trip-colors.test.ts vérifie la concordance).
+   * --trip-<id> : pastille, ligne d'itinéraire, point (≥ 3:1 sur la page).
+   * --trip-<id>-text : la même teinte lisible comme texte (≥ 4,5:1 sur --bg et --surface).
+   * Dans un composant, ne pas lire ces jetons directement : poser tripStyle(color) (web/trip-colors.ts)
+   * puis utiliser --trip, --trip-text, --trip-page, --trip-soft.
+   */
+  --trip-coral: #cd443d;
+  --trip-coral-text: #c94039;
+  --trip-amber: #c97b00;
+  --trip-amber-text: #a26202;
+  --trip-moss: #4f7205;
+  --trip-moss-text: #4f7205;
+  --trip-pine: #2d8d64;
+  --trip-pine-text: #1a8058;
+  --trip-lagoon: #1e999c;
+  --trip-lagoon-text: #067d7f;
+  --trip-azure: #2f8adc;
+  --trip-azure-text: #0d74c4;
+  --trip-indigo: #3e309f;
+  --trip-indigo-text: #3e309f;
+  --trip-lilac: #a04aa3;
+  --trip-lilac-text: #a04aa3;
+  --trip-raspberry: #a11056;
+  --trip-raspberry-text: #a11056;
+  --trip-slate: #5b646f;
+  --trip-slate-text: #5b646f;
+  --on-trip: #ffffff; /* coche ou icône posée sur une pastille pleine */
+  --trip-page-mix: 11%; /* part de la teinte dans le fond d'une page de voyage */
+
+  /* ---- Typographie : Geist (auto-hébergée via @fontsource-variable, aucune requête externe) ---- */
+  --font-sans: "Geist Variable", "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono Variable", "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-display: var(--font-sans); /* titres : même famille, plus serrée et plus grasse */
+
+  --fs-2xs: 11px; /* légendes de carte, onglets */
+  --fs-xs: 12px; /* étiquettes, badges */
+  --fs-sm: 13.5px; /* métadonnées, aides */
+  --fs-md: 15px; /* texte de liste, boutons */
+  --fs-base: 16px; /* corps */
+  --fs-lg: 19px; /* intertitres de section */
+  --fs-xl: 24px; /* titres de carte, de feuille */
+  --fs-2xl: 30px; /* titre d'écran (« Voyages ») */
+  --fs-3xl: clamp(34px, 6vw, 46px); /* grand titre */
+  --fs-display: clamp(40px, 12vw, 72px); /* titre posé sur une couverture */
+
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 650; /* titres d'écran et de couverture */
+
+  --lh-tight: 0.98;
+  --lh-snug: 1.2;
+  --lh-body: 1.5;
+
+  --tracking-tight: -0.02em; /* titres courants */
+  --tracking-tighter: -0.045em; /* grands titres, titre de couverture */
+
+  /* ---- Espacements (base 4) ---- */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px; /* marge latérale d'écran sur téléphone */
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+  --gutter: var(--sp-4);
+
+  /* ---- Rayons ---- */
+  --r-xs: 6px;
+  --r-sm: 10px; /* petites vignettes, champs */
+  --r-md: 14px; /* lignes de liste, vignettes 58 px */
+  --r-lg: 18px; /* cartes, écrans en maquette */
+  --r-xl: 22px; /* feuilles, grandes cartes */
+  --r-full: 999px; /* boutons, pastilles, filtres */
+
+  /* ---- Ombres (neutres, jamais teintées) ---- */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+  --shadow-md: 0 6px 20px -10px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 22px 50px -20px rgba(0, 0, 0, 0.35);
+  --shadow-float: 0 18px 40px -24px rgba(0, 0, 0, 0.45);
+
+  /* ---- Mouvement ---- */
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1); /* sortie douce : apparitions, déplacements */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 120ms; /* appui, survol */
+  --dur: 200ms; /* changement d'état */
+  --dur-slow: 360ms; /* feuilles, couverture */
+
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-  color-scheme: light dark;
+  color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --paper: #101312;
-    --surface: #1a1e1d;
-    --ink: #eef0ee;
-    --muted: #949b98;
-    --hairline: rgba(238, 240, 238, 0.12);
-    --autostrada: #19a266;
-    --veil: rgba(16, 19, 18, 0.72);
+  :root:not([data-theme="light"]) {
+    --bg: #0c0c0e;
+    --surface: #17171a;
+    --surface-raised: #1f1f23;
+    --surface-sunken: #111113;
+    --glass: rgba(30, 30, 34, 0.62);
+    --overlay: rgba(0, 0, 0, 0.55);
+    --scrim: rgba(10, 12, 14, 0.42);
+  --avatar-top: #85888f;
+  --avatar-bottom: #55585f;
+    --avatar-top: #85888f;
+    --avatar-bottom: #55585f;
+    --text: #ededeb;
+    --text-muted: #9c9ea3;
+    --text-faint: #6e7075;
+    --line: rgba(237, 237, 235, 0.09);
+    --line-strong: rgba(237, 237, 235, 0.16);
+    --accent: #ededea;
+    --accent-hover: #ffffff;
+    --on-accent: #141416;
+    --focus: #ededeb;
+    --danger: #ff8a78;
+    --success: #6fd39b;
+    --warning: #f2b85b;
+    --globe-ocean: #101113;
+    --globe-land: #1d1e21;
+    --globe-visited: #2a2b2f;
+    --globe-border: #36373b;
+    --globe-sky: #050506;
+    --globe-horizon: #1a1b1e;
+    --trip-coral: #e87162;
+    --trip-coral-text: #e87162;
+    --trip-amber: #e49e38;
+    --trip-amber-text: #e49e38;
+    --trip-moss: #b6e27b;
+    --trip-moss-text: #b6e27b;
+    --trip-pine: #66c58f;
+    --trip-pine-text: #66c58f;
+    --trip-lagoon: #68e3de;
+    --trip-lagoon-text: #68e3de;
+    --trip-azure: #7dcbfe;
+    --trip-azure-text: #7dcbfe;
+    --trip-indigo: #796cd1;
+    --trip-indigo-text: #7f72d8;
+    --trip-lilac: #c781cb;
+    --trip-lilac-text: #c781cb;
+    --trip-raspberry: #d85584;
+    --trip-raspberry-text: #d85584;
+    --trip-slate: #9ba6b1;
+    --trip-slate-text: #9ba6b1;
+    --on-trip: #141416;
+    --trip-page-mix: 17%;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+    --shadow-md: 0 6px 20px -10px rgba(0, 0, 0, 0.6);
+    --shadow-lg: 0 22px 50px -20px rgba(0, 0, 0, 0.7);
+    color-scheme: dark;
   }
+}
+:root[data-theme="dark"] {
+  --bg: #0c0c0e;
+  --surface: #17171a;
+  --surface-raised: #1f1f23;
+  --surface-sunken: #111113;
+  --glass: rgba(30, 30, 34, 0.62);
+  --overlay: rgba(0, 0, 0, 0.55);
+  --scrim: rgba(10, 12, 14, 0.42);
+  --text: #ededeb;
+  --text-muted: #9c9ea3;
+  --text-faint: #6e7075;
+  --line: rgba(237, 237, 235, 0.09);
+  --line-strong: rgba(237, 237, 235, 0.16);
+  --accent: #ededea;
+  --accent-hover: #ffffff;
+  --on-accent: #141416;
+  --focus: #ededeb;
+  --danger: #ff8a78;
+  --success: #6fd39b;
+  --warning: #f2b85b;
+  --globe-ocean: #101113;
+  --globe-land: #1d1e21;
+  --globe-visited: #2a2b2f;
+  --globe-border: #36373b;
+  --globe-sky: #050506;
+  --globe-horizon: #1a1b1e;
+  --trip-coral: #e87162;
+  --trip-coral-text: #e87162;
+  --trip-amber: #e49e38;
+  --trip-amber-text: #e49e38;
+  --trip-moss: #b6e27b;
+  --trip-moss-text: #b6e27b;
+  --trip-pine: #66c58f;
+  --trip-pine-text: #66c58f;
+  --trip-lagoon: #68e3de;
+  --trip-lagoon-text: #68e3de;
+  --trip-azure: #7dcbfe;
+  --trip-azure-text: #7dcbfe;
+  --trip-indigo: #796cd1;
+  --trip-indigo-text: #7f72d8;
+  --trip-lilac: #c781cb;
+  --trip-lilac-text: #c781cb;
+  --trip-raspberry: #d85584;
+  --trip-raspberry-text: #d85584;
+  --trip-slate: #9ba6b1;
+  --trip-slate-text: #9ba6b1;
+  --on-trip: #141416;
+  --trip-page-mix: 17%;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 6px 20px -10px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 22px 50px -20px rgba(0, 0, 0, 0.7);
+  color-scheme: dark;
+}
+
+/*
+ * Teinte d'un voyage : posée par tripStyle(color) (web/trip-colors.ts) sur l'élément qui « appartient »
+ * à un voyage (ligne de liste, page, carte). Tous les descendants peuvent ensuite utiliser :
+ *   --trip       teinte pleine (pastille, route, point)
+ *   --trip-text  teinte lisible comme texte
+ *   --trip-page  fond de page teinté (Horizon : 11 % en clair, 17 % en sombre)
+ *   --trip-soft  fond d'étiquette (14 % de la teinte sur la surface)
+ */
+[data-trip-color] {
+  --trip-page: color-mix(in oklab, var(--trip) var(--trip-page-mix), var(--bg));
+  --trip-soft: color-mix(in srgb, var(--trip) 14%, var(--surface));
 }

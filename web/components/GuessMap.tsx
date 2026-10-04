@@ -38,7 +38,9 @@ export function GuessMap({ pin, pins, onPick, start, round }: { pin: { lat: numb
     m.on("click", (e) => pick.current?.(e.lngLat.lat, e.lngLat.lng));
     m.on("load", () => {
       m.addSource("lines", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
-      m.addLayer({ id: "lines", type: "line", source: "lines", paint: { "line-color": "#16191b", "line-width": 2, "line-dasharray": [2, 2], "line-opacity": 0.7 } });
+      // MapLibre ne lit pas le CSS : le trait reprend le jeton --text, lu à l'instant.
+      const ink = getComputedStyle(document.documentElement).getPropertyValue("--text").trim() || "#141416";
+      m.addLayer({ id: "lines", type: "line", source: "lines", paint: { "line-color": ink, "line-width": 1.6, "line-dasharray": [2, 2], "line-opacity": 0.55 } });
     });
     map.current = m;
     return () => {
@@ -58,11 +60,13 @@ export function GuessMap({ pin, pins, onPick, start, round }: { pin: { lat: numb
     if (!m) return;
     for (const mk of markers.current) mk.remove();
     markers.current = [];
-    const all: Pin[] = [...pins, ...(pin ? [{ ...pin, color: "var(--autostrada)", label: t("game.myPin") }] : [])];
+    const all: Pin[] = [...pins, ...(pin ? [{ ...pin, color: "var(--accent)", label: t("game.myPin") }] : [])];
     for (const p of all) {
       const node = document.createElement("div");
       node.className = `guess-pin${p.kind === "answer" ? " is-answer" : ""}`;
       node.style.setProperty("--c", p.color);
+      // Texte de l'étiquette : sur l'Encre, la couleur prévue pour l'Encre ; sur le gris des joueurs, celle du fond.
+      node.style.setProperty("--on", p.color === "var(--accent)" ? "var(--on-accent)" : "var(--bg)");
       node.innerHTML = `<span></span><b></b>`;
       node.querySelector("b")!.textContent = p.label;
       markers.current.push(new maplibregl.Marker({ element: node, anchor: "bottom" }).setLngLat([p.lon, p.lat]).addTo(m));

@@ -1,55 +1,94 @@
-.notebook__section { padding: 0 16px; margin-top: 26px; max-width: 820px; }
-.notebook__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
-.notebook__head h2 { margin: 0; font-family: var(--font-sign); font-weight: 600; font-size: 28px; }
-.notebook__head .button svg { width: 18px; height: 18px; }
-.notebook__sub { margin: 22px 0 8px; font-size: 15px; color: var(--muted); font-weight: 600; }
-.notebook__empty { margin: 0; color: var(--muted); max-width: 46ch; }
+.notebook { padding-bottom: var(--sp-16); }
+.notebook__section { padding: 0 var(--gutter); margin-top: var(--sp-8); max-width: 860px; }
+.notebook__head { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); margin-bottom: var(--sp-3); }
+.notebook__head h2 { margin: 0; font-family: var(--font-display); font-weight: var(--fw-bold); font-size: var(--fs-xl); letter-spacing: var(--tracking-tight); line-height: var(--lh-snug); }
+.notebook__head .button svg { width: 16px; height: 16px; }
+.notebook__sub { margin: var(--sp-6) 0 var(--sp-2); font-size: var(--fs-md); color: var(--text-muted); font-weight: var(--fw-semibold); letter-spacing: 0; }
+.notebook__empty { margin: 0; color: var(--text-muted); max-width: 46ch; }
 
-.wishes { list-style: none; margin: 0; padding: 0; border-radius: 18px; overflow: hidden; background: var(--hairline); display: grid; gap: 1px; }
+/* ---- Envies : une liste groupée, comme Rappels ---- */
+.wishes { list-style: none; margin: 0; padding: 0; border-radius: var(--r-lg); overflow: hidden; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); }
 .wishes:empty { display: none; }
-.wish { display: flex; align-items: center; gap: 12px; padding: 0 14px; background: var(--surface); }
+.wish { position: relative; display: flex; align-items: center; gap: var(--sp-3); padding: 0 var(--sp-4); }
+.wish + .wish::before { content: ""; position: absolute; top: 0; left: calc(var(--sp-4) + 24px + var(--sp-3)); right: 0; border-top: 1px solid var(--line); }
 .wish__check {
   flex: none;
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  border: 2px solid var(--signal);
+  border: 1.5px solid var(--line-strong);
   background: transparent;
-  color: #fff;
+  color: var(--on-accent);
   display: grid;
   place-items: center;
   padding: 0;
   cursor: pointer;
-  transition: background 200ms var(--ease), border-color 200ms var(--ease), transform 160ms var(--ease);
+  transition: background-color var(--dur) var(--ease), border-color var(--dur) var(--ease), transform var(--dur-fast) var(--ease);
 }
+.wish__check:hover { border-color: var(--text-muted); }
 .wish__check:active { transform: scale(0.88); }
-.wish__check svg { width: 16px; height: 16px; }
-.wish.is-done .wish__check { background: var(--autostrada); border-color: var(--autostrada); }
-.wish__main { flex: 1; min-width: 0; display: grid; gap: 2px; text-align: left; padding: 14px 0; border: 0; background: none; cursor: pointer; }
-.wish__title { font-size: 17px; font-weight: 600; }
-.wish.is-done .wish__title { color: var(--muted); }
-.wish__meta { color: var(--muted); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.wish__meta:empty { display: none; }
+.wish__check svg { width: 14px; height: 14px; }
+.wish.is-done .wish__check { background: var(--accent); border-color: var(--accent); }
+.wish__main { flex: 1; min-width: 0; min-height: 52px; display: grid; align-content: center; gap: 2px; text-align: left; padding: var(--sp-3) 0; border: 0; background: none; cursor: pointer; }
+.wish__title { font-size: var(--fs-md); font-weight: var(--fw-semibold); line-height: var(--lh-snug); }
+.wish__flag { margin-right: 6px; }
+.wish.is-done .wish__title { color: var(--text-muted); }
+.wish__meta { color: var(--text-muted); font-size: var(--fs-sm); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* L'envie réalisée renvoie au voyage : pastille de sa couleur + son nom. */
+.wish__trip { display: inline-flex; align-items: center; gap: 6px; color: var(--text); font-size: var(--fs-sm); font-weight: var(--fw-medium); }
 
-.memories { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
-.memory { display: flex; gap: 14px; padding: 14px; border-radius: 18px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--hairline); color: var(--ink); text-decoration: none; }
-.memory img { flex: none; width: 64px; height: 64px; border-radius: 12px; object-fit: cover; }
-.memory__where { margin: 0; font-weight: 700; }
-.memory__where span { font-weight: 500; color: var(--muted); }
-.memory__body { margin: 4px 0; white-space: pre-line; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.5; }
-.memory__who { margin: 0; font-size: 13px; color: var(--muted); }
+/* ---- Souvenirs : des cartes, la photo du voyage en bandeau, le texte comme une citation ---- */
+.memories { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-3); }
+@media (min-width: 640px) { .memories { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.memories > li { display: grid; }
+.memory {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--text);
+  text-decoration: none;
+  transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+.memory:hover { box-shadow: inset 0 0 0 1px var(--line-strong), var(--shadow-md); transform: translateY(-1px); }
+.memory__cover { width: 100%; height: 132px; object-fit: cover; }
+.memory__text { display: grid; align-content: start; gap: var(--sp-2); padding: var(--sp-4) var(--sp-4) var(--sp-4); }
+.memory__where { display: flex; align-items: center; gap: var(--sp-2); margin: 0; font-size: var(--fs-sm); font-weight: var(--fw-semibold); line-height: var(--lh-snug); }
+.memory__where > span { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.memory__chapter { font-weight: var(--fw-regular); color: var(--text-muted); }
+.memory__body {
+  margin: 0;
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-medium);
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+  white-space: pre-line;
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-wrap: pretty;
+}
+.memory__who { margin: 0; font-size: var(--fs-sm); color: var(--text-muted); }
 
-.wish-form { display: grid; gap: 14px; }
-.wish-form__label { display: grid; gap: 6px; font-weight: 600; font-size: 15px; }
-.wish-form__label small { font-weight: 400; color: var(--muted); }
-.wish-form__hits { list-style: none; margin: -6px 0 0; padding: 4px; border-radius: 14px; background: var(--hairline); display: grid; }
-.wish-form__hits button { width: 100%; display: flex; gap: 10px; align-items: center; padding: 10px; border: 0; background: none; border-radius: 10px; text-align: left; cursor: pointer; }
+/* ---- Feuille d'une envie ---- */
+.wish-form { display: grid; gap: var(--sp-4); }
+.wish-form__label { display: grid; gap: 6px; font-weight: var(--fw-semibold); font-size: var(--fs-md); }
+.wish-form__label small { font-weight: var(--fw-regular); color: var(--text-muted); }
+.wish-form__hits { list-style: none; margin: -6px 0 0; padding: 4px; border-radius: var(--r-md); background: var(--surface-sunken); box-shadow: inset 0 0 0 1px var(--line); display: grid; }
+.wish-form__hits button { width: 100%; display: flex; gap: 10px; align-items: center; padding: 10px; border: 0; background: none; border-radius: var(--r-sm); text-align: left; cursor: pointer; }
 .wish-form__hits button:hover { background: var(--surface); }
-.wish-form__hits svg { flex: none; width: 18px; height: 18px; color: var(--muted); }
-.wish-form__hits small { display: block; color: var(--muted); }
+.wish-form__hits svg { flex: none; width: 18px; height: 18px; color: var(--text-muted); }
+.wish-form__hits small { display: block; color: var(--text-muted); font-size: var(--fs-sm); }
 
 @media (min-width: 900px) {
-  .notebook__section { padding: 0 40px; margin-top: 34px; }
+  .notebook__section { padding: 0 var(--sp-10); margin-top: var(--sp-10); }
 }
-.wish__flag { margin-right: 6px; }
-.notebook__head h2 { line-height: 1.05; }
+
+/* Lien discret vers les statistiques et réglages du foyer, en bas du Carnet. */
+.notebook__household { display: inline-flex; align-items: center; gap: var(--sp-2); margin: var(--sp-8) var(--gutter) 0; padding: var(--sp-2) 0; color: var(--text-muted); font-weight: var(--fw-medium); font-size: var(--fs-md); text-decoration: none; }
+.notebook__household svg { width: 18px; height: 18px; }
+.notebook__household:hover { color: var(--text); }
+@media (min-width: 900px) { .notebook__household { margin-inline: var(--sp-10); } }

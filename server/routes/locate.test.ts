@@ -27,7 +27,7 @@ describe("à localiser", () => {
     expect(u.total).toBe(4); // la 5 profite du GPS de la 4 (30 min)
     expect(u.days.map((d: any) => [d.day, d.count])).toEqual([["2026-09-07", 1], ["2026-09-06", 3]]);
     expect(u.days[1].moments.map((m: any) => m.ids)).toEqual([[1, 2], [3]]);
-    expect(u.days[1].media[0]).toMatchObject({ id: 1, thumb: "/api/media/1/thumb" });
+    expect(u.days[1].media[0]).toMatchObject({ id: 1, thumb: "/api/media/1/thumb", original: "/api/media/1/original", uploadedBy: "alex" });
   });
 
   it("pose un lieu sur un groupe, crée le voyage, et les photos sortent de la liste", async () => {
@@ -51,5 +51,22 @@ describe("à localiser", () => {
     expect((await app.inject({ method: "POST", url: "/api/media/locate", payload: { ids: [1], lat: 1, lon: 1 } })).statusCode).toBe(401);
     for (const payload of [{ ids: [], lat: 1, lon: 1 }, { ids: [1], lat: 99, lon: 1 }, { ids: ["1"], lat: 1, lon: 1 }, { ids: [1], lat: "a", lon: 1 }])
       expect((await app.inject({ method: "POST", url: "/api/media/locate", headers: me, payload })).statusCode).toBe(400);
+  });
+});
+
+describe("lieu d'un point posé sur la carte", () => {
+  it("nomme le lieu le plus proche, hors ligne", async () => {
+    const res = (await app.inject({ url: "/api/places/reverse?lat=46.3683&lon=14.1146" })).json();
+    expect(res).toMatchObject({ countryCode: "SI", flag: "🇸🇮", lat: 46.3683, lon: 14.1146 });
+    expect(typeof res.name).toBe("string");
+  });
+
+  it("en pleine mer : pas de nom, mais le point reste valable", async () => {
+    expect((await app.inject({ url: "/api/places/reverse?lat=40&lon=-40" })).json()).toMatchObject({ name: null, lat: 40, lon: -40 });
+  });
+
+  it("refuse des coordonnées invalides", async () => {
+    expect((await app.inject({ url: "/api/places/reverse?lat=abc&lon=1" })).statusCode).toBe(400);
+    expect((await app.inject({ url: "/api/places/reverse?lat=95&lon=1" })).statusCode).toBe(400);
   });
 });

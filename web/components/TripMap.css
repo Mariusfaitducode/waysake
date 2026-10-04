@@ -1,19 +1,21 @@
-.trip-map { height: 340px; border-radius: 22px; overflow: hidden; background: var(--hairline); }
+.trip-map { height: 340px; border-radius: var(--r-lg); overflow: hidden; background: var(--surface-sunken); box-shadow: inset 0 0 0 1px var(--line); }
+/* Point d'étape numéroté : à la couleur du voyage (--trip posé par la page), sinon Encre. */
 .stop {
   border: 0;
-  padding: 2.5px;
-  border-radius: 7px;
-  background: var(--autostrada);
-  color: #fff;
-  font-family: var(--font-sign);
-  font-weight: 600;
-  font-size: 16px;
+  padding: 0;
+  border-radius: var(--r-full);
+  background: var(--trip, var(--accent));
+  color: var(--on-trip, var(--on-accent));
+  font-family: var(--font-sans);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-xs);
   line-height: 1;
   cursor: pointer;
-  box-shadow: 0 4px 10px -3px rgba(0, 0, 0, 0.4);
-  transition: transform 200ms var(--ease);
+  box-shadow: 0 0 0 2px var(--bg), var(--shadow-sm);
+  transition: transform var(--dur) var(--ease);
 }
-.stop span { display: block; min-width: 22px; padding: 3px 5px 2px; border: 1.5px solid currentColor; border-radius: 5px; }
+.stop span { display: grid; place-items: center; min-width: 22px; height: 22px; padding: 0 6px; font-variant-numeric: tabular-nums; }
 .stop:hover { transform: scale(1.15); }
-@media (min-width: 900px) { .trip-map { height: 440px; } }
-.trip-map--compact { height: 200px; border-radius: 16px; }
+.stop:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+@media (min-width: 900px) { .trip-map { height: 420px; } }
+.trip-map--compact { height: 200px; border-radius: var(--r-lg); }

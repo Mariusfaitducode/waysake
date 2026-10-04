@@ -1,40 +1,59 @@
-.locate { max-width: 860px; }
-.locate__days { display: grid; gap: 14px; padding: 8px 16px 0; }
-.lday { min-width: 0; padding: 16px; border-radius: 22px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--hairline); }
+.locate { max-width: 900px; padding-bottom: var(--sp-16); }
+.locate__game { display: inline-flex; align-items: center; gap: 4px; margin: var(--sp-1) var(--gutter) var(--sp-5); color: var(--text-muted); font-size: var(--fs-sm); font-weight: var(--fw-medium); text-decoration: none; }
+.locate__game svg { width: 14px; height: 14px; transform: scaleX(-1); }
+.locate__game:hover { color: var(--text); }
+@media (min-width: 900px) { .locate__game { margin-inline: var(--sp-10); } }
+
+.locate__days { display: grid; gap: var(--sp-3); padding: 0 var(--gutter); }
+@media (min-width: 900px) { .locate__days { padding-inline: var(--sp-10); } }
+
+/* Une journée : titre Geist, nombre de photos, action Encre ; les photos en bande. */
+.lday { min-width: 0; padding: var(--sp-4); border-radius: var(--r-lg); background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); }
+.lday__head { display: flex; justify-content: space-between; align-items: center; gap: var(--sp-3); }
 .lday__head > div { min-width: 0; }
-.lday__head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-.lday__head h2 { margin: 0; font-family: var(--font-sign); font-weight: 600; font-size: 24px; line-height: 1.1; }
-.lday__head p { margin: 2px 0 0; color: var(--muted); font-size: 15px; }
+.lday__title { margin: 0; font-family: var(--font-display); font-weight: var(--fw-bold); font-size: var(--fs-lg); letter-spacing: var(--tracking-tight); line-height: var(--lh-snug); }
+.lday__head p { margin: 2px 0 0; color: var(--text-muted); font-size: var(--fs-sm); }
 .lday__head .button { flex: none; }
-.lday__strip { display: flex; gap: 4px; margin-top: 12px; overflow-x: auto; scrollbar-width: none; align-items: center; }
+.lday__head .button svg { width: 16px; height: 16px; }
+
+.lday__strip { display: flex; gap: 3px; margin-top: var(--sp-3); overflow-x: auto; scrollbar-width: none; align-items: center; }
 .lday__strip::-webkit-scrollbar { display: none; }
-.lday__strip img { flex: none; width: 64px; height: 64px; object-fit: cover; border-radius: 8px; }
-.lday__more { flex: none; padding: 0 10px; color: var(--muted); font-weight: 600; }
-.lday__toggle { margin-top: 10px; padding: 6px 0; border: 0; background: none; color: var(--autostrada); font-weight: 600; font-size: 15px; cursor: pointer; text-align: left; }
-.lday__moments { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 1px; border-radius: 14px; overflow: hidden; background: var(--hairline); }
-.lday__moments li { display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: var(--surface); }
+.lday__thumb { position: relative; flex: none; padding: 0; border: 0; background: var(--surface-sunken); border-radius: var(--r-xs); overflow: hidden; cursor: zoom-in; }
+.lday__thumb::after { content: ""; position: absolute; inset: 0; background: #fff; opacity: 0; transition: opacity var(--dur-fast) var(--ease); }
+.lday__thumb:hover::after { opacity: 0.1; }
+.lday__strip img { display: block; width: 76px; height: 76px; object-fit: cover; }
+.lday__strip .lday__thumb:first-child { border-radius: var(--r-sm) var(--r-xs) var(--r-xs) var(--r-sm); }
+.lday__strip .lday__thumb:last-child { border-radius: var(--r-xs) var(--r-sm) var(--r-sm) var(--r-xs); }
+.lday__strip .lday__thumb:only-child { border-radius: var(--r-sm); }
+
+.lday__toggle { margin-top: var(--sp-3); padding: 4px 0; border: 0; background: none; color: var(--text); font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer; text-align: left; text-decoration: underline; text-decoration-color: var(--line-strong); text-underline-offset: 3px; }
+.lday__toggle:hover { text-decoration-color: currentColor; }
+
+.lday__moments { list-style: none; margin: var(--sp-2) 0 0; padding: 0; border-radius: var(--r-md); overflow: hidden; background: var(--surface-sunken); box-shadow: inset 0 0 0 1px var(--line); }
+.lday__moments li { position: relative; display: flex; align-items: center; gap: var(--sp-3); padding: 10px var(--sp-3); }
+.lday__moments li + li { border-top: 1px solid var(--line); }
 .lmoment__thumbs { display: flex; flex: none; }
-.lmoment__thumbs img { width: 40px; height: 40px; object-fit: cover; border-radius: 8px; box-shadow: 0 0 0 2px var(--surface); margin-left: -10px; }
-.lmoment__thumbs img:first-child { margin-left: 0; }
-.lmoment__text { flex: 1; display: grid; }
-.lmoment__text span { color: var(--muted); font-size: 14px; }
+.lmoment__thumbs .lday__thumb { margin-left: -12px; border-radius: var(--r-xs); box-shadow: 0 0 0 2px var(--surface-sunken); }
+.lmoment__thumbs .lday__thumb:first-child { margin-left: 0; }
+.lmoment__thumbs img { display: block; width: 40px; height: 40px; object-fit: cover; }
+.lmoment__text { flex: 1; min-width: 0; display: grid; line-height: var(--lh-snug); }
+.lmoment__text strong { font-size: var(--fs-md); font-weight: var(--fw-semibold); }
+.lmoment__text span { color: var(--text-muted); font-size: var(--fs-sm); }
+
 .toast {
   position: fixed;
   left: 50%;
   bottom: calc(96px + var(--safe-bottom));
   translate: -50% 0;
   z-index: 60;
-  padding: 12px 18px;
-  border-radius: 999px;
-  background: var(--ink);
-  color: var(--paper);
-  font-weight: 600;
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  max-width: calc(100vw - 2 * var(--gutter));
+  padding: var(--sp-3) var(--sp-5);
+  border-radius: var(--r-full);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semibold);
+  box-shadow: var(--shadow-lg);
   animation: toast 3.2s var(--ease) both;
 }
 @keyframes toast { 0% { opacity: 0; transform: translateY(10px); } 10%, 85% { opacity: 1; transform: none; } 100% { opacity: 0; } }
-@media (min-width: 900px) { .locate__days { padding-inline: 40px; } }
-
-.locate__game { display: inline-block; margin: 0 16px 16px; color: var(--autostrada); font-weight: 600; text-decoration: none; }
-.locate__game:hover { text-decoration: underline; }
-@media (min-width: 900px) { .locate__game { margin-inline: 40px; } }

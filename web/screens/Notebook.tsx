@@ -7,7 +7,9 @@ import { t } from "../i18n/index.js";
 import { autoName, placeTitle } from "../i18n/places.js";
 import { Header } from "../components/Header.js";
 import { ActionSheet, Sheet } from "../components/Sheet.js";
-import { IconCheck, IconPin, IconPlus } from "../shell/icons.js";
+import { TripColorDot } from "../components/TripColor.js";
+import { IconChart, IconCheck, IconPin, IconPlus } from "../shell/icons.js";
+import { tripColorProps, type TripColorId } from "../trip-colors.js";
 import "./Notebook.css";
 
 export function Notebook() {
@@ -20,6 +22,8 @@ export function Notebook() {
   const [completing, setCompleting] = useState<Wish | null>(null);
   const [editing, setEditing] = useState<Wish | null>(null);
 
+  // Couleur de chaque voyage, pour la pastille des souvenirs et des envies réalisées.
+  const colors = new Map<string, TripColorId>((trips ?? []).map((trip) => [trip.slug, trip.color]));
   const todo = wishes?.filter((w) => !w.done) ?? [];
   const done = wishes?.filter((w) => w.done) ?? [];
 
@@ -47,7 +51,7 @@ export function Notebook() {
             <h3 className="notebook__sub">{t("notebook.done")}</h3>
             <ul className="wishes">
               {done.map((w) => (
-                <WishRow key={w.id} wish={w} onToggle={() => api.updateWish(w.id, { done: false }).then(bump)} onOpen={() => setEditing(w)} />
+                <WishRow key={w.id} wish={w} color={w.doneTrip ? colors.get(w.doneTrip.slug) : undefined} onToggle={() => api.updateWish(w.id, { done: false }).then(bump)} onOpen={() => setEditing(w)} />
               ))}
             </ul>
           </>
@@ -62,14 +66,17 @@ export function Notebook() {
         <ul className="memories">
           {notes?.map((n) => (
             <li key={`${n.trip.slug}-${n.chapterId}`}>
-              <Link to={`/v/${n.trip.slug}`} className="memory">
-                {n.trip.cover && <img src={n.trip.cover} alt="" loading="lazy" />}
-                <div>
+              <Link to={`/v/${n.trip.slug}`} className="memory" {...(colors.has(n.trip.slug) ? tripColorProps(colors.get(n.trip.slug)) : {})}>
+                {n.trip.cover && <img className="memory__cover" src={n.trip.cover} alt="" loading="lazy" />}
+                <div className="memory__text">
                   <p className="memory__where">
-                    {placeTitle(n.trip.title)}
-                    {n.chapterTitle && <span>, {placeTitle(n.chapterTitle)}</span>}
+                    {colors.has(n.trip.slug) && <TripColorDot color={colors.get(n.trip.slug)} />}
+                    <span>
+                      {placeTitle(n.trip.title)}
+                      {n.chapterTitle && <span className="memory__chapter"> · {placeTitle(n.chapterTitle)}</span>}
+                    </span>
                   </p>
-                  <p className="memory__body">{n.body}</p>
+                  <blockquote className="memory__body">{n.body}</blockquote>
                   <p className="memory__who">{authorName(n.author)}</p>
                 </div>
               </Link>
@@ -77,6 +84,10 @@ export function Notebook() {
           ))}
         </ul>
       </section>
+
+      <Link to="/stats" className="notebook__household">
+        <IconChart /> {t("household.link")}
+      </Link>
 
       {adding && <WishSheet onClose={() => setAdding(false)} onSaved={bump} />}
       {editing && <WishSheet wish={editing} onClose={() => setEditing(null)} onSaved={bump} />}
@@ -98,7 +109,8 @@ export function Notebook() {
   );
 }
 
-function WishRow({ wish, onToggle, onOpen }: { wish: Wish; onToggle: () => void; onOpen: () => void }) {
+function WishRow({ wish, color, onToggle, onOpen }: { wish: Wish; color?: TripColorId; onToggle: () => void; onOpen: () => void }) {
+  const meta = [wish.month && wishMonth(wish.month), wish.note].filter(Boolean).join(" · ");
   return (
     <li className={`wish${wish.done ? " is-done" : ""}`}>
       <button className="wish__check" onClick={onToggle} aria-label={wish.done ? t("notebook.markTodo", { title: wish.title }) : t("notebook.markDone", { title: wish.title })} aria-pressed={wish.done}>
@@ -109,9 +121,13 @@ function WishRow({ wish, onToggle, onOpen }: { wish: Wish; onToggle: () => void;
           {wish.flag && <span className="wish__flag" aria-hidden="true">{wish.flag}</span>}
           {wish.title}
         </span>
-        <span className="wish__meta">
-          {[wish.month && wishMonth(wish.month), wish.doneTrip && placeTitle(wish.doneTrip.title), wish.note].filter(Boolean).join(". ")}
-        </span>
+        {wish.doneTrip && (
+          <span className="wish__trip">
+            {color && <TripColorDot color={color} size={8} />}
+            {placeTitle(wish.doneTrip.title)}
+          </span>
+        )}
+        {meta && <span className="wish__meta">{meta}</span>}
       </button>
     </li>
   );

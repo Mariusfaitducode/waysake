@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import type { Media } from "../api.js";
 import { useAuthorName, useDataVersion } from "../data.js";
-import { fullDate, hitName } from "../format.js";
+import { dayLabel, hitName, timeLabel } from "../format.js";
 import { PlacePicker } from "./PlacePicker.js";
-import { IconBack, IconClose } from "../shell/icons.js";
+import { IconBack, IconClose, IconPin } from "../shell/icons.js";
 import { t } from "../i18n/index.js";
 import { placeTitle } from "../i18n/places.js";
 import { PhotoSocial } from "./PhotoSocial.js";
@@ -21,13 +21,24 @@ type Props = {
   live?: { onLeave: () => void };
 };
 
-/** Plein écran, dialog natif (focus piégé, Échap), flèches au clavier, balayage au doigt. */
+const IconDownload = () => (
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19.5h14" />
+  </svg>
+);
+
+/**
+ * Plein écran façon Photos : la photo seule sur fond noir (son propre flou derrière), un chrome discret
+ * qu'un toucher sur la photo masque ou rappelle. Dialog natif (focus piégé, Échap), flèches au clavier,
+ * balayage au doigt, glisser vers le bas pour fermer.
+ */
 export function Viewer({ items, index, onIndex, onClose, action, live }: Props) {
   const m = items[index];
   const ref = useRef<HTMLDialogElement>(null);
   const touch = useRef<{ x: number; y: number } | null>(null);
   const [done, setDone] = useState<number | null>(null);
   const [placing, setPlacing] = useState(false);
+  const [bare, setBare] = useState(false);
   // Lieu posé depuis la visionneuse, affiché tout de suite (la liste se recharge en arrière-plan).
   const [placed, setPlaced] = useState<Record<number, string>>({});
   const authorName = useAuthorName();
@@ -56,13 +67,18 @@ export function Viewer({ items, index, onIndex, onClose, action, live }: Props) 
   // Un GPS d'origine ne se remplace jamais ; un lieu posé à la main ou au jeu se corrige.
   const located = m.lat != null || placed[m.id] !== undefined;
   const canPlace = !located || m.locationSource === "manual" || m.locationSource === "game" || placed[m.id] !== undefined;
-  const placeName = placed[m.id] ?? (m.place && placeTitle(m.place));
-  const meta = [placeName, m.takenAtLocal ? fullDate(m.takenAtLocal) : t("common.unknownDate")].filter(Boolean).join(", ");
+  const placeName = placed[m.id] ?? (m.place ? placeTitle(m.place) : null);
+  const day = m.takenAtLocal ? dayLabel(m.takenAtLocal.slice(0, 10)) : t("common.unknownDate");
+  const time = m.takenAtLocal ? timeLabel(m.takenAtLocal) : null;
+  // Titre façon Photos : le lieu, puis la date et l'heure ; sans lieu, la date seule en titre.
+  const title = placeName ?? day;
+  const subtitle = placeName ? [day, time].filter(Boolean).join(" · ") : time;
+  const alt = [placeName, day].filter(Boolean).join(", ");
 
   return (
     <dialog
       ref={ref}
-      className="viewer"
+      className={`viewer${bare ? " is-bare" : ""}`}
       aria-label={t("viewer.label")}
       // En React, la fermeture d'une feuille ouverte depuis la visionneuse remonte jusqu'ici : on l'ignore.
       onClose={(e) => e.target === e.currentTarget && onClose()}
@@ -76,19 +92,36 @@ export function Viewer({ items, index, onIndex, onClose, action, live }: Props) 
         touch.current = null;
       }}
     >
+      {/* La photo elle-même, très floutée, remplit les bords : l'image ne flotte pas dans un cadre noir. */}
+      <div className="viewer__ambient" aria-hidden="true">
+        <img key={m.id} src={m.preview} alt="" />
+      </div>
       {m.kind === "video" ? (
         <video key={m.id} className="viewer__media" src={m.original} poster={m.preview} controls playsInline autoPlay />
       ) : (
-        <img key={m.id} className="viewer__media" src={m.preview} alt={meta} />
+        <img key={m.id} className="viewer__media" src={m.preview} alt={alt} onClick={() => setBare((b) => !b)} />
       )}
-      <div className="viewer__bar">
+
+      <header className="viewer__bar">
         <button className="icon-button icon-button--glass" onClick={() => ref.current?.close()} aria-label={t("common.close")}>
           <IconClose />
         </button>
-        <span className="viewer__count">
-          {index + 1} / {items.length}
-        </span>
-      </div>
+        {!live && (
+          <div className="viewer__title">
+            <strong>{title}</strong>
+            {subtitle && <span>{subtitle}</span>}
+          </div>
+        )}
+        <div className="viewer__tools">
+          <span className="viewer__count">
+            {index + 1} / {items.length}
+          </span>
+          <a className="icon-button icon-button--glass" href={m.original} download aria-label={t("viewer.download")} title={t("viewer.download")}>
+            <IconDownload />
+          </a>
+        </div>
+      </header>
+
       {index > 0 && (
         <button className="viewer__nav viewer__nav--prev icon-button icon-button--glass" onClick={() => go(-1)} aria-label={t("viewer.prev")}>
           <IconBack />
@@ -100,32 +133,32 @@ export function Viewer({ items, index, onIndex, onClose, action, live }: Props) 
         </button>
       )}
       {live && <LiveOverlay mediaId={m.id} onLeave={live.onLeave} />}
+
       <footer className="viewer__info">
-        <PhotoSocial key={m.id} media={m} />
-        <div>
-          <p className="viewer__place">{meta}</p>
-          <p className="viewer__who">{t("viewer.by", { name: who })}</p>
-        </div>
-        <div className="viewer__actions">
-          {canPlace && (
-            <button className="viewer__action" onClick={() => setPlacing(true)}>
-              {located ? t("viewer.editPlace") : t("viewer.addPlace")}
-            </button>
-          )}
-          {action && (
-            <button className="viewer__action" onClick={() => action.run(m).then(() => setDone(m.id))} disabled={done === m.id}>
-              {done === m.id ? t("viewer.done") : action.label}
-            </button>
-          )}
-          <a className="viewer__action" href={m.original} download>
-            {t("viewer.download")}
-          </a>
+        <div className="viewer__panel">
+          <PhotoSocial key={m.id} media={m} />
+          <div className="viewer__foot">
+            <span className="viewer__who">{t("viewer.by", { name: who })}</span>
+            <div className="viewer__actions">
+              {canPlace && (
+                <button className="viewer__action" onClick={() => setPlacing(true)}>
+                  <IconPin />
+                  {located ? t("viewer.editPlace") : t("viewer.addPlace")}
+                </button>
+              )}
+              {action && (
+                <button className="viewer__action" onClick={() => action.run(m).then(() => setDone(m.id))} disabled={done === m.id}>
+                  {done === m.id ? t("viewer.done") : action.label}
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </footer>
       {placing && (
         <PlacePicker
           photos={[m.id]}
-          preview={m.thumb}
+          previews={[m.preview]}
           onDone={(place) => {
             setPlaced((p) => ({ ...p, [m.id]: hitName(place) }));
             bump();

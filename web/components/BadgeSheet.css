@@ -1,10 +1,22 @@
-.badge__lead { margin: 0 0 16px; color: var(--muted); }
-.badge__lead strong { color: var(--ink); }
-.badge__card { display: flex; gap: 16px; align-items: center; padding: 14px; border-radius: 18px; background: var(--hairline); }
-.badge__qr { flex: none; width: 128px; height: 128px; border-radius: 12px; overflow: hidden; background: #fff; }
+/* Badge du frigo : le QR sur blanc dans un puits gris, le lien à côté, les étapes numérotées. */
+.badge__lead { margin: 0 0 var(--sp-4); color: var(--text-muted); font-size: var(--fs-md); }
+.badge__lead strong { color: var(--text); font-weight: var(--fw-semibold); }
+.badge__card { display: flex; gap: var(--sp-4); align-items: center; padding: var(--sp-3); border-radius: var(--r-lg); background: var(--surface-sunken); box-shadow: inset 0 0 0 0.5px var(--line); }
+.badge__qr { flex: none; width: 128px; height: 128px; padding: 5px; border-radius: var(--r-md); overflow: hidden; background: #fff; box-shadow: inset 0 0 0 0.5px var(--line-strong); }
 .badge__qr svg { display: block; width: 100%; height: 100%; }
-.badge__link { display: grid; gap: 10px; min-width: 0; }
-.badge__link code { font-family: var(--font-ui); font-size: 14px; word-break: break-all; color: var(--muted); }
-.badge__warn { margin: 14px 0 0; padding: 12px 14px; border-radius: 14px; background: color-mix(in srgb, var(--signal) 22%, transparent); font-size: 14px; }
-.badge__nfc { margin-top: 18px; display: grid; }
-.badge__steps { margin: 18px 0 0; padding-left: 22px; display: grid; gap: 8px; }
+.badge__link { display: grid; justify-items: start; gap: 10px; min-width: 0; }
+.badge__link code { font-family: var(--font-mono); font-size: var(--fs-sm); word-break: break-all; color: var(--text-muted); }
+.badge__warn {
+  position: relative;
+  margin: var(--sp-4) 0 0;
+  padding: var(--sp-3) var(--sp-4) var(--sp-3) calc(var(--sp-4) + 14px);
+  border-radius: var(--r-md);
+  background: color-mix(in srgb, var(--warning) 9%, var(--surface));
+  box-shadow: inset 0 0 0 0.5px color-mix(in srgb, var(--warning) 35%, transparent);
+  font-size: var(--fs-sm);
+}
+.badge__warn::before { content: ""; position: absolute; left: var(--sp-4); top: calc(var(--sp-3) + 6px); width: 8px; height: 8px; border-radius: 50%; background: var(--warning); }
+.badge__nfc { margin-top: var(--sp-5); display: grid; }
+.badge__steps { list-style: none; margin: var(--sp-5) 0 0; padding: 0; display: grid; gap: var(--sp-3); font-size: var(--fs-md); }
+.badge__steps li { display: grid; grid-template-columns: auto 1fr; gap: var(--sp-3); align-items: start; }
+.badge__steps li > span:last-child { padding-top: 2px; line-height: 1.45; }

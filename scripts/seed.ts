@@ -1,26 +1,22 @@
-import sharp from "sharp";
 import { config } from "../server/config.js";
 import { openDb } from "../server/db.js";
 import { ingest } from "../server/ingest.js";
 import { makeJpeg } from "../test/fixtures.js";
+import { demoCacheDir, demoPhotoJpeg } from "./demo-photos.js";
 import { demoShots, type Shot } from "./demo-trips.js";
 
+// Photos libres (crédits : docs/demo-photos.md), téléchargées une fois puis prises dans le cache.
+// La date et le GPS sont ceux du voyage de démo, pas ceux de la photo.
+let plain = 0;
 async function photo(shot: Shot): Promise<Buffer> {
   const [w, h] = shot.portrait ? [1067, 1600] : [1600, 1067];
-  let source: Buffer;
-  try {
-    const res = await fetch(`https://picsum.photos/seed/${shot.seed}/${w}/${h}.jpg`);
-    if (!res.ok) throw new Error(String(res.status));
-    source = Buffer.from(await res.arrayBuffer());
-  } catch {
-    const hue = [...shot.seed].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 7);
-    source = await sharp({ create: { width: w, height: h, channels: 3, background: `hsl(${hue},45%,55%)` } })
-      .jpeg()
-      .toBuffer();
-  }
-  return makeJpeg({ source, takenAt: shot.takenAt, lat: shot.lat, lon: shot.lon });
+  const { data, photo } = await demoPhotoJpeg(shot.place, shot.index, w, h, { seed: shot.seed });
+  if (!photo) plain++;
+  return makeJpeg({ source: data, takenAt: shot.takenAt, lat: shot.lat, lon: shot.lon });
 }
 
+const started = Date.now();
+console.log(`photos de démo : cache ${demoCacheDir()}`);
 const db = openDb(config.dataDir);
 const shots = demoShots();
 let added = 0;
@@ -35,4 +31,5 @@ await Promise.all(
     }
   }),
 );
-console.log(`\n${added} photos ajoutées · ${dupes} déjà présentes`);
+console.log(`\n${added} photos ajoutées · ${dupes} déjà présentes · ${((Date.now() - started) / 1000).toFixed(0)} s`);
+if (plain) console.log(`${plain} images unies à la place de photos indisponibles (réseau ?) — relancez pnpm seed plus tard.`);

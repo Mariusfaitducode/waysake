@@ -1,7 +1,8 @@
 import type { FastifyInstance } from "fastify";
 import type { Db } from "../db.js";
 import { countriesGeoJson, countryName, distanceKm, flag, type GeoPlace } from "../geo.js";
-import { getTrip, listTrips, mergeChapterWithPrevious, renameChapter, renameTrip, setCover } from "../trips.js";
+import { getTrip, listTrips, mergeChapterWithPrevious, renameChapter, renameTrip, setCover, setTripColor } from "../trips.js";
+import { isTripColorId, TRIP_COLORS } from "../trip-palette.js";
 import { mediaUrls } from "./media.js";
 import { tripFavorites, withSocial } from "../social.js";
 
@@ -40,6 +41,19 @@ export function tripRoutes(app: FastifyInstance, db: Db) {
       return { ok: true };
     },
   );
+
+  // Couleur du voyage : un identifiant de la palette, ou null pour revenir à « Automatique ».
+  app.put<{ Params: { slug: string }; Body: { color?: unknown } }>("/api/trips/:slug/color", async (req, reply) => {
+    const color = req.body?.color;
+    if (color !== null && !isTripColorId(color))
+      return reply.code(400).send({ error: "Couleur inconnue.", code: "invalid_color" });
+    if (!setTripColor(db, req.params.slug, color)) return reply.code(404).send({ error: "Ce voyage n'existe pas (ou plus).", code: "trip_not_found" });
+    const t = getTrip(db, req.params.slug)!;
+    return { color: t.color, colorAuto: t.colorAuto, autoColor: t.autoColor };
+  });
+
+  // La palette des couleurs de voyage (le site l'embarque aussi ; utile à l'app et aux scripts).
+  app.get("/api/trip-colors", async () => TRIP_COLORS);
 
   app.patch<{ Params: { id: string }; Body: { title?: string | null } }>("/api/chapters/:id", async (req, reply) => {
     if (!renameChapter(db, Number(req.params.id), req.body?.title ?? null)) return reply.code(404).send({ error: "Introuvable", code: "not_found" });

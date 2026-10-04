@@ -1,48 +1,69 @@
+/*
+ * Regarder ensemble. Invitation : une bannière de notification sobre (verre, ombre douce, point vert « en
+ * direct »). Dans la visionneuse : une pilule --scrim floutée, texte blanc sur la photo.
+ */
 .live-invite {
   position: fixed;
   z-index: 70;
   left: 50%;
-  top: calc(env(safe-area-inset-top, 0px) + 12px);
+  top: calc(env(safe-area-inset-top, 0px) + var(--sp-3));
   translate: -50% 0;
   display: flex;
   align-items: center;
-  gap: 10px;
-  width: min(560px, calc(100vw - 24px));
-  padding: 10px 12px 10px 16px;
-  border-radius: var(--r-md);
-  background: var(--ink);
-  color: var(--paper);
-  box-shadow: var(--shadow-float);
+  gap: var(--sp-3);
+  width: min(520px, calc(100vw - 2 * var(--sp-3)));
+  padding: var(--sp-2) var(--sp-2) var(--sp-2) var(--sp-4);
+  border-radius: var(--r-xl);
+  background: var(--glass);
+  color: var(--text);
+  backdrop-filter: saturate(1.8) blur(24px);
+  -webkit-backdrop-filter: saturate(1.8) blur(24px);
+  box-shadow: var(--shadow-lg), inset 0 0 0 0.5px var(--line-strong);
   animation: live-drop 420ms var(--ease) both;
 }
-.live-invite p { flex: 1; margin: 0; font-size: 15px; line-height: 1.3; }
-.live-invite .button--quiet { color: var(--paper); }
-.live-invite__dot, .live-bar__dot { flex: none; width: 10px; height: 10px; border-radius: 50%; background: #19a266; }
-.live-invite__dot, .live-bar__dot.is-on { animation: live-pulse 1.6s ease-in-out infinite; }
-.live-bar__dot:not(.is-on) { background: var(--signal); }
+.live-invite p { flex: 1; min-width: 0; margin: 0; font-size: var(--fs-md); font-weight: var(--fw-medium); line-height: 1.3; }
+.live-invite .button--small { padding: 8px 14px; font-size: var(--fs-sm); }
+.live-invite__dot, .live-bar__dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--success); }
+.live-invite__dot, .live-bar__dot.is-on { animation: live-pulse 1.8s ease-in-out infinite; }
+.live-bar__dot:not(.is-on) { background: var(--warning); }
 @keyframes live-drop { from { opacity: 0; transform: translateY(-12px); } }
-@keyframes live-pulse { 50% { box-shadow: 0 0 0 6px rgba(25, 162, 102, 0.25); } }
+@keyframes live-pulse { 50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--success) 22%, transparent); } }
 
 .live-bar {
   position: absolute;
   z-index: 2;
   left: 50%;
-  top: calc(env(safe-area-inset-top, 0px) + 12px);
+  top: calc(env(safe-area-inset-top, 0px) + var(--sp-3));
   translate: -50% 0;
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 6px 6px 6px 14px;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.55);
-  color: #fff;
-  font-size: 14px;
-  font-weight: 600;
+  width: max-content;
+  max-width: calc(100vw - 2 * var(--sp-3));
+  padding: 5px 5px 5px var(--sp-4);
+  border-radius: var(--r-full);
+  background: var(--scrim);
+  color: var(--text-on-photo);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
   white-space: nowrap;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px) saturate(1.5);
+  -webkit-backdrop-filter: blur(16px) saturate(1.5);
 }
-.live-bar__leave { border: 0; border-radius: 999px; padding: 6px 12px; background: rgba(255, 255, 255, 0.18); color: #fff; font: inherit; cursor: pointer; }
+.live-bar > span:not(.live-bar__dot) { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.live-bar__leave {
+  flex: none;
+  border: 0;
+  border-radius: var(--r-full);
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.18);
+  color: var(--text-on-photo);
+  font: inherit;
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease);
+}
+.live-bar__leave:hover { background: rgba(255, 255, 255, 0.28); }
 
 .live-floats { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 1; }
 .live-float {
@@ -54,7 +75,7 @@
   font-size: 54px;
   animation: live-float 2.6s cubic-bezier(0.2, 0.7, 0.3, 1) both;
 }
-.live-float small { font-size: 13px; font-weight: 700; color: #fff; text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7); }
+.live-float small { font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--text-on-photo); text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7); }
 @keyframes live-float {
   0% { opacity: 0; transform: translateY(20px) scale(0.6); }
   15% { opacity: 1; transform: translateY(0) scale(1.15); }
@@ -64,4 +85,9 @@
   .live-float { animation: live-fade 2.6s both; }
   @keyframes live-fade { 0%, 100% { opacity: 0; } 15%, 70% { opacity: 1; } }
   .live-invite__dot, .live-bar__dot.is-on { animation: none; }
+}
+
+/* Téléphone : sous la barre de la visionneuse (fermer, compteur, télécharger), pas dessus. */
+@media (max-width: 600px) {
+  .live-bar { top: calc(env(safe-area-inset-top, 0px) + 60px); }
 }

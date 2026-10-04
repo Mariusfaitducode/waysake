@@ -9,6 +9,7 @@ import { EmptyState } from "../components/EmptyState.js";
 import { PhotoGrid } from "../components/PhotoGrid.js";
 import { Viewer } from "../components/Viewer.js";
 import { useUpload } from "../shell/upload.js";
+import { IconBack, IconPin } from "../shell/icons.js";
 import "./Library.css";
 
 type Section = { key: string; title: string; items: Media[] };
@@ -38,12 +39,16 @@ export function Library() {
 
       {unlocated && unlocated.total > 0 && (
         <Link to="/photos/a-localiser" className="library__locate">
-          <span className="library__locate-pin" aria-hidden="true" />
-          <span>
+          <span className="library__locate-pin" aria-hidden="true">
+            <IconPin />
+          </span>
+          <span className="library__locate-text">
             <strong>{t("library.unlocated", { count: unlocated.total })}</strong>
             <small>{t("library.unlocatedHint")}</small>
           </span>
-          <span className="library__locate-go" aria-hidden="true">›</span>
+          <span className="library__locate-go" aria-hidden="true">
+            <IconBack />
+          </span>
         </Link>
       )}
 

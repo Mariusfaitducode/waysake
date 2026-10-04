@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
-    "backgroundColor": "#0B7A4B",
+    "backgroundColor": "#1B1B1E",
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "fr.atlas.voyages"
@@ -14,7 +14,7 @@
     "android": {
       "package": "fr.atlas.voyages",
       "adaptiveIcon": {
-        "backgroundColor": "#0B7A4B",
+        "backgroundColor": "#1B1B1E",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -46,13 +46,30 @@
         }
       ],
       "@react-native-community/datetimepicker",
-      "expo-font",
+      [
+        "expo-font",
+        {
+          "android": {
+            "fonts": [
+              {
+                "fontFamily": "Geist",
+                "fontDefinitions": [
+                  { "path": "./node_modules/@expo-google-fonts/geist/400Regular/Geist_400Regular.ttf", "weight": 400 },
+                  { "path": "./node_modules/@expo-google-fonts/geist/500Medium/Geist_500Medium.ttf", "weight": 500 },
+                  { "path": "./node_modules/@expo-google-fonts/geist/600SemiBold/Geist_600SemiBold.ttf", "weight": 600 },
+                  { "path": "./node_modules/@expo-google-fonts/geist/700Bold/Geist_700Bold.ttf", "weight": 700 }
+                ]
+              }
+            ]
+          }
+        }
+      ],
       [
         "expo-splash-screen",
         {
           "image": "./assets/splash-icon.png",
           "imageWidth": 160,
-          "backgroundColor": "#0B7A4B"
+          "backgroundColor": "#1B1B1E"
         }
       ],
       "./plugins/withReleaseSigning"

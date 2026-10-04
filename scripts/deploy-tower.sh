@@ -13,9 +13,19 @@ remote() { ssh -o BatchMode=yes "$TARGET" "$1"; }
 step "Connexion à la tour"
 remote 'Write-Output "OK : $env:COMPUTERNAME"; docker version --format "Docker {{.Server.Version}}"; tailscale version | Select-Object -First 1'
 
-step "Envoi du code (version commitée : $(git rev-parse --short HEAD))"
+COMMIT="$(git rev-parse --short HEAD)"
+step "Version en ligne"
+LIVE="$(remote '(Invoke-WebRequest -UseBasicParsing http://127.0.0.1:8420/api/health -TimeoutSec 5).Content' 2>/dev/null || true)"
+echo "  tour : ${LIVE:-injoignable} ; à déployer : $COMMIT"
+if [ "${FORCE:-0}" != 1 ] && printf '%s' "$LIVE" | grep -q "\"commit\":\"$COMMIT\""; then
+  echo "  La tour est déjà à jour. (FORCE=1 pour redéployer quand même.)"
+  exit 0
+fi
+
+step "Envoi du code (version commitée : $COMMIT)"
 ARCHIVE="$(mktemp -t atlas).tar"
-git archive --format=tar HEAD > "$ARCHIVE"
+# Seul le code commité part ; server/version.json dit à la tour (et à /api/health) quelle version elle fait tourner.
+git archive --format=tar --add-virtual-file="server/version.json:{\"commit\":\"$COMMIT\",\"date\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" HEAD > "$ARCHIVE"
 scp -q "$ARCHIVE" "$TARGET:C:/Atlas-app.tar"
 rm -f "$ARCHIVE"
 remote "New-Item -ItemType Directory -Force C:\\Atlas-app, $DATA\\app | Out-Null; tar -xf C:\\Atlas-app.tar -C C:\\Atlas-app; Remove-Item C:\\Atlas-app.tar"
@@ -47,6 +57,8 @@ step "Accès privé via Tailscale (HTTPS)"
 remote "tailscale serve --bg 8420 | Out-Null; tailscale serve status"
 
 step "Vérification"
-remote 'Start-Sleep 5; (Invoke-WebRequest -UseBasicParsing http://127.0.0.1:8420/api/health).Content'
+HEALTH="$(remote 'Start-Sleep 5; (Invoke-WebRequest -UseBasicParsing http://127.0.0.1:8420/api/health).Content')"
+echo "  $HEALTH"
+printf '%s' "$HEALTH" | grep -q "\"commit\":\"$COMMIT\"" || { echo "La tour ne répond pas avec la version $COMMIT."; exit 1; }
 echo
 echo "Waysake est en ligne. Sur le téléphone (Tailscale activé), ouvre l'adresse https://… affichée ci-dessus, puis /app."

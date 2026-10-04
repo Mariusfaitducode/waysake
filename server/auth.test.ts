@@ -53,6 +53,7 @@ const PROTECTED = [
   "/api/unlocated",
   "/api/imports/last",
   "/api/space",
+  "/api/stats/overview",
   "/api/geo/countries.geojson",
   "/api/media/1/original",
   "/api/media/1/thumb",
@@ -96,7 +97,7 @@ describe("avec WAYSAKE_PASSWORD", () => {
   it("/api/health reste ouvert et annonce le mot de passe", async () => {
     const res = await app.inject({ url: "/api/health" });
     expect(res.statusCode).toBe(200);
-    expect(res.json()).toEqual({ ok: true, auth: true });
+    expect(res.json()).toEqual({ ok: true, auth: true, version: "dev" });
   });
 
   for (const url of PROTECTED)

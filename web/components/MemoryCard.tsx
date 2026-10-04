@@ -4,6 +4,7 @@ import { useApi } from "../data.js";
 import { t } from "../i18n/index.js";
 import { placeTitle } from "../i18n/places.js";
 import { Viewer } from "./Viewer.js";
+import { TripColorDot } from "./TripColor.js";
 import "./MemoryCard.css";
 
 /** Date locale du téléphone (YYYY-MM-DD) : c'est son « aujourd'hui » qui compte. */
@@ -15,10 +16,11 @@ function localToday() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-/** « Il y a un an… » : une carte discrète sur le globe quand ce jour a des souvenirs ; un tap les rouvre. */
+/** « Il y a un an… » : une carte discrète (pastille à la couleur du voyage) sur le globe quand ce jour a des souvenirs ; un tap les rouvre. */
 export function MemoryCard() {
   const today = useMemo(localToday, []);
   const { data } = useApi(() => api.memories(today), [today]);
+  const { data: trips } = useApi(api.trips);
   const [open, setOpen] = useState<number | null>(null);
   const groups = data?.groups ?? [];
   const media = useMemo(() => groups.flatMap((g) => g.media), [groups]);
@@ -27,16 +29,20 @@ export function MemoryCard() {
   const first = groups[0];
   const cover = first.media.find((m) => m.hasThumbs) ?? first.media[0];
   const total = groups.reduce((n, g) => n + g.count, 0);
+  const color = first.trip && trips?.find((trip) => trip.slug === first.trip!.slug)?.color;
 
   return (
     <>
-      <button className="memory" onClick={() => setOpen(0)} aria-label={t("memories.open")}>
-        <img className="memory__img" src={cover.thumb} alt="" />
-        <span className="memory__text">
+      <button className="memory-card" onClick={() => setOpen(0)} aria-label={t("memories.open")}>
+        <img className="memory-card__img" src={cover.thumb} alt="" />
+        <span className="memory-card__text">
           <strong>{t("memories.when", { count: first.yearsAgo })}</strong>
           <span>
-            {first.trip ? `${placeTitle(first.trip.title)}, ` : ""}
-            {t("count.photos", { count: total })}
+            {color && <TripColorDot color={color} size={8} />}
+            <span>
+              {first.trip ? `${placeTitle(first.trip.title)} · ` : ""}
+              {t("count.photos", { count: total })}
+            </span>
           </span>
         </span>
       </button>

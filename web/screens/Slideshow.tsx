@@ -5,16 +5,16 @@ import { useApi } from "../data.js";
 import { fullDate } from "../format.js";
 import { t } from "../i18n/index.js";
 import { localizeTrip, placeTitle } from "../i18n/places.js";
-import { Sign } from "../components/Sign.js";
 import { IconBack, IconClose } from "../shell/icons.js";
 import { PHOTO_MS, SIGN_MS, routeSvg, slideshowPlan } from "../slideshow.js";
+import { tripColorHex } from "../trip-colors.js";
 import "./Slideshow.css";
 
 const IDLE_MS = 3000;
 
 /**
- * Diaporama d'un voyage, pensé pour la télé : plein écran, une photo toutes les 5 s, un panneau entre deux
- * étapes, une mini-carte qui avance. Télécommande : ← → pour changer, OK/Espace pour la pause, Retour pour sortir.
+ * Diaporama d'un voyage, pensé pour la télé : plein écran, une photo toutes les 5 s, un titre Horizon entre deux
+ * étapes (la première photo de l'étape, floutée, sous le nom et la route), une mini-carte qui avance. Télécommande : ← → pour changer, OK/Espace pour la pause, Retour pour sortir.
  */
 export function Slideshow() {
   const { slug = "" } = useParams();
@@ -100,26 +100,44 @@ export function Slideshow() {
   const chapter = slide ? trip.chapters[slide.chapter] : null;
 
   return (
-    <div className={`slideshow${chrome ? "" : " is-idle"}`} onPointerMove={wake} onClick={wake}>
+    // Toujours sur fond noir : la teinte « sombre » de la couleur du voyage, pour la route et la progression.
+    <div className={`slideshow${chrome ? "" : " is-idle"}`} style={{ "--tint": tripColorHex(trip.color, true) } as React.CSSProperties} onPointerMove={wake} onClick={wake}>
       {slide?.kind === "photo" && <Photo key={`${slide.media.id}-${index}`} media={slide.media} />}
       {slide?.kind === "sign" && chapter && (
         <div key={`sign-${index}`} className="slideshow__sign">
-          <span className="slideshow__exit">{t("slideshow.stop", { n: slide.chapter + 1 })}</span>
-          <Sign as="h1" size="lg">{chapter.title}</Sign>
-          {chapter.places.length > 0 && <p>{chapter.places.map((p) => placeTitle(p)).join(", ")}</p>}
+          {chapter.media[0] && <img src={chapter.media[0].preview} alt="" className="slideshow__sign-bg" aria-hidden="true" />}
+          <div className="slideshow__sign-text">
+            <span className="slideshow__eyebrow">
+              <i aria-hidden="true" />
+              {t("slideshow.stop", { n: slide.chapter + 1 })}
+            </span>
+            <h1 className="slideshow__title">{chapter.title}</h1>
+            {chapter.places.length > 0 && <p>{chapter.places.map((p) => placeTitle(p)).join(", ")}</p>}
+            {trip.chapters.length > 1 && (
+              <ol className="slideshow__route" aria-hidden="true">
+                {trip.chapters.map((c, i) => (
+                  <li key={c.id} className={i < slide.chapter ? "is-done" : i === slide.chapter ? "is-current" : ""}>
+                    <span>{c.title}</span>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </div>
         </div>
       )}
       {ended && (
-        <div className="slideshow__sign">
-          <Sign as="h1" size="lg">{trip.title}</Sign>
-          <p>{t("slideshow.end")}</p>
-          <div className="slideshow__end">
-            <button className="button" autoFocus onClick={() => setIndex(0)}>
-              {t("slideshow.again")}
-            </button>
-            <button className="button button--quiet slideshow__quiet" onClick={exit}>
-              {t("slideshow.back")}
-            </button>
+        <div className="slideshow__sign slideshow__sign--end">
+          <div className="slideshow__sign-text">
+            <h1 className="slideshow__title">{trip.title}</h1>
+            <p>{t("slideshow.end")}</p>
+            <div className="slideshow__end">
+              <button className="button slideshow__primary" autoFocus onClick={() => setIndex(0)}>
+                {t("slideshow.again")}
+              </button>
+              <button className="button button--quiet slideshow__quiet" onClick={exit}>
+                {t("slideshow.back")}
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -134,7 +152,7 @@ export function Slideshow() {
 
       {map && map.path && slide && (
         <svg className="slideshow__map" viewBox="0 0 220 140" aria-hidden="true">
-          <path d={map.path} className="slideshow__route" />
+          <path d={map.path} className="slideshow__map-route" />
           {map.points.map(([x, y], i) => (
             <circle key={i} cx={x} cy={y} r={i === slide.chapter ? 7 : 4} className={i <= slide.chapter ? "is-done" : ""} />
           ))}

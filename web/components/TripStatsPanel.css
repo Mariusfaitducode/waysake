@@ -1,29 +1,31 @@
-.stats { padding: 0 16px; display: grid; gap: 16px; }
-/* Panneau d'autoroute : fond vert, liseré blanc, chiffres en Barlow Condensed. */
+/* Le voyage en détails (bas de la page d'un voyage) : faits, puis qui a pris les photos. Sobre, sans panneau. */
+.stats { padding: 0 var(--gutter); display: grid; gap: var(--sp-5); }
+.stats__facts { margin: 0; display: grid; gap: var(--sp-3); }
+.stats__facts > div { padding-top: var(--sp-3); border-top: 1px solid var(--line); }
+.stats__facts dt, .stats__label { margin: 0; color: var(--text-muted); font-size: var(--fs-sm); }
+.stats__facts dd { margin: 2px 0 0; font-weight: var(--fw-semibold); }
+.stats__who { display: grid; gap: var(--sp-2); }
+.stats__bar { display: flex; height: 10px; border-radius: var(--r-full); overflow: hidden; gap: 2px; }
+.stats__bar span { min-width: 4px; }
+.stats__legend { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: var(--fs-md); }
+.stats__legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
+.stats__legend b { font-variant-numeric: tabular-nums; }
+.stats__verdict { margin: 0; font-size: var(--fs-lg); font-weight: var(--fw-semibold); letter-spacing: var(--tracking-tight); }
+@media (min-width: 900px) {
+  .stats { padding-inline: var(--sp-10); max-width: 840px; }
+  .stats__facts { grid-template-columns: 1fr 1fr; gap: var(--sp-6); }
+}
+
+/*
+ * Grands chiffres en ligne : n'est plus utilisé par la page du voyage (chiffres en haut de page), mais
+ * screens/Stats.tsx le réutilise (.stats__panel). Version Horizon : Encre sur surface, sans panneau routier.
+ */
 .stats__panel {
   margin: 0;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 2px;
-  padding: 6px;
-  border-radius: var(--r-md);
-  background: var(--autostrada);
-  color: var(--autostrada-ink);
-  box-shadow: inset 0 0 0 2px var(--autostrada), inset 0 0 0 4px rgba(255, 255, 255, 0.9);
+  gap: var(--sp-4);
 }
-.stats__panel > div { padding: 12px 14px 10px; display: flex; flex-direction: column-reverse; }
-.stats__panel dt { font-size: 14px; opacity: 0.9; }
-.stats__panel dd { margin: 0; font-family: var(--font-sign); font-weight: 600; font-size: 44px; line-height: 1; font-variant-numeric: tabular-nums; }
-.stats__facts { margin: 0; display: grid; gap: 10px; }
-.stats__facts dt, .stats__label { margin: 0; color: var(--muted); font-size: 14px; }
-.stats__facts dd { margin: 2px 0 0; font-weight: 600; }
-.stats__who { display: grid; gap: 8px; }
-.stats__bar { display: flex; height: 12px; border-radius: 999px; overflow: hidden; gap: 2px; }
-.stats__bar span { min-width: 4px; }
-.stats__legend { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 15px; }
-.stats__legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
-.stats__legend b { font-variant-numeric: tabular-nums; }
-.stats__verdict { margin: 0; font-family: var(--font-sign); font-weight: 600; font-size: 24px; }
-@media (min-width: 900px) {
-  .stats { padding-inline: 40px; max-width: 840px; }
-}
+.stats__panel > div { display: flex; flex-direction: column-reverse; }
+.stats__panel dt { margin-top: 4px; color: var(--text-muted); font-size: var(--fs-sm); }
+.stats__panel dd { margin: 0; font-size: var(--fs-2xl); font-weight: var(--fw-semibold); letter-spacing: var(--tracking-tight); line-height: 1; font-variant-numeric: tabular-nums; }

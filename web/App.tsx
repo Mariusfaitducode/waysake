@@ -22,6 +22,7 @@ import { Login } from "./screens/Login.js";
 import { ImportReview } from "./screens/ImportReview.js";
 import { GetApp } from "./screens/GetApp.js";
 import { Locate } from "./screens/Locate.js";
+import { Stats } from "./screens/Stats.js";
 import { useLocale } from "./i18n/index.js";
 
 export function App() {
@@ -100,6 +101,7 @@ export function App() {
                 <Route path="app" element={<GetApp />} />
                 <Route path="jeu" element={<Games />} />
                 <Route path="jeu/:id" element={<GamePlay />} />
+                <Route path="stats" element={<Stats />} />
                 <Route path="*" element={<NotFound />} />
               </Route>
             </Routes>

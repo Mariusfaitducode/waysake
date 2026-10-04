@@ -1,0 +1,25 @@
+/*
+ * Monogramme : dégradé gris neutre (comme Contacts), teinté à 30 % par la couleur du profil. Un profil vert en base
+ * devient un gris vert très doux : sobre, sans réécrire les données. Initiale blanche (≥ 4,5:1 en bas du dégradé).
+ * Les gris de base sont des jetons (--avatar-top / --avatar-bottom, tokens.css).
+ */
+.avatar {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: var(--size, 36px);
+  height: var(--size, 36px);
+  border-radius: 50%;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--c) 30%, var(--avatar-top)),
+    color-mix(in oklch, var(--c) 30%, var(--avatar-bottom))
+  );
+  color: var(--text-on-photo);
+  font-family: var(--font-display);
+  font-weight: var(--fw-semibold);
+  font-size: calc(var(--size, 36px) * 0.44);
+  letter-spacing: -0.01em;
+  line-height: 1;
+  user-select: none;
+}

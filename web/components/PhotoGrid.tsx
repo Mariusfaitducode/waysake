@@ -39,7 +39,8 @@ export function PhotoGrid<T extends GridItem>({
     return () => ro.disconnect();
   }, []);
 
-  const gap = width < 600 ? 3 : 6;
+  // Grille fine façon Photos : des joints de 2 px sur téléphone, 4 px sur grand écran.
+  const gap = width < 600 ? 2 : 4;
   const targetHeight = width < 600 ? 118 : width < 1100 ? 190 : 230;
   const rows = width ? justify(items.map(ratio), { width, targetHeight, gap }) : [];
 
@@ -66,7 +67,12 @@ export function PhotoGrid<T extends GridItem>({
                     onLoad={(e) => e.currentTarget.classList.add("is-loaded")}
                   />
                 ) : (
-                  <span className="grid__video" aria-hidden="true">▶</span>
+                  <span className="grid__placeholder" aria-hidden="true" />
+                )}
+                {m.kind === "video" && (
+                  <span className="grid__video" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="12" height="12"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor" /></svg>
+                  </span>
                 )}
                 {!selected && <ReactionBadge reactions={m.reactions} />}
                 {selected && <span className="grid__check" aria-hidden="true" />}

@@ -6,6 +6,8 @@ import { createReadStream, existsSync, rmSync } from "node:fs";
 import { resolve } from "node:path";
 import { openDb, type Db } from "./db.js";
 import { rebuildTrips } from "./trips.js";
+import { tripColorService, type TripColorService } from "./trip-colors.js";
+import { onTripsChanged } from "./trip-events.js";
 import { expireImports } from "./imports.js";
 import { identify, userRoutes } from "./routes/users.js";
 import { mediaRoutes } from "./routes/media.js";
@@ -18,11 +20,13 @@ import { souvenirRoutes } from "./routes/souvenirs.js";
 import { liveRoutes } from "./routes/live.js";
 import { gameRoutes } from "./routes/game.js";
 import { spaceRoutes } from "./routes/space.js";
+import { statsRoutes } from "./routes/stats.js";
+import { createTraffic } from "./stats.js";
 import { setupAuth } from "./auth.js";
 import { scheduleSnapshots } from "./backup.js";
 import { setting } from "./config.js";
 
-export type WaysakeApp = FastifyInstance & { waysake: { db: Db; rebuild: () => void; scheduleRebuild: () => void } };
+export type WaysakeApp = FastifyInstance & { waysake: { db: Db; rebuild: () => void; scheduleRebuild: () => void; colors: TripColorService } };
 
 export async function buildApp(opts: {
   dataDir: string;
@@ -33,6 +37,7 @@ export async function buildApp(opts: {
   /** Instantané quotidien de la base dans DATA_DIR/backups (activé par main.ts). */
   snapshots?: boolean;
 }): Promise<WaysakeApp> {
+  const startedAt = Date.now();
   const app = Fastify({ logger: false, bodyLimit: 1024 * 1024 });
   const db = openDb(opts.dataDir);
   // Envois interrompus par un redémarrage : leurs fichiers temporaires ne serviront plus.
@@ -54,11 +59,16 @@ export async function buildApp(opts: {
       }
     }, opts.rebuildDelayMs ?? 4000);
   };
-  app.decorate("waysake", { db, rebuild, scheduleRebuild });
+  // Couleur automatique des voyages : recalculée en arrière-plan à chaque changement (jamais bloquant).
+  const colors = tripColorService(db, opts.dataDir, (err) => app.log.error(err));
+  const stopColors = onTripsChanged(db, colors.schedule);
+  app.decorate("waysake", { db, rebuild, scheduleRebuild, colors });
   const stopSnapshots = opts.snapshots ? scheduleSnapshots(db, opts.dataDir, (err) => app.log.error(err)) : () => {};
   app.addHook("onClose", async () => {
     clearTimeout(timer);
     stopSnapshots();
+    stopColors();
+    await colors.idle();
     db.close();
   });
 
@@ -78,7 +88,24 @@ export async function buildApp(opts: {
 
   await app.register(cookie);
   // Le mot de passe passe avant tout le reste, y compris le choix du profil.
-  setupAuth(app, db, "password" in opts ? opts.password : setting("PASSWORD"));
+  const password = "password" in opts ? opts.password : setting("PASSWORD");
+  setupAuth(app, db, password);
+
+  // Trafic de l'API depuis le démarrage (page « Statistiques ») : en mémoire, rien de nominatif hormis le profil.
+  // Un 401 ne compte pour aucun profil : n'importe qui peut poser le cookie de profil d'un autre.
+  const traffic = createTraffic();
+  app.addHook("onResponse", async (req, reply) => {
+    if (!req.url.startsWith("/api/")) return;
+    traffic.record({
+      method: req.method,
+      route: req.routeOptions.url,
+      status: reply.statusCode,
+      contentType: String(reply.getHeader("content-type") ?? ""),
+      bytes: Number(reply.getHeader("content-length")) || 0,
+      requestBytes: Number(req.headers["content-length"]) || 0,
+      userId: reply.statusCode === 401 ? null : (identify(db, req)?.id ?? null),
+    });
+  });
 
   // Protection CSRF : toute modification exige une identité. Le cookie (SameSite=Lax) n'accompagne
   // jamais un formulaire posté depuis un autre site, et un autre site ne peut pas poser l'en-tête
@@ -128,6 +155,7 @@ export async function buildApp(opts: {
   liveRoutes(app, db);
   gameRoutes(app, db);
   spaceRoutes(app, db, opts.dataDir);
+  statsRoutes(app, db, opts.dataDir, { traffic, password: !!password, startedAt });
 
   const webDir = opts.webDir && resolve(opts.webDir);
   if (webDir && existsSync(webDir)) {

@@ -12,6 +12,7 @@ export const fr = {
   "setup.connect": "Se connecter",
   "setup.who": "Qui es-tu ?",
   "setup.remember": "Waysake s'en souviendra sur ce téléphone.",
+  "setup.address.label": "Adresse de la tour",
 
   // Mot de passe du foyer (WAYSAKE_PASSWORD)
   "setup.password.title": "Mot de passe",

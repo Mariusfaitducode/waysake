@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import QRCode from "qrcode";
 import { Header } from "../components/Header.js";
 import { locale, t } from "../i18n/index.js";
@@ -11,6 +11,22 @@ type Space = {
   monthly: { bytes: number };
   forecast: { months: number | null; fullAt: number | null };
 };
+
+/** Étapes numérotées : pastilles `.step-number` (Encre), le texte à côté. */
+export function Steps({ items }: { items: ReactNode[] }) {
+  return (
+    <ol className="steps">
+      {items.map((item, i) => (
+        <li key={i}>
+          <span className="step-number" aria-hidden="true">
+            {i + 1}
+          </span>
+          <div className="steps__body">{item}</div>
+        </li>
+      ))}
+    </ol>
+  );
+}
 
 /** Place sur la tour : libre, prise par Waysake, et jusqu'à quand ça tiendra au rythme actuel (GET /api/space). */
 function SpaceCard() {
@@ -33,7 +49,7 @@ function SpaceCard() {
   return (
     <section className="getapp__card">
       <h2>{t("getApp.space.title")}</h2>
-      <p>{t("getApp.space.free", { free: bytes(space.disk.free), total: bytes(space.disk.total) })}</p>
+      <p className="getapp__lead">{t("getApp.space.free", { free: bytes(space.disk.free), total: bytes(space.disk.total) })}</p>
       <div className="getapp__meter" role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(used * 100)}>
         <span style={{ width: `${Math.min(100, used * 100)}%` }} />
       </div>
@@ -56,7 +72,8 @@ export function GetApp() {
   const host = location.host;
 
   useEffect(() => {
-    QRCode.toString(`${location.origin}/app`, { type: "svg", margin: 1, color: { dark: "#16191b", light: "#ffffff" } }).then(setQr);
+    // Le QR reste noir sur blanc dans les deux thèmes : c'est ce que les appareils photo lisent le mieux.
+    QRCode.toString(`${location.origin}/app`, { type: "svg", margin: 1, color: { dark: "#141416", light: "#ffffff" } }).then(setQr);
     const exists = (url: string, set: (ok: boolean) => void) =>
       fetch(url, { method: "HEAD" }).then((r) => set(r.ok && !r.headers.get("content-type")?.includes("text/html")), () => set(false));
     exists("/waysake.apk", setApk);
@@ -80,28 +97,28 @@ export function GetApp() {
       {device !== "iphone" && (
         <section className="getapp__card">
           <h2>Android</h2>
-          <ol className="getapp__steps">
-            <li>
-              {apk === false ? (
+          <Steps
+            items={[
+              apk === false ? (
                 <span>{t("getApp.android.missing")}</span>
               ) : (
                 <a className="button" href="/waysake.apk" download="Waysake.apk">
                   {t("getApp.android.download")}
                 </a>
-              )}
-            </li>
-            <li>{t("getApp.android.install")}</li>
-            <li>
-              {t("getApp.android.address")}
-              <span className="getapp__address">
-                <code>{host}</code>
-                <button className="button button--quiet button--small" onClick={() => navigator.clipboard?.writeText(host).then(() => setCopied(true))}>
-                  {copied ? t("getApp.copied") : t("getApp.copy")}
-                </button>
-              </span>
-            </li>
-            <li>{t("getApp.android.permission")}</li>
-          </ol>
+              ),
+              t("getApp.android.install"),
+              <>
+                {t("getApp.android.address")}
+                <span className="getapp__address">
+                  <code>{host}</code>
+                  <button className="button button--quiet button--small" onClick={() => navigator.clipboard?.writeText(host).then(() => setCopied(true))}>
+                    {copied ? t("getApp.copied") : t("getApp.copy")}
+                  </button>
+                </span>
+              </>,
+              t("getApp.android.permission"),
+            ]}
+          />
         </section>
       )}
 
@@ -111,16 +128,16 @@ export function GetApp() {
         <section className="getapp__card">
           <h2>iPhone</h2>
           {shortcut ? (
-            <ol className="getapp__steps">
-              <li>
+            <Steps
+              items={[
                 <a className="button" href="/waysake.shortcut">
                   {t("getApp.iphone.install")}
-                </a>
-              </li>
-              <li>{t("getApp.iphone.add")}</li>
-              <li>{t("getApp.iphone.run")}</li>
-              <li>{t("getApp.iphone.allow")}</li>
-            </ol>
+                </a>,
+                t("getApp.iphone.add"),
+                t("getApp.iphone.run"),
+                t("getApp.iphone.allow"),
+              ]}
+            />
           ) : (
             <p>{t("getApp.iphone")}</p>
           )}

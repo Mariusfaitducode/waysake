@@ -1,64 +1,35 @@
+/* L'enveloppe porte la mise en page ; le conteneur MapLibre (intérieur) garde ses propres classes. */
 .globe-map { position: absolute; inset: 0; }
+.globe-map__canvas { position: absolute; inset: 0; }
 .globe-map .maplibregl-canvas { outline: none; }
+.globe-map .maplibregl-canvas:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
 
-.pin {
-  position: relative;
-  width: 54px;
-  height: 54px;
-  padding: 3px;
+/* Nom du voyage au bout de son itinéraire : texte sur un liseré couleur de page, comme sur la maquette. */
+.globe-label {
+  display: block;
+  padding: 0;
   border: 0;
-  border-radius: 14px;
-  background: #fff;
-  box-shadow: 0 6px 18px -6px rgba(0, 0, 0, 0.45);
+  background: none;
+  color: var(--text);
+  font: var(--fw-semibold) var(--fs-sm) / 1.15 var(--font-sans);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
   cursor: pointer;
-  transition: transform 260ms var(--ease);
-  transform-origin: bottom center;
+  text-shadow:
+    0 0 2px var(--bg), 0 0 2px var(--bg), 0 0 3px var(--bg),
+    1px 1px 0 var(--bg), -1px -1px 0 var(--bg), 1px -1px 0 var(--bg), -1px 1px 0 var(--bg);
+  transition: opacity var(--dur) var(--ease);
 }
-.pin::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: -6px;
-  width: 12px;
-  height: 12px;
-  background: #fff;
-  transform: translateX(-50%) rotate(45deg);
-  border-radius: 2px;
-  z-index: -1;
-}
-.pin img { width: 100%; height: 100%; object-fit: cover; border-radius: 11px; }
-.pin span {
-  position: absolute;
-  top: -8px;
-  right: -10px;
-  min-width: 24px;
-  padding: 2px 6px;
-  border-radius: 999px;
-  background: var(--autostrada);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 700;
-  box-shadow: 0 0 0 2px #fff;
-}
-.pin:hover, .pin.is-selected { transform: scale(1.18); }
-.maplibregl-marker:has(.pin.is-selected) { z-index: 2; }
-.pin.is-selected { box-shadow: 0 0 0 3px var(--autostrada), 0 10px 24px -6px rgba(0, 0, 0, 0.5); }
+.globe-label.is-flip { transform: translateX(calc(-100% - 18px)); }
+.globe-label.is-dim { opacity: 0.4; }
+.globe-label.is-hidden { opacity: 0; pointer-events: none; }
+.maplibregl-marker.is-front { z-index: 2; }
 
 .wish-pin {
   width: 14px;
   height: 14px;
-  border-radius: 50%;
-  border: 2.5px solid var(--signal);
+  border-radius: var(--r-full);
+  border: 2px solid var(--text);
   background: transparent;
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.15);
-}
-.pin--group::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 14px;
-  background: #fff;
-  transform: translate(5px, -5px) rotate(6deg);
-  z-index: -1;
-  box-shadow: 0 4px 12px -6px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 0 2px var(--bg);
 }

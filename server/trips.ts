@@ -3,6 +3,8 @@ import type { Db } from "./db.js";
 import { tripFavorites } from "./social.js";
 import { clusterTrips, detectHome, type ChapterDraft, type ClusterInput, type LatLon, type TripDraft } from "./clustering.js";
 import { reverseGeocode, type GeoPlace } from "./geo.js";
+import { isTripColorId, NEUTRAL_TRIP_COLOR, type TripColorId } from "./trip-palette.js";
+import { notifyTripsChanged } from "./trip-events.js";
 
 /**
  * Persistance des voyages. Le regroupement est recalculé de zéro, puis chaque nouveau voyage (et chaque
@@ -97,7 +99,7 @@ export function rebuildTrips(db: Db): { trips: number; home: LatLon | null } {
   const home = homeFor(db, items);
   const { trips } = clusterTrips(items, { home });
 
-  return db.transaction(() => {
+  const result = db.transaction(() => {
     db.prepare("INSERT INTO setting (key, value) VALUES ('home.detected', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").run(json(home));
 
     const oldTripOf = new Map<number, number>();
@@ -166,6 +168,8 @@ export function rebuildTrips(db: Db): { trips: number; home: LatLon | null } {
     db.prepare("DELETE FROM trip WHERE id NOT IN (SELECT value FROM json_each(?))").run(tripIds);
     return { trips: trips.length, home };
   })();
+  notifyTripsChanged(db);
+  return result;
 }
 
 // ---------- lecture ----------
@@ -173,7 +177,7 @@ export function rebuildTrips(db: Db): { trips: number; home: LatLon | null } {
 type TripRow = {
   id: number; slug: string; title: string; custom_title: string | null; cover_media_id: number | null;
   auto_cover_media_id: number | null; start_at: number; end_at: number; center_lat: number; center_lon: number;
-  country_codes: string; route: string; media_count: number;
+  country_codes: string; route: string; media_count: number; color: string | null; auto_color: string | null;
 };
 
 /** La photo la plus réagie de chaque voyage (couverture automatique tant qu'aucune n'est choisie). */
@@ -206,13 +210,41 @@ function tripSummary(r: TripRow, favorite?: number) {
     countryCodes: JSON.parse(r.country_codes) as string[],
     mediaCount: r.media_count,
     coverMediaId: r.cover_media_id ?? favorite ?? r.auto_cover_media_id,
+    ...tripColorFields(r),
   };
+}
+
+/**
+ * Couleur de voyage : `color` est la couleur effective (choix manuel, sinon automatique, sinon Ardoise
+ * tant que le calcul n'a pas eu lieu) ; `colorAuto` dit si elle est automatique ; `autoColor` est ce
+ * que donnerait « Automatique » (pastille du sélecteur).
+ */
+function tripColorFields(r: Pick<TripRow, "color" | "auto_color">) {
+  const autoColor: TripColorId = isTripColorId(r.auto_color) ? r.auto_color : NEUTRAL_TRIP_COLOR;
+  const manual = isTripColorId(r.color) ? r.color : null;
+  return { color: manual ?? autoColor, colorAuto: manual === null, autoColor };
+}
+
+/** Couverture effective de chaque voyage (choisie, sinon la plus réagie, sinon automatique). */
+export function effectiveCovers(db: Db): Map<number, number | null> {
+  return new Map(listTrips(db).map((t) => [t.id, t.coverMediaId]));
+}
+
+/** Choisit la couleur d'un voyage, ou revient à l'automatique (null). false si le voyage n'existe pas. */
+export function setTripColor(db: Db, slug: string, color: TripColorId | null) {
+  const ok = db.prepare("UPDATE trip SET color = ? WHERE slug = ?").run(color, slug).changes > 0;
+  if (ok) notifyTripsChanged(db);
+  return ok;
 }
 export type TripSummary = ReturnType<typeof tripSummary>;
 
-export function listTrips(db: Db): TripSummary[] {
+/** Liste des voyages : résumé, nombre d'étapes et itinéraire ([lon, lat] par jour, pour le globe). */
+export function listTrips(db: Db): (TripSummary & { chapterCount: number; route: [number, number][] })[] {
   const favorites = topFavorites(db);
-  return (db.prepare("SELECT * FROM trip ORDER BY start_at DESC").all() as TripRow[]).map((r) => tripSummary(r, favorites.get(r.id)));
+  const rows = db
+    .prepare("SELECT t.*, (SELECT COUNT(*) FROM chapter c WHERE c.trip_id = t.id) AS chapter_count FROM trip t ORDER BY t.start_at DESC")
+    .all() as (TripRow & { chapter_count: number })[];
+  return rows.map((r) => ({ ...tripSummary(r, favorites.get(r.id)), chapterCount: r.chapter_count, route: JSON.parse(r.route) as [number, number][] }));
 }
 
 export function getTrip(db: Db, slug: string) {
@@ -268,12 +300,14 @@ export function renameChapter(db: Db, chapterId: number, title: string | null) {
 }
 
 export function setCover(db: Db, slug: string, mediaId: number | null) {
-  return db
+  const ok = db
     .prepare(
       `UPDATE trip SET cover_media_id = ? WHERE slug = ? AND (? IS NULL OR ? IN (
          SELECT mc.media_id FROM media_chapter mc JOIN chapter c ON c.id = mc.chapter_id WHERE c.trip_id = trip.id))`,
     )
     .run(mediaId, slug, mediaId, mediaId).changes > 0;
+  if (ok) notifyTripsChanged(db);
+  return ok;
 }
 
 /** Fusionne l'étape avec la précédente, et s'en souvient pour les recalculs suivants. */

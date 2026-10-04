@@ -1,4 +1,5 @@
 import type { Db } from "./db.js";
+import { notifyTripsChanged } from "./trip-events.js";
 
 /** Les quatre réactions possibles, dans l'ordre d'affichage. */
 export const REACTIONS = ["❤️", "😂", "🤩", "😮"] as const;
@@ -46,6 +47,7 @@ export function setReaction(db: Db, mediaId: number, userId: string, emoji: Reac
   if (on)
     db.prepare("INSERT INTO reaction (media_id, user_id, emoji, created_at) VALUES (?, ?, ?, ?) ON CONFLICT DO NOTHING").run(mediaId, userId, emoji, Date.now());
   else db.prepare("DELETE FROM reaction WHERE media_id = ? AND user_id = ? AND emoji = ?").run(mediaId, userId, emoji);
+  notifyTripsChanged(db); // la photo la plus réagie peut devenir la couverture, donc changer la couleur
 }
 
 /** Légende partagée : la dernière écriture gagne ; une légende vide l'efface. */

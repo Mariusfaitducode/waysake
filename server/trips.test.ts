@@ -22,6 +22,21 @@ describe("rebuildTrips", () => {
     expect(trips.find((t) => t.title === "Berlin")!.slug).toBe("berlin-2024");
   });
 
+  it("donne le nombre d'étapes de chaque voyage dans la liste", () => {
+    insertDemoMedia(db);
+    rebuildTrips(db);
+    const counts = listTrips(db).map((t) => t.chapterCount);
+    expect(counts.every((n) => n >= 1)).toBe(true);
+    expect(road().chapterCount).toBe(getTrip(db, road().slug)!.chapters.length);
+  });
+
+  it("donne l'itinéraire de chaque voyage dans la liste, comme le détail", () => {
+    insertDemoMedia(db);
+    rebuildTrips(db);
+    expect(road().route.length).toBeGreaterThan(1);
+    expect(road().route).toEqual(getTrip(db, road().slug)!.route);
+  });
+
   it("est idempotent : mêmes ids, mêmes liens", () => {
     insertDemoMedia(db);
     rebuildTrips(db);

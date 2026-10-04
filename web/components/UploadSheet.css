@@ -1,32 +1,45 @@
+/* Zone de dépôt : un puits calme, le bouton Encre au centre. */
 .drop {
   display: grid;
-  gap: 6px;
+  gap: var(--sp-2);
   justify-items: center;
   text-align: center;
-  padding: 42px 20px;
-  border-radius: var(--r-md);
-  border: 2px dashed var(--hairline);
+  padding: var(--sp-8) var(--sp-5);
+  border-radius: var(--r-lg);
+  background: var(--surface-sunken);
+  box-shadow: inset 0 0 0 1px var(--line);
+  outline: 1.5px dashed transparent;
+  outline-offset: -8px;
   cursor: pointer;
-  transition: border-color 200ms var(--ease), background 200ms var(--ease);
+  transition: outline-color var(--dur) var(--ease), background-color var(--dur) var(--ease);
 }
-.drop:hover, .drop.is-over, .drop:focus-within { border-color: var(--autostrada); background: color-mix(in srgb, var(--autostrada) 7%, transparent); }
+.drop:hover, .drop.is-over { outline-color: var(--line-strong); }
+.drop.is-over { background: color-mix(in srgb, var(--text) 5%, var(--surface-sunken)); outline-color: var(--text-muted); }
+.drop:has(input:focus-visible) { outline: 2px solid var(--focus); outline-offset: 2px; }
+.drop + .sheet__meta { font-size: var(--fs-sm); }
+.drop + .sheet__meta a { color: var(--text); font-weight: var(--fw-medium); text-decoration-color: var(--line-strong); text-underline-offset: 3px; }
+.drop + .sheet__meta a:hover { text-decoration-color: currentColor; }
+.drop__icon { display: grid; place-items: center; width: 48px; height: 48px; margin-bottom: var(--sp-2); border-radius: var(--r-md); background: var(--surface); color: var(--text-muted); box-shadow: var(--shadow-sm); }
+.drop__icon svg { width: 24px; height: 24px; }
 .drop__lead {
-  background: var(--autostrada);
-  color: var(--autostrada-ink);
-  padding: 13px 24px;
-  border-radius: 999px;
-  font-weight: 600;
+  background: var(--accent);
+  color: var(--on-accent);
+  padding: 12px 22px;
+  border-radius: var(--r-full);
+  font-weight: var(--fw-semibold);
+  transition: background-color var(--dur-fast) var(--ease);
 }
-.drop__hint { color: var(--muted); font-size: 15px; max-width: 30ch; margin-top: 8px; }
+.drop:hover .drop__lead { background: var(--accent-hover); }
+.drop__hint { color: var(--text-muted); font-size: var(--fs-sm); max-width: 32ch; margin-top: var(--sp-1); }
 
-.progress { height: 8px; border-radius: 4px; background: var(--hairline); overflow: hidden; }
+.progress { height: 6px; border-radius: var(--r-full); background: var(--surface-sunken); box-shadow: inset 0 0 0 1px var(--line); overflow: hidden; }
 .progress__bar {
   height: 100%;
-  background: var(--autostrada);
+  border-radius: inherit;
+  background: var(--accent);
   transform-origin: left;
   transition: transform 300ms var(--ease);
 }
-.failed { margin-top: 18px; font-size: 15px; }
-.failed ul { padding-left: 18px; color: var(--muted); }
-
-
+.failed { margin-top: var(--sp-5); font-size: var(--fs-md); }
+.failed p { margin: 0 0 var(--sp-2); color: var(--danger); font-weight: var(--fw-medium); }
+.failed ul { margin: 0 0 var(--sp-3); padding-left: 18px; color: var(--text-muted); font-size: var(--fs-sm); }

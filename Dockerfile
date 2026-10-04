@@ -26,6 +26,8 @@ WORKDIR /app
 COPY --from=build /app/package.json ./
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/server ./server
+# Géométrie du logo, partagée avec le site : la carte postale (server/postcard.ts) la dessine.
+COPY --from=build /app/web/brand.ts ./web/brand.ts
 COPY --from=build /app/dist ./dist
 VOLUME /data
 EXPOSE 8420

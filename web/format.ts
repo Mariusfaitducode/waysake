@@ -75,3 +75,20 @@ export function countryName(code: string, fallback = code, l = locale()) {
     return fallback;
   }
 }
+
+/** Moment vécu (dernier envoi, dernier instantané) : à l'heure de cet appareil, pas en UTC. */
+const localFmt = new Map<Locale, Intl.DateTimeFormat>();
+export function when(ts: number, l = locale()) {
+  let f = localFmt.get(l);
+  if (!f) localFmt.set(l, (f = new Intl.DateTimeFormat(tags[l], { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })));
+  return f.format(ts);
+}
+
+/** « 2026-09 » → « sept. 26 », pour l'axe d'un histogramme. */
+export const shortMonth = (m: string, l = locale()) => fmt(l, "shortMonth", { month: "short", year: "2-digit" }).format(new Date(`${m}-01T00:00:00Z`));
+/** « 2026-10-04 » → « sam. 4 », pour l'axe des 7 derniers jours. */
+export const shortDay = (d: string, l = locale()) => fmt(l, "shortDay", { weekday: "short", day: "numeric" }).format(new Date(`${d}T00:00:00Z`));
+
+/** Défilement doux, sauf si le système demande moins de mouvement. */
+export const scrollBehavior = (): ScrollBehavior =>
+  typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";

@@ -23,7 +23,7 @@ export function BadgeSheet({ slug, title, onClose }: { slug: string; title: stri
   const canWriteNfc = typeof window !== "undefined" && "NDEFReader" in window;
 
   useEffect(() => {
-    QRCode.toString(url, { type: "svg", margin: 1, errorCorrectionLevel: "M", color: { dark: "#16191b", light: "#ffffff" } }).then(setSvg);
+    QRCode.toString(url, { type: "svg", margin: 1, errorCorrectionLevel: "M", color: { dark: "#141416", light: "#ffffff" } }).then(setSvg);
   }, [url]);
 
   async function writeNfc() {
@@ -60,9 +60,14 @@ export function BadgeSheet({ slug, title, onClose }: { slug: string; title: stri
         </div>
       ) : (
         <ol className="badge__steps">
-          <li>{rich(t("badge.ios.step1"))}</li>
-          <li>{rich(t("badge.ios.step2"))}</li>
-          <li>{rich(t("badge.ios.step3"))}</li>
+          {(["badge.ios.step1", "badge.ios.step2", "badge.ios.step3"] as const).map((key, i) => (
+            <li key={key}>
+              <span className="step-number" aria-hidden="true">
+                {i + 1}
+              </span>
+              <span>{rich(t(key))}</span>
+            </li>
+          ))}
         </ol>
       )}
     </Sheet>

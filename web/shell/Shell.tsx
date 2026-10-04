@@ -1,9 +1,11 @@
-import { NavLink, Outlet, useLocation } from "react-router";
+import { Link, NavLink, Outlet, useLocation } from "react-router";
 import type { User } from "../api.js";
-import { IconBook, IconGlobe, IconPhotos, IconPlus, IconTrips } from "./icons.js";
+import { IconBook, IconChart, IconGlobe, IconPhotos, IconPlus, IconTrips } from "./icons.js";
 import { useUpload } from "./upload.js";
 import { ErrorBoundary } from "../components/ErrorBoundary.js";
 import { LiveInvite } from "../components/LiveInvite.js";
+import { Logo } from "../components/Logo.js";
+import { Avatar } from "../components/Avatar.js";
 import { t } from "../i18n/index.js";
 import "./Shell.css";
 
@@ -25,17 +27,21 @@ export function Shell({ me, onSwitchProfile }: { me: User; onSwitchProfile: () =
   return (
     <div className={`shell${focused ? " shell--focused" : ""}`}>
       <nav className="tabs" aria-label={t("nav.main")} hidden={focused}>
-        <div className="tabs__brand" aria-hidden="true">
-          <span>Waysake</span>
-        </div>
+        <Link to="/" className="tabs__brand" aria-label="Waysake" title="Waysake">
+          <Logo size={30} />
+        </Link>
         {TABS.map(({ to, label, icon: Icon, end }) => (
           <NavLink key={to} to={to} end={end} className={({ isActive }) => `tabs__item${isActive || (to === "/voyages" && pathname.startsWith("/v/")) ? " is-active" : ""}`}>
             <Icon />
-            <span>{t(label)}</span>
+            <span className="tabs__label">{t(label)}</span>
           </NavLink>
         ))}
-        <button className="tabs__me" onClick={onSwitchProfile} style={{ "--c": me.color } as React.CSSProperties} aria-label={t("profile.switch", { name: me.name })}>
-          {me.name[0]}
+        {/* Sur ordinateur, un accès discret aux statistiques du foyer au-dessus du profil ; sur téléphone, depuis le Carnet. */}
+        <NavLink to="/stats" className={({ isActive }) => `tabs__extra${isActive ? " is-active" : ""}`} aria-label={t("household.title")} title={t("household.title")}>
+          <IconChart />
+        </NavLink>
+        <button className="tabs__me" onClick={onSwitchProfile} aria-label={t("profile.switch", { name: me.name })} title={me.name}>
+          <Avatar name={me.name} color={me.color} size={36} />
         </button>
       </nav>
       <main className="shell__main">

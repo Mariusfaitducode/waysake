@@ -37,7 +37,7 @@ WAYSAKE_PROFILES="Léa, Tom" WAYSAKE_PASSWORD="un mot de passe" docker compose u
 
 - `WAYSAKE_DATA` : le dossier où vivent les photos et la base (par défaut `./atlas-data`, à côté du
   `docker-compose.yml`). Ex. `WAYSAKE_DATA=/mnt/photos/waysake`, ou `WAYSAKE_DATA=D:/Waysake` sous Windows.
-- `WAYSAKE_PROFILES` : les profils du foyer, avec une couleur facultative (`"Léa:#0B7A4B, Tom:#1F6FB2"`). Un
+- `WAYSAKE_PROFILES` : les profils du foyer, avec une couleur facultative (`"Léa:#3E309F, Tom:#2F8ADC"`). Un
   profil ajouté plus tard est créé au redémarrage ; un profil n'est jamais supprimé (les photos y sont rattachées).
   Sans réglage, une base neuve reçoit deux profils d'exemple, « Alex » et « Sam ».
 - `WAYSAKE_PASSWORD` : le mot de passe du foyer (voir « Sécurité »). Vide : Waysake est ouvert à tout le réseau.
@@ -57,8 +57,10 @@ Pour mettre à jour : `docker compose pull && docker compose up -d`.
 
 Pour construire l'image vous-même, depuis un clone du dépôt : `docker compose up -d --build`.
 
-Sur une machine Windows joignable en SSH, `scripts/deploy-tower.sh utilisateur@machine C:/Waysake` fait tout
-depuis un Mac ou un Linux : envoi du code, construction, démarrage et vérification.
+Sur une machine Windows joignable en SSH, `scripts/release.sh utilisateur@machine C:/Waysake` fait tout
+depuis un Mac ou un Linux : vérifications (code commité, `main` inclus), tests, compilation, envoi, construction,
+démarrage et contrôle de la version. Une machine déjà à jour est laissée telle quelle (`FORCE=1` pour forcer).
+`/api/health` indique la version qui tourne : `{"ok":true,"version":{"commit":"…","date":"…"}}`.
 
 ## Sur le téléphone
 
@@ -96,6 +98,10 @@ pnpm seed      # jeu de démonstration
 pnpm dev       # API sur :8420, site sur :5173
 pnpm test
 ```
+
+Les photos de démo sont des photos libres, créditées dans [docs/demo-photos.md](docs/demo-photos.md) :
+`pnpm seed` les télécharge une fois dans `~/.cache/waysake-demo/` (dossier modifiable avec `WAYSAKE_DEMO_CACHE`,
+téléchargement désactivé avec `WAYSAKE_DEMO_PHOTOS=off`).
 
 Pile : Node, Fastify, SQLite (better-sqlite3), React, Vite, MapLibre ; ffmpeg pour les vidéos.
 

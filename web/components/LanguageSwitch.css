@@ -1,28 +1,29 @@
+/* Contrôle segmenté façon iOS : puits gris, segment choisi en surface claire légèrement ombrée. */
 .lang-switch {
   display: inline-flex;
   gap: 2px;
   padding: 3px;
-  border-radius: 999px;
-  background: var(--surface);
-  box-shadow: inset 0 0 0 1px var(--hairline);
+  border-radius: var(--r-full);
+  background: var(--surface-sunken);
+  box-shadow: inset 0 0 0 0.5px var(--line);
 }
 .lang-switch__item {
   border: 0;
   background: none;
-  color: var(--muted);
+  color: var(--text-muted);
   font: inherit;
-  font-size: 14px;
-  font-weight: 600;
-  padding: 6px 14px;
-  border-radius: 999px;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  padding: 6px 16px;
+  border-radius: var(--r-full);
   cursor: pointer;
-  transition: background 160ms var(--ease), color 160ms var(--ease);
+  transition: background-color var(--dur) var(--ease), color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
 }
+.lang-switch__item:hover { color: var(--text); }
 .lang-switch__item[aria-pressed="true"] {
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--surface-raised);
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+  box-shadow: var(--shadow-sm), inset 0 0 0 0.5px var(--line);
 }
-.lang-switch__item:focus-visible {
-  outline: 2px solid var(--signal);
-  outline-offset: 2px;
-}
+.lang-switch__item:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }

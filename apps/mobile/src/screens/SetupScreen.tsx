@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Button, LanguageSwitch, Sign } from "../components";
+import { Button, Field, LanguageSwitch, Notice, Title, Wordmark } from "../components";
 import { PasswordError, tower, type Person } from "../server";
 import { normalizeServer, saveSettings, type Settings } from "../storage";
-import { font, useTheme } from "../theme";
+import { fs, gutter, radius, type, useTheme } from "../theme";
 import { locale, tr, type Locale } from "../i18n";
 
 /** Premier lancement : relier le téléphone à la tour, donner le mot de passe du foyer s'il y en a un, puis dire qui l'utilise. */
@@ -55,40 +55,57 @@ export function SetupScreen({ initial, onDone, onLang }: { initial: Settings | n
     onDone(s);
   }
 
+  /** Revenir à l'adresse (mauvaise tour, faute de frappe). */
+  function changeAddress() {
+    setServer(null);
+    setPeople(null);
+    setAskPassword(false);
+    setError(null);
+  }
+
   return (
-    <SafeAreaView style={[styles.screen, { backgroundColor: t.paper }]}>
+    <SafeAreaView style={[styles.screen, { backgroundColor: t.bg }]}>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <View style={styles.top}>
-            <Sign size={34}>Waysake</Sign>
+            <Wordmark size={32} />
             <LanguageSwitch value={locale()} onChange={onLang} />
           </View>
-          {!server ? (
-            <>
-              <Text style={[styles.title, { color: t.ink }]}>{tr("setup.title")}</Text>
-              <Text style={[styles.lead, { color: t.muted }]}>
-                {tr("setup.lead")}
+
+          {server && (
+            <View style={[styles.server, { backgroundColor: t.surface, borderColor: t.line }]}>
+              <View style={[styles.dot, { backgroundColor: t.success }]} />
+              <Text numberOfLines={1} style={[type(fs.sm, 500), { color: t.text, flexShrink: 1 }]}>
+                {server.replace(/^https?:\/\//, "")}
               </Text>
-              <TextInput
+              <Button title={tr("waysake.changeAddress")} kind="plain" small onPress={changeAddress} style={{ marginLeft: "auto" }} />
+            </View>
+          )}
+
+          {!server ? (
+            <View style={styles.step}>
+              <Title>{tr("setup.title")}</Title>
+              <Text style={[type(fs.base), { color: t.muted }]}>{tr("setup.lead")}</Text>
+              <Field
+                label={tr("setup.address.label")}
                 value={address}
                 onChangeText={setAddress}
                 placeholder={tr("setup.placeholder")}
-                placeholderTextColor={t.muted}
                 autoCapitalize="none"
                 autoCorrect={false}
                 keyboardType="url"
                 returnKeyType="go"
                 onSubmitEditing={connect}
-                style={[styles.input, { color: t.ink, backgroundColor: t.hairline }]}
               />
-              {error && <Text style={[styles.error, { color: t.danger }]}>{error}</Text>}
+              {error && <Notice>{error}</Notice>}
               <Button title={tr("setup.connect")} onPress={connect} busy={busy} disabled={!address.trim()} />
-            </>
+            </View>
           ) : !people ? (
-            <>
-              <Text style={[styles.title, { color: t.ink }]}>{tr("setup.password.title")}</Text>
-              <Text style={[styles.lead, { color: t.muted }]}>{tr("setup.password.lead")}</Text>
-              <TextInput
+            <View style={styles.step}>
+              <Title>{tr("setup.password.title")}</Title>
+              <Text style={[type(fs.base), { color: t.muted }]}>{tr("setup.password.lead")}</Text>
+              <Field
+                label={tr("setup.password.label")}
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
@@ -99,27 +116,33 @@ export function SetupScreen({ initial, onDone, onLang }: { initial: Settings | n
                 autoComplete="current-password"
                 returnKeyType="go"
                 onSubmitEditing={unlock}
-                accessibilityLabel={tr("setup.password.label")}
-                style={[styles.input, { color: t.ink, backgroundColor: t.hairline }]}
               />
-              {error && <Text style={[styles.error, { color: t.danger }]}>{error}</Text>}
+              {error && <Notice>{error}</Notice>}
               <Button title={tr("setup.password.continue")} onPress={unlock} busy={busy} disabled={!password} />
-            </>
+            </View>
           ) : (
-            <>
-              <Text style={[styles.title, { color: t.ink }]}>{tr("setup.who")}</Text>
-              <Text style={[styles.lead, { color: t.muted }]}>{tr("setup.remember")}</Text>
+            <View style={styles.step}>
+              <Title>{tr("setup.who")}</Title>
+              <Text style={[type(fs.base), { color: t.muted }]}>{tr("setup.remember")}</Text>
               <View style={styles.people}>
                 {people.map((p) => (
-                  <Pressable key={p.id} onPress={() => pick(p.id)} style={({ pressed }) => [styles.person, { transform: [{ scale: pressed ? 0.96 : 1 }] }]} accessibilityRole="button" accessibilityLabel={p.name}>
+                  <Pressable
+                    key={p.id}
+                    onPress={() => pick(p.id)}
+                    style={({ pressed }) => [styles.person, { backgroundColor: pressed ? t.sunken : t.surface, borderColor: t.line, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
+                    accessibilityRole="button"
+                    accessibilityLabel={p.name}
+                  >
                     <View style={[styles.avatar, { backgroundColor: p.color }]}>
-                      <Text style={styles.avatarText}>{p.name[0]}</Text>
+                      <Text style={[type(34, 600, "tight"), styles.avatarText]}>{p.name[0]}</Text>
                     </View>
-                    <Text style={[styles.personName, { color: t.ink }]}>{p.name}</Text>
+                    <Text numberOfLines={1} style={[type(fs.md, 600), { color: t.text }]}>
+                      {p.name}
+                    </Text>
                   </Pressable>
                 ))}
               </View>
-            </>
+            </View>
           )}
         </ScrollView>
       </KeyboardAvoidingView>
@@ -129,15 +152,13 @@ export function SetupScreen({ initial, onDone, onLang }: { initial: Settings | n
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: 24, paddingTop: 48, gap: 16 },
+  content: { paddingHorizontal: gutter + 4, paddingTop: 20, paddingBottom: 40, gap: 28 },
   top: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  title: { fontFamily: font.sign, fontSize: 44, lineHeight: 46, marginTop: 24 },
-  lead: { fontSize: 17, lineHeight: 24 },
-  input: { borderRadius: 14, paddingHorizontal: 16, paddingVertical: 16, fontSize: 18 },
-  error: { fontSize: 15, lineHeight: 21 },
-  people: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 36, marginTop: 28 },
-  person: { alignItems: "center", gap: 12 },
-  avatar: { width: 124, height: 124, borderRadius: 62, alignItems: "center", justifyContent: "center" },
-  avatarText: { color: "#fff", fontFamily: font.sign, fontSize: 60, lineHeight: 70 },
-  personName: { fontSize: 19, fontWeight: "600" },
+  step: { gap: 16, marginTop: 12 },
+  server: { flexDirection: "row", alignItems: "center", gap: 10, borderRadius: radius.full, borderWidth: 1, paddingLeft: 14, paddingRight: 4, paddingVertical: 4, minHeight: 44 },
+  dot: { width: 8, height: 8, borderRadius: 4 },
+  people: { flexDirection: "row", flexWrap: "wrap", gap: 12, marginTop: 8 },
+  person: { flexGrow: 1, flexBasis: "40%", alignItems: "center", gap: 12, borderRadius: radius.lg, borderWidth: 1, paddingVertical: 20, paddingHorizontal: 12 },
+  avatar: { width: 76, height: 76, borderRadius: 38, alignItems: "center", justifyContent: "center" },
+  avatarText: { color: "#FFFFFF" },
 });

@@ -1,35 +1,38 @@
-/** Icônes au trait, 24 px, dessinées pour Waysake (pas de bibliothèque). */
-const base = { width: 24, height: 24, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round" as const, strokeLinejoin: "round" as const, "aria-hidden": true };
+/**
+ * Icônes au trait, 24 px, dessinées pour Waysake (pas de bibliothèque). Les icônes d'onglet ont une forme
+ * `.ic-fill` : transparente au repos, remplie quand l'onglet est actif (comme les symboles « .fill » d'iOS).
+ */
+const base = { width: 24, height: 24, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.7, strokeLinecap: "round" as const, strokeLinejoin: "round" as const, "aria-hidden": true };
 
 export const IconGlobe = () => (
   <svg {...base}>
-    <circle cx="12" cy="12" r="9" />
+    <circle className="ic-fill" cx="12" cy="12" r="9" />
     <path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3Z" />
   </svg>
 );
+/** Une route en lacets : un départ, deux virages, une arrivée (le chemin du logo, en plus simple). */
 export const IconTrips = () => (
   <svg {...base}>
-    <path d="M4 19c3-1 4-4 7-4s3 2 5 2 3-1 4-2" />
-    <circle cx="6" cy="7" r="2.2" />
-    <path d="M6 9.2v3.3M17.5 4.5l2 2-2 2" />
-    <path d="M19.5 6.5H13" />
+    <path d="M8.2 19H15a3.5 3.5 0 0 0 0-7H9a3.5 3.5 0 0 1 0-7h6.8" />
+    <circle className="ic-fill" cx="6" cy="19" r="2.2" />
+    <circle className="ic-fill" cx="18" cy="5" r="2.2" />
   </svg>
 );
 export const IconPhotos = () => (
   <svg {...base}>
-    <rect x="3" y="5" width="18" height="14" rx="3" />
-    <circle cx="9" cy="10" r="1.6" />
-    <path d="m21 15-4.5-4.5L8 19" />
+    <rect className="ic-fill" x="3" y="4.5" width="18" height="15" rx="3.5" />
+    <circle cx="8.8" cy="9.6" r="1.6" />
+    <path d="m21 15.5-4.6-4.6L8 19.5" />
   </svg>
 );
 export const IconBook = () => (
   <svg {...base}>
-    <path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5Z" />
-    <path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19M9 7h6" />
+    <path className="ic-fill" d="M5 4.8A1.8 1.8 0 0 1 6.8 3H19v15H6.8A1.8 1.8 0 0 0 5 19.8Z" />
+    <path d="M5 19.8A1.8 1.8 0 0 0 6.8 21.5H19M9 7.5h6" />
   </svg>
 );
 export const IconPlus = () => (
-  <svg {...base} strokeWidth={2.4}>
+  <svg {...base} strokeWidth={2.2}>
     <path d="M12 5v14M5 12h14" />
   </svg>
 );
@@ -74,5 +77,13 @@ export const IconTogether = () => (
     <circle cx="9" cy="9" r="3.2" />
     <circle cx="16.5" cy="10" r="2.6" />
     <path d="M3.5 19c.6-3 2.8-4.6 5.5-4.6s4.9 1.6 5.5 4.6M14.2 15.1c.7-.4 1.5-.6 2.3-.6 2.1 0 3.7 1.3 4.1 3.8" />
+  </svg>
+);
+export const IconChart = () => (
+  <svg {...base}>
+    <path d="M4 20h16" />
+    <rect className="ic-fill" x="5.5" y="12" width="3" height="5" rx="1" />
+    <rect className="ic-fill" x="10.5" y="6" width="3" height="11" rx="1" />
+    <rect className="ic-fill" x="15.5" y="9" width="3" height="8" rx="1" />
   </svg>
 );

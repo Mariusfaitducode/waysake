@@ -1,29 +1,29 @@
-/* Comme une photo glissée sous le titre : petite, inclinée d'un rien, jamais envahissante. */
-.memory {
+/* « Il y a un an » : une petite carte de verre sous le titre du globe, jamais envahissante. */
+.memory-card {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-top: 12px;
-  padding: 6px 14px 6px 6px;
-  max-width: 280px;
+  gap: var(--sp-3);
+  margin-top: var(--sp-3);
+  padding: 6px var(--sp-4) 6px 6px;
+  max-width: 300px;
   border: 0;
   border-radius: var(--r-md);
-  background: var(--veil);
-  color: var(--ink);
+  background: var(--glass);
+  color: var(--text);
   font: inherit;
   text-align: left;
   cursor: pointer;
-  box-shadow: 0 10px 24px -14px rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  rotate: -1.5deg;
-  transition: rotate 220ms var(--ease), transform 220ms var(--ease);
-  animation: memory-in 520ms var(--ease) 300ms both;
+  box-shadow: inset 0 0 0 1px var(--line), var(--shadow-md);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  animation: memory-card-in 520ms var(--ease) 300ms both;
 }
-.memory:hover { rotate: 0deg; transform: translateY(-2px); }
-.memory__img { flex: none; width: 48px; height: 48px; border-radius: var(--r-sm); object-fit: cover; border: 2px solid #fff; }
-.memory__text { display: grid; min-width: 0; line-height: 1.25; }
-.memory__text strong { font-family: var(--font-sign); font-weight: 600; font-size: 19px; }
-.memory__text span { color: var(--muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-@keyframes memory-in { from { opacity: 0; transform: translateY(-6px); } }
-@media (prefers-reduced-motion: reduce) { .memory { animation: none; rotate: 0deg; } }
+.memory-card:hover { transform: translateY(-1px); box-shadow: inset 0 0 0 1px var(--line-strong), var(--shadow-lg); }
+.memory-card__img { flex: none; width: 48px; height: 48px; border-radius: var(--r-sm); object-fit: cover; }
+.memory-card__text { display: grid; gap: 2px; min-width: 0; line-height: var(--lh-snug); }
+.memory-card__text strong { font-family: var(--font-display); font-weight: var(--fw-semibold); font-size: var(--fs-md); letter-spacing: var(--tracking-tight); }
+.memory-card__text > span { display: flex; align-items: center; gap: 6px; min-width: 0; color: var(--text-muted); font-size: var(--fs-xs); }
+.memory-card__text > span > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@keyframes memory-card-in { from { opacity: 0; transform: translateY(-6px); } }
+@media (prefers-reduced-motion: reduce) { .memory-card { animation: none; } }

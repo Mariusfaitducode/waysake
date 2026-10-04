@@ -113,6 +113,7 @@ describe("proposition, validation et annulation par l'API", () => {
     const b = (await send(id, "b.jpg", await makeJpeg({ takenAt: "2026:09:01 11:00:00", lat: 46.37, lon: 14.11, color: "#a33" }))).json();
     const p = (await app.inject({ url: `/api/imports/${id}` })).json();
     expect(p.newTrips[0]).toMatchObject({ title: "Bled", count: 2 });
+    expect(p.newTrips[0].color).toMatch(/^(coral|amber|moss|pine|lagoon|azure|indigo|lilac|raspberry|slate)$/);
     expect((await app.inject({ method: "PATCH", url: `/api/imports/${id}`, payload: { exclude: [b.id] }, headers: me })).statusCode).toBe(200);
     expect((await app.inject({ url: `/api/imports/${id}` })).json().counts.toImport).toBe(1);
     const c1 = await app.inject({ method: "POST", url: `/api/imports/${id}/confirm`, headers: me });
@@ -120,6 +121,13 @@ describe("proposition, validation et annulation par l'API", () => {
     expect(c1.json()).toEqual({ trips: ["bled-2026"] });
     expect(c2.json()).toEqual(c1.json());
     expect((await app.inject({ url: "/api/media" })).json().items.map((m: any) => m.id)).toEqual([a.id]);
+  });
+
+  it("propose la couleur du nouveau voyage, tirée de sa couverture", async () => {
+    const { id } = (await newImport()).json();
+    for (const h of ["10", "11"]) await send(id, `${h}.jpg`, await makeJpeg({ takenAt: `2026:09:01 ${h}:00:00`, lat: 46.3683, lon: 14.1146, color: "#2a6fd6", width: 96, height: 64 }));
+    const p = (await app.inject({ url: `/api/imports/${id}` })).json();
+    expect(p.newTrips[0].color).toBe("azure");
   });
 
   it("valide le corps de la modification", async () => {

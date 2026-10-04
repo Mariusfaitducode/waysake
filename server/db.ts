@@ -156,17 +156,24 @@ const MIGRATIONS = [
     PRIMARY KEY (game_id, round, user_id)
   );
   `,
+  `
+  -- Couleur de voyage (palette de server/trip-palette.ts) : choix manuel (NULL = automatique),
+  -- et couleur extraite de la couverture, recalculée en arrière-plan.
+  ALTER TABLE trip ADD COLUMN color TEXT;
+  ALTER TABLE trip ADD COLUMN auto_color TEXT;
+  `,
 ];
 
 export type Profile = { id: string; name: string; color: string };
 
-const COLORS = ["#0B7A4B", "#1F6FB2", "#C2410C", "#7C3AED", "#BE185D", "#0E7490"];
+// Couleurs d'avatar par défaut, prises dans la palette Horizon (server/trip-palette.ts), sans vert.
+const COLORS = ["#3E309F", "#CD443D", "#2F8ADC", "#A04AA3", "#C97B00", "#1E999C"];
 export const DEFAULT_PROFILES = "Alex,Sam";
 
 const slug = (name: string) =>
   name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
-/** « Alex:#0B7A4B, Sam » → profils ; la couleur est facultative. */
+/** « Alex:#3E309F, Sam » → profils ; la couleur est facultative. */
 export function parseProfiles(spec: string): Profile[] {
   return spec
     .split(",")

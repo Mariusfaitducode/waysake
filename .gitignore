@@ -8,3 +8,4 @@ web/public/waysake.apk
 web/public/atlas.apk
 atlas-data/
 web/public/waysake.shortcut
+server/version.json

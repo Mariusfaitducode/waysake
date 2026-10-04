@@ -1,111 +1,137 @@
-.shell { min-height: 100dvh; }
-.shell__main { padding-bottom: calc(84px + var(--safe-bottom)); }
+/*
+ * Coquille façon apps Apple : barre d'onglets translucide en bas sur téléphone, barre latérale sur ordinateur.
+ * Encombrement fixe (le globe s'y cale) : 62 px de haut en bas d'écran, 92 px de large à gauche.
+ * Exposé en variables pour les écrans qui voudraient s'y caler sans recopier les valeurs.
+ */
+:root { --shell-bottom: calc(62px + var(--safe-bottom)); --shell-left: 0px; }
+@media (min-width: 900px) { :root { --shell-bottom: 0px; --shell-left: 92px; } }
 
-/* Barre d'onglets : en bas sur téléphone (comme iOS), en rail à gauche sur ordinateur. */
+.shell { min-height: 100dvh; }
+.shell__main { padding-bottom: calc(var(--shell-bottom) + var(--sp-6)); }
+
 .tabs {
   position: fixed;
   z-index: 30;
   left: 0;
   right: 0;
   bottom: 0;
+  height: calc(62px + var(--safe-bottom));
   display: flex;
   justify-content: space-around;
-  padding: 6px 4px calc(4px + var(--safe-bottom));
-  background: var(--veil);
+  align-items: flex-start;
+  padding: 7px var(--sp-1) var(--safe-bottom);
+  background: var(--glass);
   backdrop-filter: saturate(1.8) blur(22px);
   -webkit-backdrop-filter: saturate(1.8) blur(22px);
-  border-top: 0.5px solid var(--hairline);
+  box-shadow: inset 0 0.5px 0 var(--line-strong);
 }
-.tabs__brand, .tabs__me { display: none; }
+.tabs__brand, .tabs__me, .tabs__extra { display: none; }
 .tabs__item {
   flex: 1;
   display: grid;
   justify-items: center;
-  gap: 2px;
-  padding: 4px 0;
-  color: var(--muted);
+  gap: 3px;
+  padding: 2px 0 4px;
+  color: var(--text-muted);
   text-decoration: none;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  border-radius: 12px;
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-medium);
+  letter-spacing: 0.005em;
+  line-height: 1.2;
+  border-radius: var(--r-sm);
   -webkit-tap-highlight-color: transparent;
+  transition: color var(--dur-fast) var(--ease);
 }
-.tabs__item svg { width: 26px; height: 26px; transition: transform 200ms var(--ease); }
+.tabs__item svg { width: 24px; height: 24px; transition: transform var(--dur) var(--ease); }
 .tabs__item:active svg { transform: scale(0.9); }
-.tabs__item.is-active { color: var(--autostrada); }
+.tabs__item.is-active { color: var(--text); font-weight: var(--fw-semibold); }
+/* Onglet actif : l'icône se remplit légèrement, comme les symboles « .fill ». */
+.tabs .ic-fill { transition: fill-opacity var(--dur) var(--ease); fill: currentColor; fill-opacity: 0; }
+.tabs .is-active .ic-fill { fill-opacity: 0.16; }
 
+/* Ajout de photos : la seule action Encre de la coquille. */
 .fab {
   position: fixed;
-  right: max(16px, env(safe-area-inset-right, 0px));
-  bottom: calc(80px + var(--safe-bottom));
+  right: max(var(--gutter), env(safe-area-inset-right, 0px));
+  bottom: calc(var(--shell-bottom) + var(--sp-4));
   z-index: 25;
-  width: 56px;
-  height: 56px;
+  width: 54px;
+  height: 54px;
   border-radius: 50%;
   border: 0;
   display: grid;
   place-items: center;
-  background: var(--autostrada);
-  color: var(--autostrada-ink);
-  box-shadow: var(--shadow-float);
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: var(--shadow-float), var(--shadow-sm);
   cursor: pointer;
-  transition: transform 200ms var(--ease);
+  transition: transform var(--dur) var(--ease), background-color var(--dur-fast) var(--ease);
 }
-.fab:hover { transform: scale(1.05); }
+.fab:hover { background: var(--accent-hover); transform: scale(1.04); }
 .fab:active { transform: scale(0.93); }
 
 @media (min-width: 900px) {
-  .shell__main { padding: 0 0 48px 92px; }
+  .shell__main { padding: 0 0 var(--sp-12) var(--shell-left); }
   .tabs {
     top: 0;
     right: auto;
-    width: 92px;
+    width: var(--shell-left);
+    height: auto;
     flex-direction: column;
     justify-content: flex-start;
-    gap: 6px;
-    padding: 22px 10px;
-    border-top: 0;
-    border-right: 0.5px solid var(--hairline);
+    align-items: stretch;
+    gap: var(--sp-1);
+    padding: var(--sp-5) var(--sp-3) var(--sp-4);
+    background: var(--surface-sunken);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: inset -0.5px 0 0 var(--line-strong);
   }
-  .tabs__item { flex: none; padding: 10px 0; font-size: 12px; }
-  .tabs__item:hover { background: var(--hairline); color: var(--ink); }
-  .tabs__item.is-active:hover { color: var(--autostrada); }
+  .tabs__item { flex: none; gap: 4px; padding: 10px 0 8px; border-radius: var(--r-md); }
+  .tabs__item svg { width: 22px; height: 22px; }
+  .tabs__item:hover { background: color-mix(in srgb, var(--text) 5%, transparent); color: var(--text); }
+  .tabs__item.is-active { background: color-mix(in srgb, var(--text) 8%, transparent); }
+  /* Le logo (chemin en W), seul en haut de la barre latérale ; il ramène au globe. */
   .tabs__brand {
-    display: block;
+    display: grid;
+    place-items: center;
     align-self: center;
-    margin-bottom: 18px;
-    background: var(--autostrada);
-    color: var(--autostrada-ink);
-    border-radius: 8px;
-    padding: 3px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: var(--sp-4);
+    border-radius: var(--r-md);
+    color: var(--accent);
   }
-  .tabs__brand span {
-    display: block;
-    border: 1.8px solid currentColor;
-    border-radius: 6px;
-    padding: 1px 8px 0;
-    font-family: var(--font-sign);
-    font-weight: 600;
-    font-size: 17px;
+  .tabs__brand:hover { background: color-mix(in srgb, var(--text) 5%, transparent); }
+  /* Statistiques du foyer : petite icône discrète, juste au-dessus du profil. */
+  .tabs__extra {
+    display: grid;
+    place-items: center;
+    align-self: center;
+    margin: auto 0 var(--sp-3);
+    width: 44px;
+    height: 40px;
+    border-radius: var(--r-md);
+    color: var(--text-muted);
   }
+  .tabs__extra svg { width: 22px; height: 22px; }
+  .tabs__extra:hover { background: color-mix(in srgb, var(--text) 5%, transparent); color: var(--text); }
+  .tabs__extra.is-active { color: var(--text); background: color-mix(in srgb, var(--text) 8%, transparent); }
   .tabs__me {
     display: grid;
     place-items: center;
-    margin: auto auto 0;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
+    align-self: center;
+    padding: 3px;
     border: 0;
-    background: var(--c);
-    color: #fff;
-    font-family: var(--font-sign);
-    font-weight: 600;
-    font-size: 20px;
+    border-radius: 50%;
+    background: none;
     cursor: pointer;
+    transition: box-shadow var(--dur) var(--ease);
   }
-  .fab { bottom: 28px; right: 28px; width: 60px; height: 60px; }
+  .tabs__me:hover { box-shadow: 0 0 0 2px var(--line-strong); }
+  .fab { bottom: var(--sp-8); right: var(--sp-8); width: 58px; height: 58px; }
 }
+.shell--focused { --shell-left: 0px; --shell-bottom: 0px; }
 .shell--focused .shell__main { padding-bottom: 0; }
 @media (min-width: 900px) { .shell--focused .shell__main { padding-left: 0; } }
 .tabs[hidden] { display: none; }

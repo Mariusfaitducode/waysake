@@ -1,0 +1,123 @@
+/* Statistiques du foyer : cartes neutres, chiffres Geist tabulaires, graphiques en Encre et nuances de gris. */
+.household { padding-bottom: var(--sp-10); }
+.household__grid { padding: 0 var(--gutter); margin-top: var(--sp-5); display: grid; gap: var(--sp-3); }
+.household__card {
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  gap: var(--sp-3);
+  padding: var(--sp-5) var(--sp-4);
+  border-radius: var(--r-xl);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 0.5px var(--line-strong);
+}
+.household__card h2 {
+  margin: 0 0 var(--sp-1);
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-lg);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--lh-snug);
+}
+.household__card p { margin: 0; line-height: 1.45; }
+.household__placeholder { min-height: 180px; border-radius: var(--r-xl); }
+.household__muted { color: var(--text-muted); font-size: var(--fs-sm); }
+.household__strong { font-weight: var(--fw-semibold); }
+.household__big { font-family: var(--font-display); font-weight: var(--fw-bold); font-size: var(--fs-xl); letter-spacing: var(--tracking-tight); line-height: 1.15; font-variant-numeric: tabular-nums; }
+.household__error { margin: var(--sp-5) var(--gutter); color: var(--danger); }
+
+/* Chiffres clés : plus de panneau, juste les nombres (TripStatsPanel.css remis à plat ici). */
+.household .stats__panel {
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: var(--sp-4);
+  padding: 0;
+  background: none;
+  color: var(--text);
+  box-shadow: none;
+}
+.household .stats__panel > div { padding: 0; gap: 2px; }
+.household .stats__panel dt { font-size: var(--fs-sm); color: var(--text-muted); opacity: 1; }
+.household__panel dd {
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-3xl);
+  letter-spacing: var(--tracking-tighter);
+  line-height: 1;
+}
+.household .stats__label { font-size: var(--fs-sm); font-weight: var(--fw-medium); }
+.household .stats__legend { font-size: var(--fs-sm); gap: 6px var(--sp-4); }
+.household .stats__legend i { width: 9px; height: 9px; box-shadow: inset 0 0 0 0.5px var(--line-strong); }
+.household .stats__bar { height: 8px; gap: 2px; background: var(--surface-sunken); }
+
+/* Histogramme : colonnes fines (40 px au plus) empilées de bas en haut, quadrillage en filets. */
+.bars { position: relative; margin: var(--sp-1) 0 0; display: grid; gap: 6px; }
+.bars__plot, .bars__ticks { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: clamp(2px, 0.6vw, 8px); }
+.bars__plot {
+  height: 150px;
+  align-items: end;
+  padding-top: 18px;
+  border-bottom: 1px solid var(--line-strong);
+  background: repeating-linear-gradient(to top, transparent 0 calc(33.33% - 1px), var(--line) calc(33.33% - 1px) 33.33%);
+}
+.bars__col { justify-self: center; width: min(100%, 40px); height: 100%; display: flex; flex-direction: column-reverse; gap: 1.5px; }
+.bars__col span { display: block; min-height: 0; border-radius: 2px; }
+.bars__col span:last-child { border-radius: 4px 4px 2px 2px; }
+.bars__ticks span { font-size: var(--fs-2xs); color: var(--text-muted); text-align: center; white-space: nowrap; overflow: visible; font-variant-numeric: tabular-nums; }
+.bars__max { position: absolute; top: 0; left: 0; font-size: var(--fs-2xs); color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.bars__legend { margin-top: var(--sp-1); }
+
+.household__people { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-4); }
+.household__people li { display: flex; gap: var(--sp-3); align-items: flex-start; }
+.household__people p { font-size: var(--fs-sm); }
+.household__people p + p { margin-top: 2px; }
+.household__people .household__strong { font-size: var(--fs-md); }
+.household__share { color: var(--text-muted); font-weight: var(--fw-medium); font-size: var(--fs-sm); margin-left: 4px; font-variant-numeric: tabular-nums; }
+
+/* Disque : Waysake (Encre), le reste du disque (gris), libre (puits). */
+.household__disk { display: flex; height: 10px; gap: 2px; border-radius: var(--r-full); overflow: hidden; background: var(--surface-sunken); box-shadow: inset 0 0 0 0.5px var(--line); }
+.household__disk span { min-width: 3px; }
+.household__disk span.is-free { min-width: 0; }
+.household .is-waysake { background: var(--accent); }
+.household .is-other { background: color-mix(in oklab, var(--accent) 34%, var(--surface)); }
+.household .is-free { background: transparent; box-shadow: inset 0 0 0 1.5px var(--line-strong); }
+.household__disk .is-free { box-shadow: none; }
+.household__legend b { font-weight: var(--fw-medium); color: var(--text-muted); }
+
+/* Avertissement : discret, une pastille --warning et un fond à peine teinté. */
+.household__warning {
+  display: grid;
+  gap: 4px;
+  padding: var(--sp-3) var(--sp-4) var(--sp-3) calc(var(--sp-4) + 14px);
+  position: relative;
+  border-radius: var(--r-md);
+  background: color-mix(in srgb, var(--warning) 9%, var(--surface));
+  box-shadow: inset 0 0 0 0.5px color-mix(in srgb, var(--warning) 35%, transparent);
+  font-size: var(--fs-sm);
+}
+.household__warning::before { content: ""; position: absolute; left: var(--sp-4); top: calc(var(--sp-3) + 6px); width: 8px; height: 8px; border-radius: 50%; background: var(--warning); }
+.household__warning .household__strong { font-size: var(--fs-md); }
+.household__warning strong { font-family: var(--font-mono); font-size: 0.92em; font-weight: var(--fw-medium); }
+.household__status { position: relative; display: grid; gap: 4px; padding: 10px var(--sp-4) 10px calc(var(--sp-4) + 14px); border-radius: var(--r-md); font-size: var(--fs-sm); font-weight: var(--fw-medium); background: var(--surface-sunken); }
+.household__status::before { content: ""; position: absolute; left: var(--sp-4); top: 17px; width: 8px; height: 8px; border-radius: 50%; background: var(--success); }
+.household__status.is-bad { background: color-mix(in srgb, var(--danger) 8%, var(--surface)); color: var(--danger); }
+.household__status.is-bad::before { background: var(--danger); }
+
+.household__split { display: grid; gap: var(--sp-4); }
+.household__facts, .household__table { margin: 0; display: grid; border-radius: var(--r-md); overflow: hidden; background: var(--surface-sunken); align-self: start; box-shadow: inset 0 0 0 0.5px var(--line); }
+.household__facts > div, .household__table > div { display: flex; justify-content: space-between; gap: var(--sp-3); padding: 10px var(--sp-3); }
+.household__facts > div + div, .household__table > div + div { box-shadow: inset 0 0.5px 0 var(--line-strong); }
+.household__facts dt, .household__table dt { color: var(--text-muted); font-size: var(--fs-sm); }
+.household__facts dd, .household__table dd { margin: 0; font-size: var(--fs-sm); font-weight: var(--fw-semibold); text-align: right; font-variant-numeric: tabular-nums; }
+.household__table a { color: var(--text); text-underline-offset: 3px; }
+
+.household__profiles { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px var(--sp-5); font-weight: var(--fw-medium); }
+.household__profiles li { display: flex; align-items: center; gap: var(--sp-2); }
+.household__external { justify-self: start; text-decoration: none; }
+
+@media (min-width: 900px) {
+  .household__grid { padding: 0 var(--sp-10); grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-4); max-width: 1100px; }
+  .household__card { padding: var(--sp-6); }
+  .household__card--wide { grid-column: 1 / -1; }
+  .household__split { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: var(--sp-8); }
+  .bars__plot { height: 190px; }
+}

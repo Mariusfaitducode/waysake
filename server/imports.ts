@@ -1,4 +1,4 @@
-import { rmSync } from "node:fs";
+import { existsSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import type { Db } from "./db.js";
 import { clusterTrips, HOME_RADIUS_KM } from "./clustering.js";
@@ -6,6 +6,8 @@ import { distanceKm } from "./geo.js";
 import { autoCover, clusterInputs, homeOf, rebuildTrips } from "./trips.js";
 import { derivedPath } from "./ingest.js";
 import { THUMB_SIZES } from "./thumbs.js";
+import { analyzeCover, snapToPalette } from "./trip-colors.js";
+import { isTripColorId, NEUTRAL_TRIP_COLOR, type TripColorId } from "./trip-palette.js";
 
 /**
  * Le sas d'import : ce qui arrive du téléphone reste en attente. Waysake propose un tri (nouveaux voyages,
@@ -75,6 +77,9 @@ function classify(db: Db, importId: number) {
       startAt: t.startAt,
       endAt: t.endAt,
       route: t.route,
+      coverMediaId: cover,
+      /** Couleur que prendra le voyage une fois importé (voir proposalWithColors) ; Ardoise en attendant. */
+      color: NEUTRAL_TRIP_COLOR as TripColorId,
       cover: cover ? thumb(cover) : null,
       coverLarge: cover ? `/api/media/${cover}/preview` : null,
       count: kept.length,
@@ -119,6 +124,27 @@ export function proposal(db: Db, importId: number) {
   };
 }
 export type Proposal = NonNullable<ReturnType<typeof proposal>>;
+
+/**
+ * La proposition, avec la couleur de chaque nouveau voyage : la même analyse de couverture que pour les voyages
+ * importés (server/trip-colors.ts), arrondie à la palette en évitant les teintes déjà prises par les voyages
+ * existants puis par les nouveaux voyages plus anciens. Une estimation : l'import peut changer la couverture.
+ */
+export async function proposalWithColors(db: Db, dataDir: string, importId: number) {
+  const p = proposal(db, importId);
+  if (!p) return null;
+  const used = new Map<string, number>();
+  for (const r of db.prepare("SELECT coalesce(color, auto_color) AS c FROM trip").all() as { c: string | null }[])
+    if (isTripColorId(r.c)) used.set(r.c, (used.get(r.c) ?? 0) + 1);
+  const sha = db.prepare("SELECT sha256 FROM media WHERE id = ? AND has_thumbs = 1");
+  for (const trip of [...p.newTrips].sort((a, b) => a.startAt - b.startAt)) {
+    const m = trip.coverMediaId === null ? undefined : (sha.get(trip.coverMediaId) as { sha256: string } | undefined);
+    const path = m ? derivedPath(dataDir, m.sha256, 400) : null;
+    trip.color = snapToPalette(path && existsSync(path) ? await analyzeCover(path) : null, used);
+    used.set(trip.color, (used.get(trip.color) ?? 0) + 1);
+  }
+  return p;
+}
 
 export function setExclusions(db: Db, importId: number, change: { exclude?: number[]; include?: number[]; keepHome?: boolean }) {
   const set = db.prepare("UPDATE media SET excluded = ? WHERE id = ? AND import_id = ? AND status = 'pending'");

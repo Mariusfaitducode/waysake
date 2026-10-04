@@ -1,3 +1,4 @@
+import type { TripColorId } from "./trip-colors.js";
 import { t } from "./i18n/index.js";
 import { fr } from "./i18n/fr.js";
 
@@ -55,6 +56,10 @@ export type Social = { reactions: Partial<Record<Reaction, string[]>>; note: str
 export type TripSummary = {
   id: number;
   slug: string;
+  /** Nombre d'étapes, donné par la liste des voyages seulement. */
+  chapterCount?: number;
+  /** Itinéraire ([lon, lat] par jour), donné par la liste des voyages (globe). */
+  route?: [number, number][];
   title: string;
   autoTitle: string;
   startAt: number;
@@ -66,6 +71,12 @@ export type TripSummary = {
   coverMediaId: number | null;
   cover: string | null;
   coverLarge: string | null;
+  /** Couleur effective du voyage (palette Horizon) : choix manuel, sinon automatique. */
+  color: TripColorId;
+  /** true quand la couleur suit la couverture (« Automatique »). */
+  colorAuto: boolean;
+  /** La teinte que donnerait « Automatique ». */
+  autoColor: TripColorId;
 };
 export type Chapter = {
   id: number;
@@ -122,6 +133,8 @@ export type ProposedTrip = {
   startAt: number;
   endAt: number;
   route: [number, number][];
+  /** Couleur que prendra le voyage une fois importé, calculée par la tour sur la couverture. */
+  color: TripColorId;
   cover: string | null;
   coverLarge: string | null;
   count: number;
@@ -140,9 +153,45 @@ export type Proposal = {
   setAside: { screenshots: ImportMedia[]; home: ImportMedia[] };
   otherPhotos: ImportMedia[];
 };
-export type UnlocatedMedia = { id: number; kind: "photo" | "video"; width: number | null; height: number | null; hasThumbs: boolean; thumb: string; preview: string; takenAtLocal: string };
+export type UnlocatedMedia = { id: number; kind: "photo" | "video"; width: number | null; height: number | null; hasThumbs: boolean; thumb: string; preview: string; original: string; uploadedBy: string; takenAtLocal: string };
+/** Le lieu le plus proche d'un point posé sur la carte (null en pleine mer). */
+export type ReversePlace = { lat: number; lon: number; name: string | null; country: string | null; countryCode: string | null; flag: string | null };
 export type UnlocatedDay = { day: string; count: number; moments: { start: string; end: string; ids: number[]; count: number }[]; media: UnlocatedMedia[] };
 export type PlaceHit = { kind: "country" | "region" | "place"; name: string; country: string; countryCode: string; lat: number; lon: number; flag: string };
+
+/** Place sur la tour (GET /api/space). */
+export type Space = {
+  disk: { free: number; total: number };
+  used: { originals: number; derived: number; database: number; total: number };
+  monthly: { bytes: number; items: number };
+  forecast: { months: number | null; fullAt: number | null };
+};
+/** Page « Statistiques » (GET /api/stats/overview). Le trafic est en mémoire : il repart de zéro à chaque démarrage. */
+export type StatsOverview = {
+  uploads: { totals: { photos: number; videos: number; bytes: number }; months: { month: string; total: number; byUser: Record<string, number> }[] };
+  people: { userId: string; photos: number; videos: number; bytes: number; lastUploadAt: number | null; reactions: number | null; share: number }[];
+  backup: {
+    snapshots: number;
+    lastSnapshotAt: number | null;
+    external: { at: string | null; ok: boolean; reason: "ok" | "failed" | "disk_missing" | "unknown" } | null;
+  };
+  traffic: {
+    since: number;
+    days: { day: string; requests: number }[];
+    served: { photos: number; videos: number; previews: number };
+    uploads: { count: number; bytes: number };
+    people: { userId: string; requests: number; visits: number; lastSeen: number }[];
+  };
+  access: { password: boolean; users: User[]; devices: { count: number; latestAt: number | null } | null };
+  app: {
+    version: { commit: string; date: string } | null;
+    startedAt: number;
+    uptime: number;
+    node: string;
+    database: number;
+    library: { trips: number; chapters: number; countries: number; unlocated: number };
+  };
+};
 
 /** La tour demande le mot de passe du foyer (WAYSAKE_PASSWORD) : session absente, fermée ou mot de passe changé. */
 export class AuthRequiredError extends Error {}
@@ -218,6 +267,9 @@ export const api = {
   cancelImport: (id: number) => send("DELETE", `/api/imports/${id}`),
   trips: () => get<TripSummary[]>("/api/trips"),
   trip: (slug: string) => get<Trip>(`/api/trips/${encodeURIComponent(slug)}`),
+  /** Fige la couleur d'un voyage, ou revient à « Automatique » avec null. */
+  setTripColor: (slug: string, color: TripColorId | null) =>
+    send<{ color: TripColorId; colorAuto: boolean; autoColor: TripColorId }>("PUT", `/api/trips/${encodeURIComponent(slug)}/color`, { color }),
   updateTrip: (slug: string, patch: { title?: string | null; coverMediaId?: number | null }) =>
     send("PATCH", `/api/trips/${encodeURIComponent(slug)}`, patch),
   renameChapter: (id: number, title: string | null) => send("PATCH", `/api/chapters/${id}`, { title }),
@@ -244,4 +296,7 @@ export const api = {
   updateWish: (id: number, patch: Partial<Wish> & { doneTripSlug?: string | null }) => send("PATCH", `/api/wishes/${id}`, patch),
   deleteWish: (id: number) => send("DELETE", `/api/wishes/${id}`),
   places: (q: string) => get<PlaceHit[]>(`/api/places?q=${encodeURIComponent(q)}`),
+  reversePlace: (lat: number, lon: number) => get<ReversePlace>(`/api/places/reverse?lat=${lat}&lon=${lon}`),
+  space: () => get<Space>("/api/space"),
+  statsOverview: () => get<StatsOverview>("/api/stats/overview"),
 };

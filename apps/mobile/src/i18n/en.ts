@@ -15,6 +15,7 @@ export const en: Translation<typeof fr> = {
   "setup.connect": "Connect",
   "setup.who": "Who's this?",
   "setup.remember": "Waysake will remember it on this phone.",
+  "setup.address.label": "Server address",
 
   // Household password (WAYSAKE_PASSWORD)
   "setup.password.title": "Password",

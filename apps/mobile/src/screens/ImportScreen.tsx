@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, Linking, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import { useKeepAwake } from "expo-keep-awake";
-import { Button } from "../components";
+import { StatusBar } from "expo-status-bar";
+import { Button, Notice, Title } from "../components";
 import { createUploadQueue, type QueueState } from "../lib/queue";
 import { describeRange, presets, type Preset } from "../lib/periods";
 import { describeMonths, splitKnown, type Month } from "../lib/months";
@@ -12,8 +13,8 @@ import { createRateMeter, diskWarning, etaSeconds, formatBytes, formatDuration }
 import { ensurePermission, fileSize, prepare, scan, type Found } from "../media";
 import { tower, type Space } from "../server";
 import { loadSent, rememberSent, type Settings } from "../storage";
-import { font, useTheme, type Theme } from "../theme";
-import { formatNumber, formatPercent, intlTag, tr } from "../i18n";
+import { fs, gutter, radius, tabular, type, useTheme, type Theme } from "../theme";
+import { formatPercent, intlTag, tr } from "../i18n";
 import { MonthsPicker } from "./MonthsPicker";
 import { SpaceCard } from "./SpaceCard";
 
@@ -40,6 +41,9 @@ const NO_AVERAGE = { photo: 4_000_000, video: 60_000_000 };
 /** Import : choisir (période, dates ou mois), voir ce qui reste à envoyer, sa taille et sa durée, envoyer. */
 export function ImportScreen({ settings, visible, onClose, onSent }: { settings: Settings; visible: boolean; onClose: () => void; onSent: (importId: number) => void }) {
   const t = useTheme();
+  // Retraits lus dans l'écran parent (déjà mesurés) : la fenêtre de la Modal, elle, ne les connaît qu'après coup,
+  // et le titre passerait d'abord sous la barre d'état.
+  const insets = useSafeAreaInsets();
   const [step, setStep] = useState<Step>({ kind: "permission" });
   const [last, setLast] = useState<number | null>(null);
   const [space, setSpace] = useState<Space | null>(null);
@@ -104,22 +108,29 @@ export function ImportScreen({ settings, visible, onClose, onSent }: { settings:
 
   const back = () => setStep({ kind: "choose" });
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={step.kind === "sending" ? () => {} : onClose}>
-      <SafeAreaView style={[s.screen, { backgroundColor: t.paper }]}>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      statusBarTranslucent
+      navigationBarTranslucent
+      onRequestClose={step.kind === "sending" ? () => {} : onClose}
+    >
+      {/* Fenêtre à part : elle reprend le style de la barre d'état, sinon icônes blanches sur fond clair. */}
+      <StatusBar style={t.dark ? "light" : "dark"} />
+      <View style={[s.screen, { backgroundColor: t.bg, paddingTop: insets.top, paddingBottom: insets.bottom, paddingLeft: insets.left, paddingRight: insets.right }]}>
         <View style={s.top}>
-          <Text style={[s.title, { color: t.ink }]}>{tr(step.kind === "months" ? "months.title" : step.kind === "range" ? "range.title" : "import.title")}</Text>
-          {step.kind !== "sending" && (
-            <Pressable onPress={onClose} hitSlop={12} accessibilityRole="button">
-              <Text style={[s.link, { color: t.accent }]}>{tr("import.close")}</Text>
-            </Pressable>
-          )}
+          <View style={{ flex: 1 }}>
+            <Title>{tr(step.kind === "months" ? "months.title" : step.kind === "range" ? "range.title" : "import.title")}</Title>
+          </View>
+          {step.kind !== "sending" && <Button title={tr("import.close")} kind="quiet" small onPress={onClose} />}
         </View>
 
         {step.kind === "permission" && <Center t={t}><ActivityIndicator color={t.accent} /></Center>}
 
         {step.kind === "denied" && (
           <Center t={t}>
-            <Text style={[s.big, { color: t.ink }]}>{tr("import.denied.title")}</Text>
+            <Text style={[s.big, { color: t.text }]}>{tr("import.denied.title")}</Text>
             <Text style={[s.lead, { color: t.muted }]}>{tr("import.denied.text")}</Text>
             <Button title={tr("import.openSettings")} onPress={() => Linking.openSettings()} />
           </Center>
@@ -127,7 +138,7 @@ export function ImportScreen({ settings, visible, onClose, onSent }: { settings:
 
         {step.kind === "choose" && (
           <ScrollView contentContainerStyle={s.list}>
-            <Text style={[s.lead, { color: t.muted }]}>{tr("import.choose")}</Text>
+            <Text style={[s.body, { color: t.muted }]}>{tr("import.choose")}</Text>
             {presets(Date.now(), last).map((p: Preset) =>
               p.key === "custom" ? null : <Card key={p.key} t={t} title={p.title} subtitle={p.subtitle} accent={p.key === "since-last"} onPress={() => run([{ from: p.from!, to: p.to! }], describeRange(p.from!, p.to!))} />,
             )}
@@ -162,7 +173,7 @@ export function ImportScreen({ settings, visible, onClose, onSent }: { settings:
             <Text style={[s.lead, { color: t.muted }]}>
               {step.phase === "scan" ? tr("import.scanning", { range: step.label }) : tr(step.phase === "check" ? "import.checking" : "import.measuring")}
             </Text>
-            {step.found > 0 && <Text style={[s.lead, { color: t.ink }]}>{tr("import.found", { count: step.found })}</Text>}
+            {step.found > 0 && <Text style={[s.lead, { color: t.text }]}>{tr("import.found", { count: step.found })}</Text>}
           </Center>
         )}
 
@@ -174,25 +185,33 @@ export function ImportScreen({ settings, visible, onClose, onSent }: { settings:
 
         {step.kind === "error" && (
           <Center t={t}>
-            <Text style={[s.big, { color: t.ink }]}>{tr("import.error.title")}</Text>
+            <Text style={[s.big, { color: t.text }]}>{tr("import.error.title")}</Text>
             <Text style={[s.lead, { color: t.muted }]}>{step.message}</Text>
             <Button title={tr("import.restart")} onPress={back} />
           </Center>
         )}
-      </SafeAreaView>
+      </View>
     </Modal>
   );
 }
 
+/** Une période proposée : titre, précision, chevron. `accent` (depuis le dernier import) : contour Encre. */
 function Card({ t, title, subtitle, accent, onPress }: { t: Theme; title: string; subtitle: string; accent?: boolean; onPress: () => void }) {
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [s.card, { backgroundColor: t.surface, borderColor: accent ? t.accent : t.hairline, transform: [{ scale: pressed ? 0.98 : 1 }] }]}
+      style={({ pressed }) => [
+        s.card,
+        { backgroundColor: pressed ? t.sunken : t.surface, borderColor: accent ? t.accent : t.line, borderWidth: accent ? 1.5 : 1, transform: [{ scale: pressed ? 0.985 : 1 }] },
+      ]}
       accessibilityRole="button"
+      accessibilityLabel={`${title}. ${subtitle}`}
     >
-      <Text style={[s.cardTitle, { color: t.ink }]}>{title}</Text>
-      <Text style={[s.cardSub, { color: t.muted }]}>{subtitle}</Text>
+      <View style={{ flex: 1, gap: 2 }}>
+        <Text style={[s.cardTitle, { color: t.text }]}>{title}</Text>
+        <Text style={[s.cardSub, { color: t.muted }]}>{subtitle}</Text>
+      </View>
+      <Text style={[s.chevron, { color: t.faint }]}>›</Text>
     </Pressable>
   );
 }
@@ -200,9 +219,15 @@ function Card({ t, title, subtitle, accent, onPress }: { t: Theme; title: string
 function DayField({ t, label, value, onPress }: { t: Theme; label: string; value: Date; onPress: () => void }) {
   const text = new Intl.DateTimeFormat(intlTag(), { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(value);
   return (
-    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={`${label} ${text}`} style={({ pressed }) => [s.card, { backgroundColor: t.surface, borderColor: t.hairline, transform: [{ scale: pressed ? 0.98 : 1 }] }]}>
-      <Text style={[s.cardSub, { color: t.muted }]}>{label}</Text>
-      <Text style={[s.cardTitle, { color: t.ink }]}>{text}</Text>
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`${label} ${text}`}
+      style={({ pressed }) => [s.card, { backgroundColor: pressed ? t.sunken : t.surface, borderColor: t.line, transform: [{ scale: pressed ? 0.985 : 1 }] }]}
+    >
+      <Text style={[s.dayLabel, { color: t.muted }]}>{label}</Text>
+      <Text style={[s.cardTitle, { color: t.text, flex: 1 }]}>{text.charAt(0).toUpperCase() + text.slice(1)}</Text>
+      <Text style={[s.chevron, { color: t.faint }]}>›</Text>
     </Pressable>
   );
 }
@@ -215,7 +240,7 @@ function Preview({ t, plan, space, onSend, onBack }: { t: Theme; plan: Plan; spa
   if (!plan.found || !items.length)
     return (
       <Center t={t}>
-        <Text style={[s.big, { color: t.ink }]}>{plan.found ? tr("import.allThere", { range: plan.label }) : tr("import.none", { range: plan.label })}</Text>
+        <Text style={[s.big, { color: t.text }]}>{plan.found ? tr("import.allThere", { range: plan.label }) : tr("import.none", { range: plan.label })}</Text>
         <Button title={tr("import.otherPeriod")} kind="quiet" onPress={onBack} />
       </Center>
     );
@@ -225,32 +250,32 @@ function Preview({ t, plan, space, onSend, onBack }: { t: Theme; plan: Plan; spa
   const rate = space?.uploadRate.bytesPerSecond ?? FALLBACK_RATE;
   const warning = space ? diskWarning(bytes, space.disk.free) : null;
   return (
-    <ScrollView contentContainerStyle={[s.center, { flex: undefined, flexGrow: 1 }]}>
-      <Text style={[s.huge, { color: t.ink }]}>{formatNumber(items.length)}</Text>
-      <Text style={[s.big, { color: t.ink }]}>
-        {tr("import.toSend", {
-          what:
-            videos > 0
-              ? tr("import.photosAndVideos", { photos: tr("count.photos", { count: photos }), videos: tr("count.videos", { count: videos }) })
-              : tr("count.photos", { count: photos }),
-        })}
-      </Text>
-      <Text style={[s.lead, { color: t.muted }]}>
-        {plan.label}
-        {plan.already > 0 ? `. ${tr("import.alreadyThere", { count: plan.already })}` : ""}
-      </Text>
-      <Text style={[s.lead, { color: t.ink }]}>{tr("import.size", { size: formatBytes(bytes), duration: formatDuration(etaSeconds(bytes, rate)) })}</Text>
-      <Text style={[s.small, { color: t.muted }]}>{tr(space?.uploadRate.measured ? "import.rateMeasured" : "import.rateDefault", { rate: formatBytes(rate) })}</Text>
-      {warning && (
-        <Text style={[s.lead, { color: t.danger }]}>
-          {warning === "full" ? tr("space.full", { missing: formatBytes(bytes - space!.disk.free) }) : tr("space.tight")}
+    <ScrollView contentContainerStyle={s.list}>
+      <View style={s.hero}>
+        <Text style={[s.eyebrow, { color: t.muted }]}>{plan.label.charAt(0).toUpperCase() + plan.label.slice(1)}</Text>
+        {/* Le nombre est dans la phrase (« 16 photos à envoyer ») : en grand titre, sans le répéter au-dessus. */}
+        <Text accessibilityRole="header" style={[s.headline, { color: t.text }]}>
+          {tr("import.toSend", {
+            what:
+              videos > 0
+                ? tr("import.photosAndVideos", { photos: tr("count.photos", { count: photos }), videos: tr("count.videos", { count: videos }) })
+                : tr("count.photos", { count: photos }),
+          })}
         </Text>
-      )}
-      <Button title={tr("import.send")} onPress={onSend} disabled={warning === "full"} style={{ alignSelf: "stretch" }} />
-      <Button title={tr("import.changePeriod")} kind="quiet" onPress={onBack} style={{ alignSelf: "stretch" }} />
-      <View style={{ alignSelf: "stretch" }}>
-        <SpaceCard t={t} space={space} />
+        {plan.already > 0 && <Text style={[s.body, { color: t.muted }]}>{tr("import.alreadyThere", { count: plan.already })}</Text>}
       </View>
+      <View style={[s.facts, { backgroundColor: t.surface, borderColor: t.line }]}>
+        <Text style={[s.fact, { color: t.text }]}>{tr("import.size", { size: formatBytes(bytes), duration: formatDuration(etaSeconds(bytes, rate)) })}</Text>
+        <Text style={[s.small, { color: t.muted, textAlign: "left" }]}>{tr(space?.uploadRate.measured ? "import.rateMeasured" : "import.rateDefault", { rate: formatBytes(rate) })}</Text>
+      </View>
+      {warning && (
+        <Notice kind={warning === "full" ? "danger" : "warning"}>
+          {warning === "full" ? tr("space.full", { missing: formatBytes(bytes - space!.disk.free) }) : tr("space.tight")}
+        </Notice>
+      )}
+      <Button title={tr("import.send")} onPress={onSend} disabled={warning === "full"} />
+      <Button title={tr("import.changePeriod")} kind="quiet" onPress={onBack} />
+      <SpaceCard t={t} space={space} />
     </ScrollView>
   );
 }
@@ -315,22 +340,31 @@ function Sending({ t, settings, importId, plan, space, onDone }: { t: Theme; set
   const ratio = totalBytes > 0 ? progress.current.bytes / totalBytes : handled / Math.max(st.total, 1);
   return (
     <Center t={t}>
-      <Text style={[s.huge, { color: t.ink }]}>{formatPercent(Math.min(1, ratio))}</Text>
-      <View style={[s.track, { backgroundColor: t.hairline }]}>
+      <Text style={[s.huge, { color: t.text }]} accessibilityLiveRegion="polite">
+        {formatPercent(Math.min(1, ratio))}
+      </Text>
+      <View
+        style={[s.track, { backgroundColor: t.sunken, borderColor: t.line }]}
+        accessible
+        accessibilityRole="progressbar"
+        accessibilityValue={{ min: 0, max: 100, now: Math.round(Math.min(1, ratio) * 100) }}
+      >
         <View style={[s.bar, { backgroundColor: t.accent, width: `${Math.min(1, ratio) * 100}%` }]} />
       </View>
-      <Text style={[s.lead, { color: t.muted }]}>
-        {tr("import.progress", { done: handled, total: st.total })}
-        {st.duplicates > 0 ? tr("import.duplicates", { count: st.duplicates }) : ""}
-      </Text>
-      <Text style={[s.lead, { color: t.muted }]}>{tr("import.sentBytes", { done: formatBytes(progress.current.bytes), total: formatBytes(totalBytes) })}</Text>
-      {!finished && <Text style={[s.lead, { color: t.ink }]}>{tr("import.remaining", { duration: formatDuration(etaSeconds(left, meter.rate())) })}</Text>}
+      <View style={s.row}>
+        <Text style={[s.small, { color: t.muted, textAlign: "left", flex: 1 }]}>
+          {tr("import.progress", { done: handled, total: st.total })}
+          {st.duplicates > 0 ? tr("import.duplicates", { count: st.duplicates }) : ""}
+        </Text>
+        <Text style={[s.small, { color: t.muted, textAlign: "right" }]}>{tr("import.sentBytes", { done: formatBytes(progress.current.bytes), total: formatBytes(totalBytes) })}</Text>
+      </View>
+      {!finished && <Text style={[s.fact, { color: t.text }]}>{tr("import.remaining", { duration: formatDuration(etaSeconds(left, meter.rate())) })}</Text>}
       {!finished && <Text style={[s.lead, { color: t.muted }]}>{tr("import.keepOpen")}</Text>}
       {finished && st.failed.length > 0 && (
         <>
-          <Text style={[s.lead, { color: t.danger }]}>
-            {tr("import.failed", { count: st.failed.length, error: st.failed[0].error })}
-          </Text>
+          <View style={{ alignSelf: "stretch" }}>
+            <Notice>{tr("import.failed", { count: st.failed.length, error: st.failed[0].error })}</Notice>
+          </View>
           <Button title={tr("import.retry")} onPress={() => queue.retryFailed()} style={{ alignSelf: "stretch" }} />
           <Button title={tr("import.continue")} kind="quiet" onPress={onDone} style={{ alignSelf: "stretch" }} />
         </>
@@ -340,23 +374,30 @@ function Sending({ t, settings, importId, plan, space, onDone }: { t: Theme; set
 }
 
 function Center({ t, children }: { t: Theme; children: React.ReactNode }) {
-  return <View style={[s.center, { backgroundColor: t.paper }]}>{children}</View>;
+  return <View style={[s.center, { backgroundColor: t.bg }]}>{children}</View>;
 }
 
 const s = StyleSheet.create({
   screen: { flex: 1 },
-  top: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 20, paddingTop: 12, paddingBottom: 4 },
-  title: { fontFamily: font.sign, fontSize: 40, lineHeight: 44 },
-  link: { fontSize: 17, fontWeight: "600" },
-  list: { padding: 20, gap: 12 },
-  lead: { fontSize: 17, lineHeight: 24, textAlign: "center" },
-  small: { fontSize: 14, lineHeight: 20, textAlign: "center" },
-  card: { borderRadius: 20, borderWidth: 2, padding: 20, gap: 4 },
-  cardTitle: { fontFamily: font.sign, fontSize: 28, lineHeight: 32 },
-  cardSub: { fontSize: 15 },
-  center: { flex: 1, padding: 28, alignItems: "center", justifyContent: "center", gap: 16 },
-  big: { fontFamily: font.sign, fontSize: 30, lineHeight: 34, textAlign: "center" },
-  huge: { fontFamily: font.sign, fontSize: 88, lineHeight: 92 },
-  track: { alignSelf: "stretch", height: 10, borderRadius: 5, overflow: "hidden" },
-  bar: { height: "100%" },
+  top: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: gutter, paddingTop: 16, paddingBottom: 8 },
+  list: { paddingHorizontal: gutter, paddingTop: 8, paddingBottom: 32, gap: 10 },
+  body: { ...type(fs.base), marginBottom: 6 },
+  lead: { ...type(fs.base), textAlign: "center" },
+  small: { ...type(fs.sm), ...tabular, textAlign: "center" },
+  card: { flexDirection: "row", alignItems: "center", gap: 12, borderRadius: radius.lg, borderWidth: 1, paddingVertical: 16, paddingHorizontal: 18, minHeight: 72 },
+  cardTitle: type(17, 600, "tight"),
+  cardSub: type(fs.sm),
+  dayLabel: { ...type(fs.sm, 500), width: 32 },
+  chevron: { fontSize: 26, lineHeight: 28, fontWeight: "300" },
+  center: { flex: 1, paddingHorizontal: gutter + 8, alignItems: "center", justifyContent: "center", gap: 14 },
+  hero: { gap: 2, paddingTop: 8, paddingBottom: 10 },
+  eyebrow: type(fs.sm, 500),
+  big: { ...type(fs.xl, 600, "tight"), textAlign: "center" },
+  headline: { ...type(fs.xxxl, 700, "tighter"), ...tabular, marginTop: 4 },
+  huge: { ...type(fs.display, 700, "tighter"), ...tabular, lineHeight: Math.round(fs.display * 1.05) },
+  facts: { borderRadius: radius.lg, borderWidth: 1, padding: 16, gap: 4 },
+  fact: { ...type(fs.lg, 600, "tight"), ...tabular },
+  row: { flexDirection: "row", alignSelf: "stretch", gap: 12 },
+  track: { alignSelf: "stretch", height: 8, borderRadius: 4, borderWidth: StyleSheet.hairlineWidth, overflow: "hidden" },
+  bar: { height: "100%", borderRadius: 4 },
 });

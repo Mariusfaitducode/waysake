@@ -1,16 +1,17 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { api, type ImportMedia, type Proposal, type ProposedTrip } from "../api.js";
-import { useDataVersion } from "../data.js";
+import { useApi, useDataVersion } from "../data.js";
 import { dateRange, flags } from "../format.js";
 import { t } from "../i18n/index.js";
 import { placeName, placeTitle } from "../i18n/places.js";
-import { Sign } from "../components/Sign.js";
 import { PhotoGrid } from "../components/PhotoGrid.js";
 import { TripMap } from "../components/TripMap.js";
 import { ActionSheet } from "../components/Sheet.js";
 import { EmptyState } from "../components/EmptyState.js";
+import { TripColorDot, TripColorTag } from "../components/TripColor.js";
 import { IconBack } from "../shell/icons.js";
+import { safeTripColor, tripColorProps, type TripColorId } from "../trip-colors.js";
 import "./ImportReview.css";
 
 /** L'écran où l'humain valide le tri proposé par Waysake. Identique sur l'app, l'ordinateur et Safari. */
@@ -22,6 +23,9 @@ export function ImportReview() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [confirmCancel, setConfirmCancel] = useState(false);
+  // Les voyages existants : leur couleur (pastille des voyages complétés).
+  const { data: trips } = useApi(api.trips);
+  const colors = new Map<string, TripColorId>((trips ?? []).map((trip) => [trip.slug, trip.color]));
 
   const load = () => api.importProposal(id).then(setP, (e: Error) => setError(e.message));
   useEffect(() => {
@@ -86,7 +90,10 @@ export function ImportReview() {
           <ul className="review__list">
             {p.extendedTrips.map((e) => (
               <li key={e.slug}>
-                <strong>{placeTitle(e.title)}</strong>
+                <strong>
+                  {colors.has(e.slug) && <TripColorDot color={colors.get(e.slug)} />}
+                  {placeTitle(e.title)}
+                </strong>
                 <span>+ {t("count.photos", { count: e.added })}</span>
               </li>
             ))}
@@ -95,7 +102,9 @@ export function ImportReview() {
       )}
 
       {p.otherPhotos.length > 0 && (
-        <Group title={t("review.other", { count: p.otherPhotos.length })} hint={t("review.other.hint")} items={p.otherPhotos} onToggle={toggle} />
+        <section className="review__block">
+          <Group title={t("review.other", { count: p.otherPhotos.length })} hint={t("review.other.hint")} items={p.otherPhotos} onToggle={toggle} />
+        </section>
       )}
 
       {(p.setAside.screenshots.length > 0 || p.setAside.home.length > 0) && (
@@ -135,12 +144,14 @@ export function ImportReview() {
 
       {!nothing && (
         <div className="review__bar">
-          <button className="button button--quiet" onClick={() => setConfirmCancel(true)} disabled={busy}>
-            {t("common.cancel")}
-          </button>
-          <button className="button review__go" onClick={confirm} disabled={busy || p.counts.toImport === 0}>
-            {busy ? t("review.importing") : t("review.import", { count: p.counts.toImport })}
-          </button>
+          <div className="review__bar-inner">
+            <button className="button button--quiet" onClick={() => setConfirmCancel(true)} disabled={busy}>
+              {t("common.cancel")}
+            </button>
+            <button className="button review__go" onClick={confirm} disabled={busy || p.counts.toImport === 0}>
+              {busy ? t("review.importing") : t("review.import", { count: p.counts.toImport })}
+            </button>
+          </div>
         </div>
       )}
 
@@ -162,26 +173,38 @@ export function ImportReview() {
   );
 }
 
+/** Le voyage proposé, en carte Horizon : couverture à flou progressif, page teintée de la couleur proposée. */
 function ProposedTripCard({ trip, onToggle }: { trip: ProposedTrip; onToggle: (m: ImportMedia) => void }) {
   const [open, setOpen] = useState(false);
+  // Calculée par la tour sur la couverture (une tour plus ancienne ne l'envoie pas : pas de teinte).
+  const color = trip.color ? safeTripColor(trip.color) : null;
   return (
-    <section className="proposed">
+    <section className={`proposed${color ? " has-color" : ""}`} {...(color ? tripColorProps(color) : {})}>
       <div className="proposed__hero">
         {trip.coverLarge && <img src={trip.coverLarge} alt="" />}
-        <div className="proposed__shade" aria-hidden="true" />
+        <div className="proposed__blur" aria-hidden="true" />
+        <div className="proposed__fade" aria-hidden="true" />
         <span className="proposed__badge">{t("review.newTrip")}</span>
         <div className="proposed__text">
           <span aria-hidden="true" className="proposed__flags">{flags(trip.countryCodes)}</span>
-          <Sign size="md">{placeTitle(trip.title)}</Sign>
-          <p>{dateRange(trip.startAt, trip.endAt)}</p>
+          <h2 className="proposed__title">{placeTitle(trip.title)}</h2>
+          <p className="proposed__dates">{dateRange(trip.startAt, trip.endAt)}</p>
         </div>
       </div>
       <div className="proposed__body">
-        <p className="proposed__facts">
-          {t("count.photos", { count: trip.count })}
-          {trip.withPeople > 0 && t("review.withPeople", { count: trip.withPeople })}
-          {trip.chapters.length > 1 && t("review.inStops", { stops: t("count.stops", { count: trip.chapters.length }) })}
-        </p>
+        <div className="proposed__facts">
+          <p>
+            {t("count.photos", { count: trip.count })}
+            {trip.withPeople > 0 && t("review.withPeople", { count: trip.withPeople })}
+            {trip.chapters.length > 1 && t("review.inStops", { stops: t("count.stops", { count: trip.chapters.length }) })}
+          </p>
+          {color && (
+            <span className="proposed__color">
+              <span>{t("review.color")}</span>
+              <TripColorTag color={color} dot />
+            </span>
+          )}
+        </div>
         {trip.chapters.length === 1 && trip.chapters[0].places.length > 0 && (
           <p className="review__hint">{trip.chapters[0].places.map((x) => placeName(x)).join(", ")}</p>
         )}
@@ -189,7 +212,7 @@ function ProposedTripCard({ trip, onToggle }: { trip: ProposedTrip; onToggle: (m
           <ol className="proposed__stops">
             {trip.chapters.map((c, i) => (
               <li key={i}>
-                <Sign size="sm">{i + 1}</Sign>
+                <span className="step-number">{i + 1}</span>
                 <span>
                   <strong>{placeTitle(c.title)}</strong>
                   {c.places.length > 0 && <small>{c.places.map((x) => placeName(x)).join(", ")}</small>}
@@ -198,7 +221,11 @@ function ProposedTripCard({ trip, onToggle }: { trip: ProposedTrip; onToggle: (m
             ))}
           </ol>
         )}
-        {trip.route.length > 1 && <TripMap route={trip.route} chapters={trip.chapters} compact />}
+        {trip.route.length > 1 && (
+          <div className="proposed__map">
+            <TripMap key={color ?? "ink"} route={trip.route} chapters={trip.chapters} compact color={color ?? undefined} />
+          </div>
+        )}
         <button className="proposed__toggle" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
           {open ? t("review.hidePhotos") : t("review.checkPhotos")}
         </button>

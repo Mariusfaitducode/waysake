@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { withSocial } from "../social.js";
-import { createReadStream, existsSync } from "node:fs";
+import { createReadStream, existsSync, statSync } from "node:fs";
 import type { Db } from "../db.js";
 import { createHash } from "node:crypto";
 import { createWriteStream, rmSync } from "node:fs";
@@ -145,7 +145,8 @@ export function mediaRoutes(app: FastifyInstance, db: Db, dataDir: string, onIng
       const m = find(req.params.id);
       const path = m && derivedPath(dataDir, m.sha256, size);
       if (!m || !m.has_thumbs || !path || !existsSync(path)) return reply.code(404).send({ error: "Introuvable", code: "not_found" });
-      reply.header("Cache-Control", "public, max-age=31536000, immutable").type("image/webp");
+      // Taille annoncée : le navigateur sait où il en est, et le compteur de trafic (page « Statistiques ») la lit.
+      reply.header("Cache-Control", "public, max-age=31536000, immutable").header("Content-Length", statSync(path).size).type("image/webp");
       return reply.send(createReadStream(path));
     });
   }

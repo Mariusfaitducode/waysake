@@ -1,8 +1,35 @@
-.trips__year { margin-top: 14px; }
-.trips__year-title { margin: 0 16px 10px; font-family: var(--font-sign); font-weight: 500; font-size: 24px; color: var(--muted); }
-.trips__list { display: grid; gap: 14px; padding: 0 16px; }
+/* Liste des voyages (Horizon). Les lignes ont 10 px de marge intérieure (survol) : la colonne recule d'autant
+   pour que les vignettes s'alignent sur le grand titre. */
+.trips { padding-bottom: var(--sp-10); }
+.trips__body { --row-inset: 10px; max-width: 860px; padding: 0 calc(var(--gutter) - var(--row-inset)); }
+.trips__filters {
+  display: flex;
+  gap: 6px;
+  margin: var(--sp-3) 0 var(--sp-1);
+  padding: 2px var(--row-inset) 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  /* Les puces qui débordent glissent sous le bord, sans coupure sèche. */
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+}
+.trips__filters::-webkit-scrollbar { display: none; }
+.trips__year-title {
+  margin: 0;
+  padding: var(--sp-4) var(--row-inset) 6px;
+  color: var(--text-muted);
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0;
+}
+.trips__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+
+.trips__skeleton { display: grid; grid-template-columns: 58px 1fr; gap: var(--sp-3); align-items: center; padding: var(--sp-2) var(--row-inset); }
+.trips__skeleton .skeleton:first-child { height: 58px; border-radius: var(--r-md); }
+.trips__skeleton .skeleton:last-child { height: 14px; width: 60%; }
+.trips__body > .trips__skeleton:first-child { margin-top: var(--sp-6); }
+
 @media (min-width: 900px) {
-  .trips__year-title { margin-inline: 40px; font-size: 28px; }
-  .trips__list { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; padding: 0 40px; }
-  .trips__list > .trip-card--lg { grid-column: 1 / -1; }
+  .trips__body { padding-inline: calc(var(--sp-10) - var(--row-inset)); }
+  .trips__filters { margin-top: var(--sp-4); -webkit-mask-image: none; mask-image: none; flex-wrap: wrap; }
 }

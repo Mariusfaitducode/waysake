@@ -1,45 +1,79 @@
 *, *::before, *::after { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; }
+/* Pas de surlignage turquoise au toucher dans la WebView Android : chaque bouton a son propre état pressé. */
+html { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
 body {
   margin: 0;
-  background: var(--paper);
-  color: var(--ink);
-  font-family: var(--font-ui);
-  font-size: 16px;
-  line-height: 1.45;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--fs-base);
+  line-height: var(--lh-body);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   font-feature-settings: "tnum" 1;
 }
+h1, h2, h3, h4 { letter-spacing: var(--tracking-tight); text-wrap: balance; }
 button { font: inherit; color: inherit; }
 img { display: block; }
-:focus-visible { outline: 2.5px solid var(--autostrada); outline-offset: 3px; border-radius: 6px; }
+code, kbd, samp { font-family: var(--font-mono); font-size: 0.9em; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: var(--r-xs); }
+/* Sur une photo ou un fond toujours sombre, l'anneau Encre clair serait invisible : blanc. */
+.viewer :focus-visible, .slideshow :focus-visible, .trip-card:focus-visible, .live-bar :focus-visible { outline-color: var(--text-on-photo); }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; }
 }
 
+/* ---------- titres ---------- */
+/* Titre d'écran ou de section : Geist serré, sans ornement. */
+.title { margin: 0; font-family: var(--font-display); font-weight: var(--fw-bold); letter-spacing: var(--tracking-tighter); line-height: var(--lh-tight); text-wrap: balance; }
+.title--sm { font-size: var(--fs-xl); font-weight: var(--fw-semibold); letter-spacing: var(--tracking-tight); line-height: var(--lh-snug); }
+.title--md { font-size: var(--fs-2xl); }
+.title--lg { font-size: var(--fs-3xl); }
+.title--display { font-size: var(--fs-display); letter-spacing: -0.05em; }
+/* Numéro d'étape : petite pastille ronde, à la couleur du voyage quand elle est posée (--trip). */
+.step-number {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.75em;
+  height: 1.75em;
+  padding: 0 0.45em;
+  border-radius: var(--r-full);
+  background: var(--trip, var(--accent));
+  color: var(--on-trip, var(--on-accent));
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
 /* ---------- composants partagés ---------- */
+/* Action principale : Encre (noir en clair, blanc cassé en sombre). Une seule par écran. */
 .button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--sp-2);
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--r-full);
   padding: 12px 20px;
-  background: var(--autostrada);
-  color: var(--autostrada-ink);
-  font-weight: 600;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: var(--fw-semibold);
+  line-height: 1.1;
   text-decoration: none;
   cursor: pointer;
-  transition: transform 160ms var(--ease), filter 160ms var(--ease);
+  transition: transform var(--dur-fast) var(--ease), background-color var(--dur-fast) var(--ease);
 }
-.button:hover { filter: brightness(1.08); }
+.button:hover { background: var(--accent-hover); }
 .button:active { transform: scale(0.97); }
 .button:disabled { opacity: 0.5; cursor: default; }
-.button--quiet { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--hairline); }
-.button--small { padding: 8px 14px; font-size: 15px; }
-.button--danger { background: transparent; color: var(--danger); box-shadow: inset 0 0 0 1.5px var(--hairline); }
+/* Action secondaire : fond très léger, texte plein. */
+.button--quiet { background: color-mix(in srgb, var(--text) 7%, transparent); color: var(--text); }
+.button--quiet:hover { background: color-mix(in srgb, var(--text) 11%, transparent); }
+.button--small { padding: 8px 14px; font-size: var(--fs-md); }
+.button--danger { background: transparent; color: var(--danger); box-shadow: inset 0 0 0 1.5px var(--line-strong); }
+.button--danger:hover { background: color-mix(in srgb, var(--danger) 8%, transparent); }
 
 .icon-button {
   width: 38px;
@@ -48,29 +82,57 @@ img { display: block; }
   border: 0;
   display: grid;
   place-items: center;
-  background: var(--hairline);
-  color: var(--ink);
+  background: color-mix(in srgb, var(--text) 7%, transparent);
+  color: var(--text);
   cursor: pointer;
-  transition: transform 160ms var(--ease);
+  transition: transform var(--dur-fast) var(--ease);
 }
 .icon-button:active { transform: scale(0.92); }
-.icon-button--glass { background: rgba(20, 22, 21, 0.38); color: #fff; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+/*
+ * Zone de toucher de 50 px autour du rond de 38 px. Sans elle, un appui près du bord tombait hors du bouton
+ * rétréci par :active (et sur le globe, dans la carte) : le premier appui sur « + » semblait ignoré.
+ */
+.icon-button { position: relative; }
+.icon-button::after { content: ""; position: absolute; inset: -6px; border-radius: 50%; }
+/* Sur une photo : rond translucide flouté, icône blanche. */
+.icon-button--glass { background: var(--scrim); color: var(--text-on-photo); backdrop-filter: blur(12px) saturate(1.5); -webkit-backdrop-filter: blur(12px) saturate(1.5); }
 
-.empty { max-width: 36ch; margin: 16vh auto 0; padding: 0 20px; text-align: center; }
-.empty h2 { font-family: var(--font-sign); font-weight: 600; font-size: 34px; line-height: 1.05; margin: 0 0 10px; }
-.empty p { color: var(--muted); margin: 0 0 24px; }
+.empty { max-width: 36ch; margin: 16vh auto 0; padding: 0 var(--sp-5); text-align: center; }
+.empty h2 { font-family: var(--font-display); font-weight: var(--fw-bold); font-size: var(--fs-2xl); letter-spacing: var(--tracking-tighter); line-height: 1.05; margin: 0 0 10px; }
+.empty p { color: var(--text-muted); margin: 0 0 var(--sp-6); }
 
 .field {
   width: 100%;
   border: 0;
-  border-radius: 12px;
+  border-radius: var(--r-sm);
   padding: 13px 14px;
-  background: var(--hairline);
-  color: var(--ink);
+  background: var(--surface-sunken);
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--text);
   font: inherit;
 }
-.field:focus { outline: 2px solid var(--autostrada); outline-offset: 0; }
-.field::placeholder { color: var(--muted); }
+.field:focus { outline: 2px solid var(--focus); outline-offset: 0; }
+.field::placeholder { color: var(--text-muted); }
 
-.skeleton { background: var(--hairline); border-radius: 12px; animation: pulse 1.4s ease-in-out infinite; }
+.skeleton { background: var(--line); border-radius: var(--r-sm); animation: pulse 1.4s ease-in-out infinite; }
 @keyframes pulse { 50% { opacity: 0.55; } }
+
+/* Lien retour (Pays, Statistiques, À localiser, Validation d'un import). */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin: calc(env(safe-area-inset-top, 0px) + var(--sp-3)) 0 calc(-1 * var(--sp-2)) var(--sp-2);
+  padding: 6px var(--sp-2);
+  border-radius: var(--r-full);
+  color: var(--text);
+  text-decoration: none;
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-md);
+  transition: background-color var(--dur-fast) var(--ease);
+}
+.back-link:hover { background: var(--surface-sunken); }
+.back-link svg { width: 20px; height: 20px; }
+@media (min-width: 900px) {
+  .back-link { margin: var(--sp-6) 0 calc(-1 * var(--sp-5)) var(--sp-8); }
+}

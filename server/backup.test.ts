@@ -12,7 +12,7 @@ describe("instantanés de la base", () => {
   it("écrit une copie lisible de la base, datée du jour", async () => {
     const dir = tmp();
     const db = openDb(dir);
-    db.prepare("INSERT INTO user (id, name, color) VALUES ('lea', 'Léa', '#0B7A4B')").run();
+    db.prepare("INSERT INTO user (id, name, color) VALUES ('lea', 'Léa', '#2D8D64')").run();
     const file = await snapshotDb(db, dir, new Date("2026-10-04T03:00:00"));
     expect(file).toBe(join(dir, "backups", "atlas-2026-10-04.db"));
     const copy = new Database(file, { readonly: true });

@@ -67,13 +67,29 @@ function mulberry32(seed: number) {
 }
 const pad = (n: number) => String(n).padStart(2, "0");
 
-export type Shot = { seed: string; takenAt?: string; lat?: number; lon?: number; who: "alex" | "sam"; portrait: boolean };
+export type Shot = {
+  seed: string;
+  /** Lieu de la prise de vue ("undated" pour les photos sans date) et rang à ce lieu : choisit la photo de démo. */
+  place: string;
+  index: number;
+  takenAt?: string;
+  lat?: number;
+  lon?: number;
+  who: "alex" | "sam";
+  portrait: boolean;
+};
 
 /** Les photos de démo, déterministes : même graine ⇒ mêmes dates, lieux et auteurs. */
 export function demoShots(seed = 42): Shot[] {
   const rand = mulberry32(seed);
   const shots: Shot[] = [];
   let n = 0;
+  const perPlace = new Map<string, number>();
+  const next = (place: string) => {
+    const i = perPlace.get(place) ?? 0;
+    perPlace.set(place, i + 1);
+    return i;
+  };
   const day = (date: string, nights: number, lat: number, lon: number, count: number, place: string) => {
     for (let i = 0; i < count; i++) {
       const d = new Date(`${date}T00:00:00Z`);
@@ -85,6 +101,8 @@ export function demoShots(seed = 42): Shot[] {
       const jitter = () => (rand() - 0.5) * 0.05;
       shots.push({
         seed: `atlas-${place}-${n++}`,
+        place,
+        index: next(place),
         takenAt: `${d.getUTCFullYear()}:${pad(d.getUTCMonth() + 1)}:${pad(d.getUTCDate())} ${pad(h)}:${pad(Math.floor(rand() * 60))}:${pad(Math.floor(rand() * 60))}`,
         lat: noGps ? undefined : lat + jitter(),
         lon: noGps ? undefined : lon + jitter(),
@@ -95,7 +113,7 @@ export function demoShots(seed = 42): Shot[] {
   };
   for (const trip of DEMO_TRIPS) for (const s of trip.stops) day(s.date, s.nights ?? 1, s.lat, s.lon, s.count, s.place);
   for (const d of HOME_DAYS) day(d, 1, HOME.lat, HOME.lon, 3, HOME.place);
-  for (let i = 0; i < 3; i++) shots.push({ seed: `atlas-undated-${i}`, who: "alex", portrait: false });
+  for (let i = 0; i < 3; i++) shots.push({ seed: `atlas-undated-${i}`, place: "undated", index: i, who: "alex", portrait: false });
   return shots;
 }
 

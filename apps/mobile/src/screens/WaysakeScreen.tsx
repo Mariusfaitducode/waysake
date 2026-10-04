@@ -1,12 +1,11 @@
-import { useRef, useState } from "react";
-import { BackHandler, Linking, StyleSheet, Text, View } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { ActivityIndicator, Animated, BackHandler, Linking, StyleSheet, Text, View } from "react-native";
 import { sameOrigin } from "../lib/origin";
-import { useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { WebView, type WebViewMessageEvent } from "react-native-webview";
-import { Button, Sign } from "../components";
+import { Button, Logo, Title, Wordmark } from "../components";
 import type { Settings } from "../storage";
-import { font, useTheme } from "../theme";
+import { fs, gutter, radius, type, useTheme } from "../theme";
 import { locale, tr } from "../i18n";
 import { ImportScreen } from "./ImportScreen";
 
@@ -20,6 +19,12 @@ export function WaysakeScreen({ settings, onReset }: { settings: Settings; onRes
   const [importing, setImporting] = useState(false);
   const [failed, setFailed] = useState(false);
   const [canGoBack, setCanGoBack] = useState(false);
+  // Premier chargement : le logo sur le fond de la page, puis fondu vers Waysake (pas d'éclair blanc).
+  const [loaded, setLoaded] = useState(false);
+  const cover = useRef(new Animated.Value(1)).current;
+  const [covered, setCovered] = useState(true);
+  // Chargements suivants : un filet Encre en haut, à la manière d'un navigateur.
+  const [progress, setProgress] = useState(1);
 
   // Le bouton retour d'Android remonte dans Waysake avant de quitter l'app.
   useEffect(() => {
@@ -50,20 +55,46 @@ export function WaysakeScreen({ settings, onReset }: { settings: Settings; onRes
     if (msg.type === "settings") onReset();
   }
 
+  function firstLoadDone() {
+    if (loaded) return;
+    setLoaded(true);
+    Animated.timing(cover, { toValue: 0, duration: 240, useNativeDriver: true }).start(() => setCovered(false));
+  }
+
   if (failed)
     return (
-      <SafeAreaView style={[styles.fallback, { backgroundColor: t.paper }]}>
-        <Sign size={30}>Waysake</Sign>
-        <Text style={[styles.title, { color: t.ink }]}>{tr("waysake.down.title")}</Text>
-        <Text style={[styles.lead, { color: t.muted }]}>{tr("waysake.down.text")}{"\n"}{tr("waysake.down.address", { url: settings.server })}</Text>
-        <Button title={tr("waysake.retry")} onPress={() => setFailed(false)} />
-        <Button title={tr("waysake.changeAddress")} kind="quiet" onPress={onReset} />
+      <SafeAreaView style={[styles.fallback, { backgroundColor: t.bg }]}>
+        <Wordmark size={30} />
+        <View style={styles.fallbackBody}>
+          <Title>{tr("waysake.down.title")}</Title>
+          <Text style={[type(fs.base), { color: t.muted }]}>{tr("waysake.down.text")}</Text>
+          <View style={[styles.address, { backgroundColor: t.surface, borderColor: t.line }]}>
+            <View style={[styles.dot, { borderColor: t.danger }]} />
+            <Text numberOfLines={2} style={[type(fs.sm, 500), { color: t.text, flexShrink: 1 }]}>
+              {tr("waysake.down.address", { url: settings.server })}
+            </Text>
+          </View>
+        </View>
+        <View style={styles.fallbackActions}>
+          <Button
+            title={tr("waysake.retry")}
+            onPress={() => {
+              setLoaded(false);
+              cover.setValue(1);
+              setCovered(true);
+              setFailed(false);
+            }}
+          />
+          <Button title={tr("waysake.changeAddress")} kind="quiet" onPress={onReset} />
+        </View>
       </SafeAreaView>
     );
 
   return (
-    <View style={[styles.screen, { backgroundColor: t.paper }]}>
-      <SafeAreaView style={styles.screen} edges={["top", "left", "right"]}>
+    <View style={[styles.screen, { backgroundColor: t.bg }]}>
+      {/* Les quatre bords : Android dessine sous la barre de gestes (bord à bord) et la WebView n'y voit pas
+          env(safe-area-inset-bottom) ; sans ce retrait, les onglets de Waysake passent sous la barre. */}
+      <SafeAreaView style={styles.screen} edges={["top", "left", "right", "bottom"]}>
         <WebView
           ref={web}
           source={{ uri: settings.server }}
@@ -79,13 +110,26 @@ export function WaysakeScreen({ settings, onReset }: { settings: Settings; onRes
           onError={() => setFailed(true)}
           onHttpError={(e) => e.nativeEvent.statusCode >= 500 && setFailed(true)}
           onNavigationStateChange={(n) => setCanGoBack(n.canGoBack)}
+          onLoadProgress={(e) => setProgress(e.nativeEvent.progress)}
+          onLoadEnd={firstLoadDone}
           sharedCookiesEnabled
           domStorageEnabled
           allowsBackForwardNavigationGestures
           pullToRefreshEnabled
           setSupportMultipleWindows={false}
-          style={{ backgroundColor: t.paper }}
+          style={{ backgroundColor: t.bg }}
         />
+        {loaded && progress < 1 && (
+          <View pointerEvents="none" style={styles.progressTrack}>
+            <View style={[styles.progressBar, { backgroundColor: t.accent, width: `${Math.max(8, progress * 100)}%` }]} />
+          </View>
+        )}
+        {covered && (
+          <Animated.View pointerEvents={loaded ? "none" : "auto"} style={[StyleSheet.absoluteFill, styles.cover, { backgroundColor: t.bg, opacity: cover }]}>
+            <Logo size={56} label="Waysake" />
+            <ActivityIndicator color={t.muted} />
+          </Animated.View>
+        )}
       </SafeAreaView>
       <ImportScreen
         settings={settings}
@@ -103,7 +147,12 @@ export function WaysakeScreen({ settings, onReset }: { settings: Settings; onRes
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  fallback: { flex: 1, padding: 24, paddingTop: 64, gap: 16 },
-  title: { fontFamily: font.sign, fontSize: 40, lineHeight: 44, marginTop: 16 },
-  lead: { fontSize: 17, lineHeight: 24 },
+  cover: { alignItems: "center", justifyContent: "center", gap: 20 },
+  progressTrack: { position: "absolute", top: 0, left: 0, right: 0, height: 2 },
+  progressBar: { height: 2, borderTopRightRadius: 1, borderBottomRightRadius: 1 },
+  fallback: { flex: 1, paddingHorizontal: gutter + 4, paddingTop: 20, paddingBottom: 24 },
+  fallbackBody: { flex: 1, justifyContent: "center", gap: 14 },
+  fallbackActions: { gap: 10 },
+  address: { flexDirection: "row", alignItems: "center", gap: 10, borderRadius: radius.md, borderWidth: 1, paddingHorizontal: 14, paddingVertical: 12, marginTop: 4 },
+  dot: { width: 10, height: 10, borderRadius: 5, borderWidth: 2 },
 });

@@ -1,4 +1,7 @@
-.globe { position: fixed; inset: 0 0 calc(62px + var(--safe-bottom)) 0; overflow: hidden; background: var(--paper); }
+/* Globe (accueil), direction Horizon : globe gris, couleur réservée aux voyages, interface posée dessus en verre. */
+.globe { position: fixed; inset: 0 0 var(--shell-bottom) var(--shell-left); overflow: hidden; background: var(--bg); }
+
+/* ---------- En-tête : marque + résumé, actions ---------- */
 .globe__top {
   position: absolute;
   top: 0;
@@ -6,86 +9,158 @@
   right: 0;
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  padding: calc(env(safe-area-inset-top, 0px) + 18px) 16px 0;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: calc(env(safe-area-inset-top, 0px) + var(--sp-4)) var(--gutter) 0;
   pointer-events: none;
 }
 .globe__top > * { pointer-events: auto; }
-.globe__title { margin: 0; font-family: var(--font-sign); font-weight: 600; font-size: 40px; line-height: 1; }
+.globe__brand { display: flex; align-items: baseline; flex-wrap: wrap; column-gap: var(--sp-3); row-gap: 2px; min-width: 0; }
+.globe__title { margin: 0; line-height: 1; color: var(--text); }
+.globe__title .wordmark { vertical-align: middle; }
 .globe__stats {
-  display: inline-block;
-  margin-top: 6px;
-  color: var(--muted);
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
   text-decoration: none;
-  font-size: 15px;
-  border-bottom: 1px solid transparent;
+  white-space: nowrap;
+  border-radius: var(--r-xs);
+  transition: color var(--dur-fast) var(--ease);
 }
-.globe__stats:hover { color: var(--ink); border-bottom-color: currentColor; }
-.globe__me {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 0;
-  background: var(--c);
-  color: #fff;
-  font-family: var(--font-sign);
-  font-weight: 600;
-  font-size: 19px;
-  cursor: pointer;
-}
-.globe .globe-map { bottom: 150px; }
-.globe__strip {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 14px;
-  display: flex;
-  gap: 12px;
-  padding: 4px 16px 10px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-}
-.globe__strip::-webkit-scrollbar { display: none; }
-.globe__slot { flex: none; scroll-snap-align: center; border-radius: 20px; transition: transform 260ms var(--ease), box-shadow 260ms var(--ease); box-shadow: 0 12px 30px -14px rgba(0, 0, 0, 0.5); }
-.globe__slot.is-selected { transform: translateY(-6px); box-shadow: 0 0 0 3px var(--autostrada), 0 18px 34px -14px rgba(0, 0, 0, 0.55); }
-.globe__empty {
-  position: absolute;
-  left: 16px;
-  right: 16px;
-  bottom: 24px;
-  max-width: 420px;
-  margin: auto;
-  padding: 20px;
-  border-radius: 22px;
-  background: var(--veil);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  text-align: center;
-}
-.globe__empty p { margin: 0 0 14px; }
+.globe__stats:hover { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
 
-@media (min-width: 900px) {
-  .globe { inset: 0 0 0 92px; }
-  .globe__top { padding: 34px 40px 0; }
-  .globe__title { font-size: 54px; }
-  .globe__me { display: none; }
-  .globe__strip { padding-inline: 40px; bottom: 28px; }
-  .globe .globe-map { bottom: 0; }
-}
-.globe__actions { display: flex; gap: 10px; align-items: center; }
-.globe__actions .icon-button { background: var(--veil); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); color: var(--autostrada); }
-
+.globe__actions { display: flex; gap: var(--sp-2); align-items: center; flex: none; }
 .globe__play {
   display: inline-flex;
   align-items: center;
   height: 36px;
-  padding: 0 14px;
-  border-radius: 999px;
-  background: var(--signal);
-  color: #16191b;
-  font-family: var(--font-sign);
-  font-weight: 600;
-  font-size: 19px;
+  padding: 0 var(--sp-4);
+  border-radius: var(--r-full);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semibold);
   text-decoration: none;
+  transition: background var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+}
+.globe__play:hover { background: var(--accent-hover); }
+.globe__play:active { transform: scale(0.97); }
+.globe__add {
+  background: var(--glass);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: var(--text);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.globe__me {
+  display: grid;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-full);
+  background: none;
+  cursor: pointer;
+}
+
+/* ---------- Colonne gauche : souvenir du jour, légende des voyages ---------- */
+.globe__side {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + 64px);
+  left: var(--gutter);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  max-height: calc(100% - 64px - 230px);
+  pointer-events: none;
+}
+.globe__side > * { pointer-events: auto; }
+.globe__side .memory { margin-top: 0; }
+
+.globe__legend {
+  display: none; /* grand écran seulement : sur téléphone, les cartes du bas portent nom et pastille */
+  width: 280px;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 6px;
+  border-radius: var(--r-md);
+  background: var(--glass);
+  backdrop-filter: blur(16px) saturate(1.3);
+  -webkit-backdrop-filter: blur(16px) saturate(1.3);
+  box-shadow: var(--shadow-md), inset 0 0 0 1px var(--line);
+  scrollbar-width: thin;
+}
+.globe__legend ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; }
+.globe__legend-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease), opacity var(--dur) var(--ease);
+}
+.globe__legend-row[data-focus] { background: color-mix(in oklab, var(--text) 6%, transparent); }
+.globe__legend-row[data-dim] { opacity: 0.55; }
+.globe__legend-row[aria-pressed="true"] { background: color-mix(in oklab, var(--trip) 14%, transparent); opacity: 1; }
+.globe__legend-row .trip-dot { box-shadow: 0 0 0 2px var(--bg); }
+.globe__legend-text { display: grid; min-width: 0; line-height: var(--lh-snug); }
+.globe__legend-text b { font-size: var(--fs-sm); font-weight: var(--fw-semibold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.globe__legend-text small { font-size: var(--fs-2xs); color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.globe__legend-row em { font-style: normal; font-size: var(--fs-2xs); color: var(--text-muted); }
+
+/* ---------- Bandeau des voyages (bas) ---------- */
+.globe__strip {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: var(--sp-3);
+  display: flex;
+  gap: var(--sp-3);
+  padding: 10px var(--gutter) 10px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--gutter);
+  scrollbar-width: none;
+}
+.globe__strip::-webkit-scrollbar { display: none; }
+.globe__slot {
+  position: relative;
+  flex: none;
+  scroll-snap-align: start;
+  border-radius: 20px;
+  box-shadow: var(--shadow-float);
+  transition: transform var(--dur-slow) var(--ease), box-shadow var(--dur-slow) var(--ease);
+}
+.globe__slot.is-selected { transform: translateY(-6px); box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--trip), var(--shadow-float); }
+
+.globe__empty {
+  position: absolute;
+  left: var(--gutter);
+  right: var(--gutter);
+  bottom: var(--sp-6);
+  max-width: 420px;
+  margin: auto;
+  padding: var(--sp-5);
+  border-radius: var(--r-xl);
+  background: var(--glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: var(--shadow-md), inset 0 0 0 1px var(--line);
+  text-align: center;
+}
+.globe__empty p { margin: 0 0 var(--sp-4); color: var(--text-muted); }
+
+@media (min-width: 900px) {
+  .globe__top { padding: var(--sp-8) var(--sp-10) 0; }
+  .globe__me { display: none; }
+  .globe__side { top: 88px; left: var(--sp-10); max-height: calc(100% - 88px - 260px); }
+  .globe__legend { display: block; }
+  .globe__strip { padding-inline: var(--sp-10); scroll-padding-inline: var(--sp-10); bottom: var(--sp-6); }
 }

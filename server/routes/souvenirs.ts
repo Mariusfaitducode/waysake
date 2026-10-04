@@ -52,7 +52,7 @@ export function souvenirRoutes(app: FastifyInstance, db: Db, dataDir: string) {
     const cover = t.coverMediaId ? (db.prepare("SELECT sha256 FROM media WHERE id = ?").get(t.coverMediaId) as { sha256: string } | undefined) : undefined;
     const jpeg = await renderPostcard(
       dataDir,
-      { title: req.query.title?.trim().slice(0, 120) || t.title, startAt: t.startAt, endAt: t.endAt, countryCodes: t.countryCodes, route: t.route, coverSha256: cover?.sha256 ?? null, km: stats.km, days: stats.days, photos: stats.photos },
+      { title: req.query.title?.trim().slice(0, 120) || t.title, startAt: t.startAt, endAt: t.endAt, countryCodes: t.countryCodes, route: t.route, coverSha256: cover?.sha256 ?? null, km: stats.km, days: stats.days, photos: stats.photos, color: t.color, stops: t.chapters.map((c) => c.title) },
       req.query.lang === "en" ? "en" : "fr",
     );
     return reply

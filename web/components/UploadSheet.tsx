@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { t } from "../i18n/index.js";
+import { IconPhotos } from "../shell/icons.js";
 import type { QueueState, UploadQueue } from "../upload-queue.js";
 import "./Sheet.css";
 import "./UploadSheet.css";
@@ -67,6 +68,9 @@ export function UploadSheet({ queue, importId, onSend, onRetry, onClose }: Props
                 className="sr-only"
                 onChange={(e) => e.target.files && onSend([...e.target.files])}
               />
+              <span className="drop__icon" aria-hidden="true">
+                <IconPhotos />
+              </span>
               <span className="drop__lead">{t("upload.choose")}</span>
               <span className="drop__hint">{t("upload.dropHint")}</span>
             </label>

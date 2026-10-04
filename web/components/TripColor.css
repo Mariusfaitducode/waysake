@@ -1,0 +1,85 @@
+/* Pastille : la teinte pleine du voyage (--trip, posé par tripStyle). */
+.trip-dot { display: inline-block; flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--trip); vertical-align: 0.05em; }
+
+/* Étiquette : nom de la couleur sur fond teinté à 14 %. */
+.trip-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--r-full);
+  background: color-mix(in srgb, var(--trip) 14%, var(--surface));
+  color: var(--text);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  white-space: nowrap;
+}
+.trip-tag .trip-dot { width: 8px; height: 8px; }
+
+/* Filtre : puce cerclée ; active = Encre pleine. */
+.trip-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border: 0;
+  border-radius: var(--r-full);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line-strong);
+  color: var(--text);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease);
+}
+.trip-filter .trip-dot { width: 9px; height: 9px; }
+.trip-filter:hover { background: color-mix(in srgb, var(--text) 5%, transparent); }
+.trip-filter[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); box-shadow: none; }
+
+/* Sélecteur (maquette Horizon « Changer la couleur d'un voyage »). */
+.trip-picker { width: min(100%, 340px); padding: 14px; border-radius: var(--r-xl); background: var(--surface); box-shadow: inset 0 0 0 1px var(--line-strong), var(--shadow-lg); }
+.trip-picker__head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-3); padding: 2px 4px 10px; }
+.trip-picker__head b { font-weight: var(--fw-semibold); font-size: var(--fs-md); }
+.trip-picker__head span { font-size: var(--fs-sm); color: var(--text-muted); }
+.trip-picker__auto {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: var(--r-md);
+  background: var(--line);
+  color: var(--text);
+  font-size: var(--fs-md);
+  font-weight: var(--fw-medium);
+  text-align: left;
+  cursor: pointer;
+}
+.trip-picker__auto svg { width: 20px; height: 20px; color: var(--text-muted); }
+.trip-picker__auto small { display: block; color: var(--text-muted); font-size: var(--fs-xs); font-weight: var(--fw-regular); }
+.trip-picker__auto-swatch { width: 22px; height: 22px; border-radius: 50%; background: var(--trip); }
+.trip-picker__auto[aria-pressed="true"] { box-shadow: inset 0 0 0 2px var(--text); }
+.trip-picker__grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 14px; padding: 0 4px 4px; }
+.trip-picker__swatch {
+  aspect-ratio: 1;
+  min-width: 40px;
+  border: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--trip);
+  color: var(--on-trip);
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease);
+}
+.trip-picker__swatch:hover { transform: scale(1.07); }
+.trip-picker__swatch svg { width: 52%; height: 52%; opacity: 0; stroke-width: 2.6; }
+.trip-picker__swatch[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px var(--trip); }
+.trip-picker__swatch[aria-pressed="true"] svg { opacity: 1; }
+.trip-picker button:disabled { cursor: default; opacity: 0.6; }
+.trip-picker button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+/* Dans une feuille : le sélecteur perd son cadre (la feuille en fournit un). */
+.sheet .trip-picker { width: 100%; padding: 0; background: none; box-shadow: none; }

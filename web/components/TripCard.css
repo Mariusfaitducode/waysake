@@ -1,31 +1,85 @@
+/* ---------- Carte sur photo (bas du globe) ---------- */
 .trip-card {
   position: relative;
   display: block;
   overflow: hidden;
-  border-radius: 22px;
-  background: var(--hairline);
-  color: #fff;
+  border-radius: var(--r-xl);
+  background: var(--surface-sunken);
+  color: var(--text-on-photo);
   text-decoration: none;
   isolation: isolate;
-  transition: transform 260ms var(--ease);
+  transition: transform var(--dur) var(--ease);
   -webkit-tap-highlight-color: transparent;
 }
 .trip-card:active { transform: scale(0.98); }
 .trip-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; transition: transform 700ms var(--ease); }
 .trip-card:hover img { transform: scale(1.04); }
-.trip-card__shade { position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, transparent 35%, rgba(0, 0, 0, 0.62)); }
-.trip-card__text { position: absolute; left: 0; right: 0; bottom: 0; display: grid; gap: 2px; padding: 18px; }
-.trip-card__flags { font-size: 18px; letter-spacing: 2px; }
-.trip-card__title { font-family: var(--font-sign); font-weight: 600; font-size: 32px; line-height: 1; text-wrap: balance; }
-.trip-card__meta { font-size: 14px; opacity: 0.9; }
-.trip-card__count { opacity: 0.75; }
+/* Photo : seul endroit où le noir est permis (lisibilité du texte blanc). */
+.trip-card__shade { position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.6)); }
+.trip-card__text { position: absolute; left: 0; right: 0; bottom: 0; display: grid; gap: 2px; padding: var(--sp-5); }
+.trip-card__title {
+  display: block;
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-3xl);
+  letter-spacing: var(--tracking-tighter);
+  line-height: var(--lh-tight);
+  text-wrap: balance;
+}
+/* Pastille sur photo : liseré blanc pour rester visible sur toutes les couvertures. */
+.trip-card__title .trip-dot { width: 0.3em; height: 0.3em; min-width: 9px; min-height: 9px; margin-right: 0.35em; vertical-align: 0.14em; box-shadow: 0 0 0 2px var(--text-on-photo); }
+.trip-card__meta { overflow: hidden; font-size: var(--fs-sm); font-weight: var(--fw-medium); opacity: 0.88; text-overflow: ellipsis; white-space: nowrap; }
 .trip-card--lg { aspect-ratio: 4 / 5; }
 .trip-card--md { aspect-ratio: 4 / 3; }
-.trip-card--sm { width: 240px; aspect-ratio: 4 / 3; border-radius: 18px; }
-.trip-card--sm .trip-card__title { font-size: 24px; }
+.trip-card--sm { width: 240px; aspect-ratio: 4 / 3; border-radius: var(--r-lg); }
+.trip-card--sm .trip-card__title { font-size: var(--fs-xl); letter-spacing: var(--tracking-tight); }
 .trip-card--sm .trip-card__text { padding: 14px; }
 @media (min-width: 900px) {
   .trip-card--lg { aspect-ratio: 16 / 10; }
-  .trip-card--lg .trip-card__title { font-size: 44px; }
-  .trip-card--lg .trip-card__text { padding: 26px; }
+}
+
+/* ---------- Ligne de la liste des voyages ---------- */
+.trip-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--sp-3);
+  align-items: center;
+  padding: var(--sp-2) 10px;
+  border-radius: var(--r-md);
+  color: var(--text);
+  text-decoration: none;
+  transition: background-color var(--dur-fast) var(--ease);
+  -webkit-tap-highlight-color: transparent;
+}
+.trip-row:hover { background: color-mix(in srgb, var(--trip) 7%, transparent); }
+.trip-row:active { background: color-mix(in srgb, var(--trip) 11%, transparent); }
+.trip-row:focus-visible { outline-offset: 0; border-radius: var(--r-md); }
+.trip-row__thumb { position: relative; width: 58px; height: 58px; flex: none; overflow: hidden; border-radius: var(--r-md); background: var(--surface-sunken); }
+.trip-row__thumb img { width: 100%; height: 100%; object-fit: cover; }
+.trip-row__thumb::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 1px var(--line); }
+.trip-row__text { min-width: 0; display: grid; }
+.trip-row__title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semibold);
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+}
+.trip-row__title > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.trip-row__meta { margin-top: 1px; overflow: hidden; color: var(--text-muted); font-size: var(--fs-sm); line-height: 1.3; text-overflow: ellipsis; white-space: nowrap; }
+.trip-row__tag { display: flex; }
+
+/* Mini-route : pastilles de 6 px reliées par un trait de 1,5 px, à la couleur du voyage. */
+.mini-route { display: flex; align-items: center; margin-top: 6px; }
+.mini-route__stop { display: flex; align-items: center; }
+.mini-route i { width: 6px; height: 6px; flex: none; border-radius: 50%; background: var(--trip); }
+.mini-route u { width: 14px; height: 1.5px; background: var(--trip); opacity: 0.55; }
+.mini-route em { margin-left: 5px; color: var(--text-muted); font-size: var(--fs-2xs); font-style: normal; }
+
+/* Écran étroit : l'étiquette s'efface, la pastille devant le titre suffit (le titre porte le sens). */
+@media (max-width: 420px) {
+  .trip-row { grid-template-columns: auto minmax(0, 1fr); }
+  .trip-row__tag { display: none; }
 }

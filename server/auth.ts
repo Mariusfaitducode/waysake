@@ -1,6 +1,7 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { createHash, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import type { Db } from "./db.js";
+import { readVersion } from "./version.js";
 
 /**
  * Mot de passe du foyer (WAYSAKE_PASSWORD), facultatif. Sans lui, Waysake reste ouvert comme avant.
@@ -86,7 +87,8 @@ export function setupAuth(app: FastifyInstance, db: Db, rawPassword: string | un
   syncPassword(db, password);
   const throttle = createThrottle();
 
-  app.get("/api/health", async () => (password ? { ok: true, auth: true } : { ok: true }));
+  const version = readVersion() ?? "dev";
+  app.get("/api/health", async () => (password ? { ok: true, auth: true, version } : { ok: true, version }));
 
   if (!password) {
     // Rien à protéger : /api/login répond simplement que la tour est ouverte.

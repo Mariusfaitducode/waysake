@@ -1,0 +1,19 @@
+/* L'enveloppe porte la forme ; le conteneur MapLibre (.pin-map__canvas) reçoit ses propres classes. */
+.pin-map { height: min(36vh, 340px); border-radius: var(--r-md); overflow: hidden; background: var(--surface-sunken); box-shadow: inset 0 0 0 1px var(--line); }
+.pin-map__canvas { width: 100%; height: 100%; }
+.pin-map .maplibregl-canvas { cursor: crosshair; }
+/* Épingle Encre, cerclée de la couleur de page pour rester lisible sur tous les fonds de carte. */
+.pin-map__pin { cursor: grab; padding: 6px; }
+.pin-map__pin:active { cursor: grabbing; }
+.pin-map__pin span {
+  display: block;
+  width: 26px;
+  height: 26px;
+  border-radius: 50% 50% 50% 0;
+  rotate: -45deg;
+  background: var(--accent);
+  border: 3px solid var(--bg);
+  box-shadow: var(--shadow-md), 0 2px 6px rgba(0, 0, 0, 0.3);
+  animation: pin-drop var(--dur-slow) var(--ease) both;
+}
+@keyframes pin-drop { from { translate: 0 -10px; opacity: 0; } }

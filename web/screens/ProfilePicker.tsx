@@ -1,10 +1,11 @@
+import { Wordmark } from "../components/Logo.js";
 import { useEffect, useState } from "react";
 import { api, type User } from "../api.js";
 import { inApp } from "../native.js";
 import { t } from "../i18n/index.js";
+import { Avatar } from "../components/Avatar.js";
 import { LanguageSwitch } from "../components/LanguageSwitch.js";
 import "./ProfilePicker.css";
-import "./Login.css";
 
 export function ProfilePicker({ onPick }: { onPick: (u: User) => void }) {
   const [users, setUsers] = useState<User[]>([]);
@@ -35,28 +36,36 @@ export function ProfilePicker({ onPick }: { onPick: (u: User) => void }) {
 
   return (
     <main className="picker">
-      <div className="picker__sign" aria-hidden="true">
-        <span>Waysake</span>
+      <div className="picker__brand">
+        <Wordmark size={30} />
       </div>
-      <h1 className="picker__title">{t("profile.who")}</h1>
-      <p className="picker__hint">{t("profile.hint")}</p>
-      <div className="picker__people">
-        {users.map((u) => (
-          <button key={u.id} className="picker__person" onClick={() => pick(u)} style={{ "--c": u.color } as React.CSSProperties}>
-            <span className="picker__avatar" aria-hidden="true">{u.name[0]}</span>
-            <span className="picker__name">{u.name}</span>
-          </button>
-        ))}
+      <div className="picker__center">
+        <h1 className="picker__title">{t("profile.who")}</h1>
+        <p className="picker__hint">{t("profile.hint")}</p>
+        <ul className="picker__people">
+          {users.map((u) => (
+            <li key={u.id}>
+              <button className="picker__person" onClick={() => pick(u)}>
+                <Avatar name={u.name} color={u.color} size={112} className="picker__avatar" />
+                <span className="picker__name">{u.name}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+        {error && (
+          <p role="alert" className="picker__error">
+            {error}
+          </p>
+        )}
       </div>
-      {error && <p role="alert" className="picker__error">{error}</p>}
-      <div className="picker__lang">
+      <footer className="picker__foot">
         <LanguageSwitch />
-      </div>
-      {locks && (
-        <button className="button button--quiet button--small picker__lock" onClick={lock}>
-          {t("profile.lock")}
-        </button>
-      )}
+        {locks && (
+          <button className="button button--quiet button--small" onClick={lock}>
+            {t("profile.lock")}
+          </button>
+        )}
+      </footer>
     </main>
   );
 }

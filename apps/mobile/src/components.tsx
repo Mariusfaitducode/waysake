@@ -1,36 +1,117 @@
-import type { ReactNode } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, Text, View, type ViewStyle } from "react-native";
-import { font, useTheme } from "./theme";
+import { forwardRef, useState, type ReactNode } from "react";
+import { ActivityIndicator, Image, Pressable, StyleSheet, Text, TextInput, View, type TextInputProps, type ViewStyle } from "react-native";
+import { fs, radius, type, useTheme } from "./theme";
 import { tr, type Locale } from "./i18n";
 
-/** Le panneau vert de Waysake, liseré blanc. */
-export function Sign({ children, size = 30 }: { children: ReactNode; size?: number }) {
+const glyph = { light: require("../assets/logo-glyph.png"), dark: require("../assets/logo-glyph-dark.png") };
+
+/**
+ * Glyphe de Waysake (chemin en W, épingle corail), en Encre du thème courant. Image tirée de web/brand.ts par
+ * scripts/build-logo.mts. Décoratif sauf si `label` est fourni.
+ */
+export function Logo({ size = 28, label }: { size?: number; label?: string }) {
   const t = useTheme();
   return (
-    <View style={[styles.sign, { backgroundColor: t.accent, borderRadius: size * 0.33, padding: size * 0.13 }]}>
-      <View style={[styles.signInner, { borderRadius: size * 0.23, paddingHorizontal: size * 0.5 }]}>
-        <Text style={{ color: "#fff", fontFamily: font.sign, fontSize: size, lineHeight: size * 1.15 }}>{children}</Text>
-      </View>
+    <Image
+      source={t.dark ? glyph.dark : glyph.light}
+      style={{ width: size, height: size }}
+      accessible={!!label}
+      accessibilityRole={label ? "image" : undefined}
+      accessibilityLabel={label}
+      importantForAccessibility={label ? "yes" : "no-hide-descendants"}
+    />
+  );
+}
+
+/** Glyphe + « Waysake » en Geist SemiBold, approche -0,045 em (comme <Wordmark> du site). `size` : hauteur du glyphe. */
+export function Wordmark({ size = 30 }: { size?: number }) {
+  const t = useTheme();
+  return (
+    <View style={styles.wordmark} accessible accessibilityRole="header" accessibilityLabel="Waysake">
+      <Logo size={size} />
+      <Text style={[type(Math.round(size * 0.72), 600, "tighter"), { color: t.text, marginLeft: size * 0.1 }]}>Waysake</Text>
     </View>
   );
 }
 
-export function Button({ title, onPress, kind = "primary", disabled, busy, style }: { title: string; onPress: () => void; kind?: "primary" | "quiet"; disabled?: boolean; busy?: boolean; style?: ViewStyle }) {
+/** Titre d'écran (--fs-2xl, 650 ≈ Geist Bold à l'écran, approche serrée). */
+export function Title({ children, size = fs.xxl }: { children: ReactNode; size?: number }) {
+  const t = useTheme();
+  return (
+    <Text accessibilityRole="header" style={[type(size, 700, "tighter"), { color: t.text }]}>
+      {children}
+    </Text>
+  );
+}
+
+type ButtonKind = "primary" | "quiet" | "plain";
+/** `primary` : l'unique action Encre de l'écran. `quiet` : contour fin. `plain` : simple lien. */
+export function Button({ title, onPress, kind = "primary", disabled, busy, style, small }: { title: string; onPress: () => void; kind?: ButtonKind; disabled?: boolean; busy?: boolean; style?: ViewStyle; small?: boolean }) {
   const t = useTheme();
   const primary = kind === "primary";
+  const off = !!disabled && !busy;
+  // Désactivé : fond creusé et texte pâle plutôt qu'une Encre délavée (illisible en sombre comme en clair).
+  const fg = off ? t.faint : primary ? t.onAccent : t.text;
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityState={{ disabled: !!(disabled || busy), busy: !!busy }}
       disabled={disabled || busy}
       onPress={onPress}
+      hitSlop={small ? 8 : undefined}
       style={({ pressed }) => [
         styles.button,
-        { backgroundColor: primary ? t.accent : "transparent", borderColor: primary ? t.accent : t.hairline, opacity: disabled ? 0.45 : 1, transform: [{ scale: pressed ? 0.97 : 1 }] },
+        small && styles.buttonSmall,
+        {
+          backgroundColor: primary ? (off ? t.sunken : t.accent) : pressed && kind === "plain" ? t.line : "transparent",
+          borderColor: primary ? (off ? t.line : t.accent) : kind === "quiet" ? t.lineStrong : "transparent",
+          opacity: off && !primary ? 0.5 : pressed && primary ? 0.86 : 1,
+          transform: [{ scale: pressed ? 0.98 : 1 }],
+        },
         style,
       ]}
     >
-      {busy ? <ActivityIndicator color={primary ? "#fff" : t.ink} /> : <Text style={[styles.buttonText, { color: primary ? "#fff" : t.ink }]}>{title}</Text>}
+      {busy ? <ActivityIndicator color={fg} /> : <Text style={[type(small ? fs.sm : fs.md, 600), { color: fg }]}>{title}</Text>}
     </Pressable>
+  );
+}
+
+/** Champ de saisie : fond creusé, bord Encre au focus. */
+export const Field = forwardRef<TextInput, TextInputProps & { label: string }>(function Field({ label, style, onFocus, onBlur, ...props }, ref) {
+  const t = useTheme();
+  const [focused, setFocused] = useState(false);
+  return (
+    <View style={{ gap: 6 }}>
+      <Text style={[type(fs.sm, 500), { color: t.muted }]}>{label}</Text>
+      <TextInput
+        ref={ref}
+        accessibilityLabel={label}
+        placeholderTextColor={t.faint}
+        selectionColor={t.accent}
+        cursorColor={t.accent}
+        onFocus={(e) => {
+          setFocused(true);
+          onFocus?.(e);
+        }}
+        onBlur={(e) => {
+          setFocused(false);
+          onBlur?.(e);
+        }}
+        {...props}
+        style={[styles.input, type(17, 500), { color: t.text, backgroundColor: t.sunken, borderColor: focused ? t.accent : t.line }, style]}
+      />
+    </View>
+  );
+});
+
+/** Message d'état (erreur, avertissement) : un trait à gauche et le texte, jamais la couleur seule. */
+export function Notice({ kind = "danger", children }: { kind?: "danger" | "warning"; children: ReactNode }) {
+  const t = useTheme();
+  const color = kind === "danger" ? t.danger : t.warning;
+  return (
+    <View accessibilityRole="alert" style={[styles.notice, { borderLeftColor: color, backgroundColor: t.surface }]}>
+      <Text style={[type(fs.md, 500), { color }]}>{children}</Text>
+    </View>
   );
 }
 
@@ -38,7 +119,7 @@ export function Button({ title, onPress, kind = "primary", disabled, busy, style
 export function LanguageSwitch({ value, onChange }: { value: Locale; onChange: (l: Locale) => void }) {
   const t = useTheme();
   return (
-    <View style={[styles.lang, { backgroundColor: t.hairline }]} accessibilityRole="radiogroup" accessibilityLabel={tr("lang.label")}>
+    <View style={[styles.lang, { backgroundColor: t.sunken, borderColor: t.line }]} accessibilityRole="radiogroup" accessibilityLabel={tr("lang.label")}>
       {(["fr", "en"] as const).map((l) => {
         const on = value === l;
         return (
@@ -47,9 +128,11 @@ export function LanguageSwitch({ value, onChange }: { value: Locale; onChange: (
             onPress={() => onChange(l)}
             accessibilityRole="radio"
             accessibilityState={{ selected: on }}
-            style={[styles.langItem, on && { backgroundColor: t.ink }]}
+            accessibilityLabel={tr(l === "fr" ? "lang.fr" : "lang.en")}
+            hitSlop={6}
+            style={[styles.langItem, on && { backgroundColor: t.surface, borderColor: t.lineStrong }]}
           >
-            <Text style={[styles.langText, { color: on ? t.paper : t.muted }]}>{tr(l === "fr" ? "lang.fr" : "lang.en")}</Text>
+            <Text style={[type(fs.sm, 600), { color: on ? t.text : t.muted }]}>{l.toUpperCase()}</Text>
           </Pressable>
         );
       })}
@@ -58,11 +141,11 @@ export function LanguageSwitch({ value, onChange }: { value: Locale; onChange: (
 }
 
 export const styles = StyleSheet.create({
-  lang: { flexDirection: "row", alignSelf: "flex-start", borderRadius: 999, padding: 3, gap: 2 },
-  langItem: { borderRadius: 999, paddingVertical: 7, paddingHorizontal: 14 },
-  langText: { fontSize: 14, fontWeight: "600" },
-  sign: { alignSelf: "flex-start" },
-  signInner: { borderWidth: 2.5, borderColor: "#fff", paddingTop: 2 },
-  button: { borderRadius: 999, borderWidth: 1.5, paddingVertical: 16, paddingHorizontal: 22, alignItems: "center", justifyContent: "center", minHeight: 56 },
-  buttonText: { fontSize: 17, fontWeight: "600" },
+  wordmark: { flexDirection: "row", alignItems: "center", alignSelf: "flex-start" },
+  lang: { flexDirection: "row", borderRadius: radius.full, borderWidth: 1, padding: 3, gap: 2 },
+  langItem: { borderRadius: radius.full, borderWidth: 1, borderColor: "transparent", paddingVertical: 6, paddingHorizontal: 12, minWidth: 44, alignItems: "center" },
+  button: { borderRadius: radius.full, borderWidth: 1, paddingVertical: 14, paddingHorizontal: 22, alignItems: "center", justifyContent: "center", minHeight: 52 },
+  buttonSmall: { paddingVertical: 8, paddingHorizontal: 14, minHeight: 36 },
+  input: { borderRadius: radius.sm, borderWidth: 1, paddingHorizontal: 14, paddingVertical: 14, minHeight: 52 },
+  notice: { borderLeftWidth: 3, borderRadius: radius.xs, paddingVertical: 10, paddingHorizontal: 12 },
 });

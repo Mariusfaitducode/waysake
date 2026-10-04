@@ -1,28 +1,58 @@
-.library__section { margin-top: 18px; }
+.library { padding-bottom: var(--sp-16); }
+.library__section { margin-top: var(--sp-6); }
+/* En-tête de mois collant, sur verre : Geist serré, le nombre en gris à côté. */
 .library__month {
   position: sticky;
   top: 0;
   z-index: 5;
   display: flex;
   align-items: baseline;
-  gap: 10px;
-  margin: 0 0 8px;
-  padding: calc(env(safe-area-inset-top, 0px) + 8px) 16px 8px;
-  font-family: var(--font-sign);
-  font-weight: 500;
-  font-size: 24px;
-  line-height: 1.1;
-  background: var(--veil);
+  gap: var(--sp-2);
+  margin: 0 0 var(--sp-2);
+  padding: calc(env(safe-area-inset-top, 0px) + var(--sp-3)) var(--gutter) var(--sp-2);
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-xl);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--lh-snug);
+  background: var(--glass);
   backdrop-filter: saturate(1.6) blur(18px);
   -webkit-backdrop-filter: saturate(1.6) blur(18px);
 }
-.library__month span { font-family: var(--font-ui); font-size: 14px; font-weight: 500; color: var(--muted); }
+.library__month span { font-family: var(--font-sans); font-size: var(--fs-sm); font-weight: var(--fw-medium); letter-spacing: 0; color: var(--text-muted); }
 @media (min-width: 900px) {
-  .library__month { padding-inline: 40px; font-size: 28px; }
+  .library__month { padding-inline: var(--sp-10); }
 }
-.library__locate { display: flex; align-items: center; gap: 14px; margin: 10px 16px 0; padding: 14px 16px; border-radius: 18px; background: color-mix(in srgb, var(--signal) 18%, var(--surface)); color: var(--ink); text-decoration: none; box-shadow: inset 0 0 0 1px var(--hairline); }
-.library__locate span:nth-child(2) { flex: 1; display: grid; gap: 2px; }
-.library__locate small { color: var(--muted); font-size: 14px; }
-.library__locate-pin { flex: none; width: 14px; height: 14px; border-radius: 50%; border: 3px solid var(--signal); }
-.library__locate-go { font-size: 26px; color: var(--muted); }
-@media (min-width: 900px) { .library__locate { margin-inline: 40px; max-width: 640px; } }
+
+/* Rappel « à localiser » : une ligne sobre, l'avertissement ne tient qu'à l'épingle. */
+.library__locate {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin: var(--sp-4) var(--gutter) 0;
+  padding: var(--sp-3) var(--sp-4) var(--sp-3) var(--sp-3);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--text);
+  text-decoration: none;
+  transition: background-color var(--dur-fast) var(--ease);
+}
+.library__locate:hover { background: color-mix(in srgb, var(--surface) 94%, var(--text)); }
+.library__locate-pin {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-sm);
+  background: color-mix(in srgb, var(--warning) 14%, transparent);
+  color: var(--warning);
+}
+.library__locate-pin svg { width: 20px; height: 20px; }
+.library__locate-text { flex: 1; min-width: 0; display: grid; gap: 1px; line-height: var(--lh-snug); }
+.library__locate-text strong { font-size: var(--fs-md); font-weight: var(--fw-semibold); }
+.library__locate-text small { color: var(--text-muted); font-size: var(--fs-sm); }
+.library__locate-go { flex: none; color: var(--text-faint); }
+.library__locate-go svg { width: 18px; height: 18px; transform: scaleX(-1); }
+@media (min-width: 900px) { .library__locate { margin-inline: var(--sp-10); max-width: 560px; } }
