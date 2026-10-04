@@ -52,6 +52,7 @@ const PROTECTED = [
   "/api/places?q=par",
   "/api/unlocated",
   "/api/imports/last",
+  "/api/space",
   "/api/geo/countries.geojson",
   "/api/media/1/original",
   "/api/media/1/thumb",

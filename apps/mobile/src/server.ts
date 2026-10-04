@@ -13,6 +13,16 @@ function errorMessage(body: { error?: string; code?: string; file?: string; seco
 
 export type Person = { id: string; name: string; color: string };
 
+/** GET /api/space : disque de la tour, place prise par Waysake, rythme de croissance, débit d'envoi connu. */
+export type Space = {
+  disk: { free: number; total: number };
+  used: { originals: number; derived: number; database: number; total: number };
+  monthly: { bytes: number; items: number };
+  forecast: { months: number | null; fullAt: number | null };
+  average: { photo: number; video: number };
+  uploadRate: { bytesPerSecond: number; measured: boolean };
+};
+
 /**
  * Appels à la tour. L'identité passe par l'en-tête X-Atlas-User (jamais dans l'adresse) ; le mot de passe du
  * foyer (WAYSAKE_PASSWORD), s'il y en a un, par `Authorization: Bearer`, téléversements compris.
@@ -46,6 +56,22 @@ export const tower = {
   users: (s: Settings) => call<Person[]>(s, "/api/users"),
   lastImport: (s: Settings) => call<{ since: number | null }>(s, "/api/imports/last"),
   newImport: (s: Settings) => call<{ id: number }>(s, "/api/imports", { method: "POST" }),
+  space: (s: Settings) => call<Space>(s, "/api/space"),
+  /** Pour chaque élément (nom, date de prise de vue), est-il déjà dans Waysake ? Par lots : une requête reste petite. */
+  async known(s: Settings, items: { name: string; takenAt: number }[]): Promise<boolean[]> {
+    const out: boolean[] = [];
+    for (let i = 0; i < items.length; i += 1000) {
+      const r = await call<{ known: boolean[] }>(s, "/api/media/known", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: items.slice(i, i + 1000) }),
+      });
+      out.push(...r.known);
+    }
+    return out;
+  },
+  uploadRate: (s: Settings, bytes: number, ms: number) =>
+    call<Space["uploadRate"]>(s, "/api/uploads/rate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ bytes, ms }) }),
   async upload(s: Settings, importId: number, uri: string, fields: Record<string, string>) {
     const r = await new File(uri).upload(`${s.server}/api/media?import=${importId}`, {
       httpMethod: "POST",

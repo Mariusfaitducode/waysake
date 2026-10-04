@@ -17,6 +17,7 @@ import { socialRoutes } from "./routes/social.js";
 import { souvenirRoutes } from "./routes/souvenirs.js";
 import { liveRoutes } from "./routes/live.js";
 import { gameRoutes } from "./routes/game.js";
+import { spaceRoutes } from "./routes/space.js";
 import { setupAuth } from "./auth.js";
 import { scheduleSnapshots } from "./backup.js";
 import { setting } from "./config.js";
@@ -126,6 +127,7 @@ export async function buildApp(opts: {
   souvenirRoutes(app, db, opts.dataDir);
   liveRoutes(app, db);
   gameRoutes(app, db);
+  spaceRoutes(app, db, opts.dataDir);
 
   const webDir = opts.webDir && resolve(opts.webDir);
   if (webDir && existsSync(webDir)) {

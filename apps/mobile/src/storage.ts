@@ -19,4 +19,25 @@ export async function loadLang(): Promise<"fr" | "en" | null> {
 }
 export const saveLang = (l: "fr" | "en") => AsyncStorage.setItem(LANG_KEY, l);
 
+/**
+ * Ce que ce téléphone a déjà remis à cette tour (identifiants de la photothèque). La tour reconnaît ses fichiers
+ * par nom et date, mais elle ne garde pas ceux écartés à la validation (captures, photos de la maison) : sans ce
+ * carnet, ces mois resteraient « partiels » pour toujours et on les renverrait à chaque fois.
+ */
+const sentKey = (server: string) => `atlas.sent.v1:${server}`;
+export async function loadSent(server: string): Promise<Set<string>> {
+  try {
+    const raw = await AsyncStorage.getItem(sentKey(server));
+    return new Set(raw ? (JSON.parse(raw) as string[]) : []);
+  } catch {
+    return new Set();
+  }
+}
+export async function rememberSent(server: string, ids: string[]) {
+  if (!ids.length) return;
+  const all = await loadSent(server);
+  ids.forEach((id) => all.add(id));
+  await AsyncStorage.setItem(sentKey(server), JSON.stringify([...all]));
+}
+
 export { normalizeServer } from "./storage-url";

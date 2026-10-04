@@ -35,8 +35,6 @@ export const fr = {
   "import.denied.text": "Autorise « Photos et vidéos » (accès complet) dans les réglages, pour que Waysake retrouve tes voyages avec leurs lieux.",
   "import.openSettings": "Ouvrir les réglages",
   "import.choose": "Quelles photos envoyer à la tour ? Waysake les triera, tu valideras ensuite.",
-  "import.firstDay": "Premier jour",
-  "import.lastDay": "Dernier jour",
   "import.scanning": "Recherche des photos {range}…",
   "import.found": { one: "{count} trouvée", other: "{count} trouvées" },
   "import.error.title": "Ça n'a pas marché",
@@ -44,8 +42,6 @@ export const fr = {
   "import.none": "Aucune photo {range}",
   "import.otherPeriod": "Choisir une autre période",
   "import.photosAndVideos": "{photos} et {videos}",
-  "import.photosFound": { one: "photo trouvée", other: "photos trouvées" },
-  "import.skipKnown": "{range}. Celles déjà dans Waysake seront ignorées.",
   "import.send": "Envoyer à Waysake",
   "import.changePeriod": "Changer de période",
   "import.progress": "{done} sur {total}",
@@ -67,6 +63,58 @@ export const fr = {
   "period.custom": "Choisir les dates",
   "period.custom.sub": "Un voyage précis, par exemple",
   "period.range": "du {from} au {to}",
+  "period.inMonths": "en {months}",
+  "period.months": "Mois par mois",
+  "period.months.sub": "Les quatre dernières années, avec ce qui est déjà envoyé",
+
+  // Choix des dates (deux champs, un seul sélecteur à la fois)
+  "range.title": "Choisir les dates",
+  "range.from": "Du",
+  "range.to": "Au",
+  "range.search": "Chercher les photos",
+  "range.back": "Retour",
+
+  // Mois par mois
+  "months.title": "Mois par mois",
+  "months.counting": "Comptage des photos du téléphone…",
+  "months.checking": "Vérification de ce que Waysake a déjà…",
+  "months.items": { zero: "Aucune photo", one: "{count} élément", other: "{count} éléments" },
+  "months.status.sent": "Déjà envoyé",
+  "months.status.partial": { one: "{count} à envoyer", other: "{count} à envoyer" },
+  "months.status.none": "Pas envoyé",
+  "months.status.unknown": "…",
+  "months.year": "Toute l'année",
+  "months.selection": { zero: "Choisis un ou plusieurs mois", one: "{count} mois choisi", other: "{count} mois choisis" },
+  "months.prepare": "Préparer l'envoi",
+
+  // Place sur la tour
+  "space.free": "Libre sur la tour : {free} sur {total}",
+  "space.used": "Waysake occupe {used}",
+  "space.forecast": "Au rythme actuel ({rate} par mois), il reste de la place pour environ {months} mois de photos : il faudra un disque supplémentaire vers {date}.",
+  "space.forecastLong": "Au rythme actuel ({rate} par mois), il reste de la place pour plus de 10 ans de photos.",
+  "space.full": "Pas assez de place sur la tour : il manque {missing}. Libère de la place ou ajoute un disque avant d'envoyer.",
+  "space.tight": "Ça tient tout juste sur la tour : il restera moins de 1 Go.",
+
+  // Préparation et envoi
+  "import.checking": "Comparaison avec ce que Waysake a déjà…",
+  "import.measuring": "Calcul de la taille…",
+  "import.toSend": "{what} à envoyer",
+  "import.alreadyThere": { one: "{count} déjà dans Waysake, ignorée.", other: "{count} déjà dans Waysake, ignorées." },
+  "import.allThere": "Tout est déjà dans Waysake {range}.",
+  "import.size": "{size} · durée estimée : {duration}",
+  "import.rateMeasured": "Estimation d'après le débit mesuré lors des derniers envois ({rate}/s).",
+  "import.rateDefault": "Estimation prudente ({rate}/s) : le débit réel sera mesuré pendant cet envoi.",
+  "import.remaining": "Encore environ {duration}",
+  "import.sentBytes": "{done} sur {total}",
+
+  // Tailles et durées
+  "size.kb": "{n} Ko",
+  "size.mb": "{n} Mo",
+  "size.gb": "{n} Go",
+  "size.tb": "{n} To",
+  "duration.lessThanMinute": "moins d'une minute",
+  "duration.minutes": { one: "{count} minute", other: "{count} minutes" },
+  "duration.hours": "{h} h {m} min",
 
   // Erreurs
   "api.unreachable": "La tour ne répond pas. Vérifie que Tailscale est connecté sur ton téléphone.",
@@ -83,5 +131,7 @@ export const fr = {
   "api.no_file": "Aucun fichier.",
   "api.import_not_found": "Cet import n'existe pas.",
   "api.import_closed": "Cet import est terminé ou n'existe plus.",
+  "api.invalid_items": "Liste de fichiers invalide.",
+  "api.invalid_rate": "Mesure de débit invalide.",
   "api.too_many_attempts": "Trop d'essais. Réessaie dans {seconds} s.",
 } as const;

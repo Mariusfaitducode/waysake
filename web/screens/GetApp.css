@@ -12,3 +12,5 @@
 @media (min-width: 900px) {
   .getapp__card { margin-inline: 40px; }
 }
+.getapp__meter { height: 8px; margin: 10px 0; border-radius: 4px; overflow: hidden; background: var(--hairline); }
+.getapp__meter span { display: block; height: 100%; background: var(--autostrada); }

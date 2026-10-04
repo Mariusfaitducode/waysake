@@ -1,5 +1,13 @@
 import { describe, it, expect } from "vitest";
-import { countryName, dateRange, days, monthLabel, number } from "./format.js";
+import { bytes, countryName, dateRange, days, monthLabel, number } from "./format.js";
+
+describe("bytes", () => {
+  it("Mo, Go, To selon la langue", () => {
+    expect(bytes(5_300_000, "fr").replace(/\s/g, " ")).toBe("5,3 Mo");
+    expect(bytes(412_000_000_000, "en")).toBe("412 GB");
+    expect(bytes(1_500_000_000_000, "en")).toBe("1.5 TB");
+  });
+});
 
 const d = (s: string) => Date.parse(`${s}T12:00:00Z`);
 // Selon la version d'ICU, Intl sépare le tiret ou les milliers par des espaces fines : on les compare comme des espaces.

@@ -1,4 +1,4 @@
-import { locale, type Locale } from "./i18n/index.js";
+import { locale, translatorFor, type Locale } from "./i18n/index.js";
 
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 const tags: Record<Locale, string> = { fr: "fr-FR", en: "en-US" };
@@ -17,6 +17,16 @@ const dayMonth = (l: Locale) => fmt(l, "dayMonth", { day: "numeric", month: "lon
 const dayMonthYear = (l: Locale) => fmt(l, "dayMonthYear", { day: "numeric", month: "long", year: "numeric" });
 const monthOnly = (l: Locale) => fmt(l, "monthOnly", { month: "long" });
 const longDay = (l: Locale) => fmt(l, "longDay", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+
+/** Taille lisible : « 5,3 Mo », « 412 Go », « 1,5 To » (même règle que l'app). */
+export function bytes(n: number, l = locale()) {
+  const tr = translatorFor(l);
+  const f = (v: number) => new Intl.NumberFormat(tags[l], { maximumFractionDigits: v < 10 ? 1 : 0 }).format(v);
+  if (n >= 1e12) return tr("size.tb", { n: f(n / 1e12) });
+  if (n >= 1e9) return tr("size.gb", { n: f(n / 1e9) });
+  if (n >= 1e6 || n === 0) return tr("size.mb", { n: f(n / 1e6) });
+  return tr("size.kb", { n: f(Math.max(1, Math.round(n / 1e3))) });
+}
 
 /** "2026-09-03T10:00:00" → "Septembre 2026". L'heure locale de prise de vue est lue telle quelle. */
 export const monthLabel = (local: string, l = locale()) => capitalize(month(l).format(new Date(`${local.slice(0, 7)}-01T00:00:00Z`)));

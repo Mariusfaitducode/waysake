@@ -1,8 +1,47 @@
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
 import { Header } from "../components/Header.js";
-import { t } from "../i18n/index.js";
+import { locale, t } from "../i18n/index.js";
+import { bytes } from "../format.js";
 import "./GetApp.css";
+
+type Space = {
+  disk: { free: number; total: number };
+  used: { total: number };
+  monthly: { bytes: number };
+  forecast: { months: number | null; fullAt: number | null };
+};
+
+/** Place sur la tour : libre, prise par Waysake, et jusqu'à quand ça tiendra au rythme actuel (GET /api/space). */
+function SpaceCard() {
+  const [space, setSpace] = useState<Space | null>(null);
+  useEffect(() => {
+    fetch("/api/space", { headers: { Accept: "application/json" } })
+      .then((r) => (r.ok ? r.json() : null))
+      .then(setSpace, () => setSpace(null));
+  }, []);
+  if (!space) return null;
+  const { months, fullAt } = space.forecast;
+  const rate = bytes(space.monthly.bytes);
+  const forecast =
+    months === null || fullAt === null
+      ? null
+      : months > 120
+        ? t("getApp.space.forecastLong", { rate })
+        : t("getApp.space.forecast", { rate, months, date: new Intl.DateTimeFormat(locale() === "fr" ? "fr-FR" : "en-US", { month: "long", year: "numeric" }).format(fullAt) });
+  const used = space.disk.total > 0 ? 1 - space.disk.free / space.disk.total : 0;
+  return (
+    <section className="getapp__card">
+      <h2>{t("getApp.space.title")}</h2>
+      <p>{t("getApp.space.free", { free: bytes(space.disk.free), total: bytes(space.disk.total) })}</p>
+      <div className="getapp__meter" role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(used * 100)}>
+        <span style={{ width: `${Math.min(100, used * 100)}%` }} />
+      </div>
+      <p>{t("getApp.space.used", { used: bytes(space.used.total) })}</p>
+      {forecast && <p>{forecast}</p>}
+    </section>
+  );
+}
 
 type Device = "android" | "iphone" | "desktop";
 const detect = (): Device => (/android/i.test(navigator.userAgent) ? "android" : /iphone|ipad/i.test(navigator.userAgent) ? "iphone" : "desktop");
@@ -65,6 +104,8 @@ export function GetApp() {
           </ol>
         </section>
       )}
+
+      <SpaceCard />
 
       {device !== "android" && (
         <section className="getapp__card">
