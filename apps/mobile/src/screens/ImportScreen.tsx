@@ -10,6 +10,7 @@ import { ensurePermission, prepare, scan, type Found } from "../media";
 import { tower } from "../server";
 import type { Settings } from "../storage";
 import { font, useTheme, type Theme } from "../theme";
+import { formatNumber, formatPercent, tr } from "../i18n";
 
 type Step =
   | { kind: "permission" }
@@ -49,7 +50,7 @@ export function ImportScreen({ settings, visible, onClose, onSent }: { settings:
       value: new Date(now.getFullYear(), now.getMonth(), 1),
       mode: "date",
       maximumDate: now,
-      title: "Premier jour",
+      title: tr("import.firstDay"),
       onChange: (e, first) => {
         if (e.type !== "set" || !first) return;
         DateTimePickerAndroid.open({
@@ -57,7 +58,7 @@ export function ImportScreen({ settings, visible, onClose, onSent }: { settings:
           mode: "date",
           minimumDate: first,
           maximumDate: now,
-          title: "Dernier jour",
+          title: tr("import.lastDay"),
           onChange: (e2, lastDay) => {
             if (e2.type !== "set" || !lastDay) return;
             const r = customRange(first, lastDay);
@@ -82,10 +83,10 @@ export function ImportScreen({ settings, visible, onClose, onSent }: { settings:
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={step.kind === "sending" ? () => {} : onClose}>
       <SafeAreaView style={[s.screen, { backgroundColor: t.paper }]}>
         <View style={s.top}>
-          <Text style={[s.title, { color: t.ink }]}>Importer</Text>
+          <Text style={[s.title, { color: t.ink }]}>{tr("import.title")}</Text>
           {step.kind !== "sending" && (
             <Pressable onPress={onClose} hitSlop={12} accessibilityRole="button">
-              <Text style={[s.link, { color: t.accent }]}>Fermer</Text>
+              <Text style={[s.link, { color: t.accent }]}>{tr("import.close")}</Text>
             </Pressable>
           )}
         </View>
@@ -94,15 +95,15 @@ export function ImportScreen({ settings, visible, onClose, onSent }: { settings:
 
         {step.kind === "denied" && (
           <Center t={t}>
-            <Text style={[s.big, { color: t.ink }]}>Atlas n'a pas accès à tes photos</Text>
-            <Text style={[s.lead, { color: t.muted }]}>Autorise « Photos et vidéos » (accès complet) dans les réglages, pour qu'Atlas retrouve tes voyages avec leurs lieux.</Text>
-            <Button title="Ouvrir les réglages" onPress={() => Linking.openSettings()} />
+            <Text style={[s.big, { color: t.ink }]}>{tr("import.denied.title")}</Text>
+            <Text style={[s.lead, { color: t.muted }]}>{tr("import.denied.text")}</Text>
+            <Button title={tr("import.openSettings")} onPress={() => Linking.openSettings()} />
           </Center>
         )}
 
         {step.kind === "choose" && (
           <ScrollView contentContainerStyle={s.list}>
-            <Text style={[s.lead, { color: t.muted }]}>Quelles photos envoyer à la tour ? Atlas les triera, tu valideras ensuite.</Text>
+            <Text style={[s.lead, { color: t.muted }]}>{tr("import.choose")}</Text>
             {presets(Date.now(), last).map((p: Preset) => (
               <Pressable
                 key={p.key}
@@ -120,8 +121,8 @@ export function ImportScreen({ settings, visible, onClose, onSent }: { settings:
         {step.kind === "scanning" && (
           <Center t={t}>
             <ActivityIndicator size="large" color={t.accent} />
-            <Text style={[s.lead, { color: t.muted }]}>Recherche des photos {describeRange(step.from, step.to)}…</Text>
-            {step.found > 0 && <Text style={[s.lead, { color: t.ink }]}>{step.found.toLocaleString("fr-FR")} trouvées</Text>}
+            <Text style={[s.lead, { color: t.muted }]}>{tr("import.scanning", { range: describeRange(step.from, step.to) })}</Text>
+            {step.found > 0 && <Text style={[s.lead, { color: t.ink }]}>{tr("import.found", { count: step.found })}</Text>}
           </Center>
         )}
 
@@ -131,9 +132,9 @@ export function ImportScreen({ settings, visible, onClose, onSent }: { settings:
 
         {step.kind === "error" && (
           <Center t={t}>
-            <Text style={[s.big, { color: t.ink }]}>Ça n'a pas marché</Text>
+            <Text style={[s.big, { color: t.ink }]}>{tr("import.error.title")}</Text>
             <Text style={[s.lead, { color: t.muted }]}>{step.message}</Text>
-            <Button title="Recommencer" onPress={() => setStep({ kind: "choose" })} />
+            <Button title={tr("import.restart")} onPress={() => setStep({ kind: "choose" })} />
           </Center>
         )}
       </SafeAreaView>
@@ -147,25 +148,25 @@ function Preview({ t, items, from, to, onSend, onBack }: { t: Theme; items: Foun
   if (!items.length)
     return (
       <Center t={t}>
-        <Text style={[s.big, { color: t.ink }]}>Aucune photo {describeRange(from, to)}</Text>
-        <Button title="Choisir une autre période" kind="quiet" onPress={onBack} />
+        <Text style={[s.big, { color: t.ink }]}>{tr("import.none", { range: describeRange(from, to) })}</Text>
+        <Button title={tr("import.otherPeriod")} kind="quiet" onPress={onBack} />
       </Center>
     );
   return (
     <Center t={t}>
-      <Text style={[s.huge, { color: t.ink }]}>{items.length.toLocaleString("fr-FR")}</Text>
+      <Text style={[s.huge, { color: t.ink }]}>{formatNumber(items.length)}</Text>
       <Text style={[s.big, { color: t.ink }]}>
         {videos > 0
-          ? `${photos.toLocaleString("fr-FR")} photo${photos > 1 ? "s" : ""} et ${videos} vidéo${videos > 1 ? "s" : ""}`
-          : `photo${photos > 1 ? "s" : ""} trouvée${photos > 1 ? "s" : ""}`}
+          ? tr("import.photosAndVideos", { photos: tr("count.photos", { count: photos }), videos: tr("count.videos", { count: videos }) })
+          : tr("import.photosFound", { count: photos })}
       </Text>
-      <Text style={[s.lead, { color: t.muted }]}>{describeRange(from, to)}. Celles déjà dans Atlas seront ignorées.</Text>
+      <Text style={[s.lead, { color: t.muted }]}>{tr("import.skipKnown", { range: describeRange(from, to) })}</Text>
       <Button
-        title="Envoyer à Atlas"
+        title={tr("import.send")}
         onPress={onSend}
         style={{ alignSelf: "stretch" }}
       />
-      <Button title="Changer de période" kind="quiet" onPress={onBack} style={{ alignSelf: "stretch" }} />
+      <Button title={tr("import.changePeriod")} kind="quiet" onPress={onBack} style={{ alignSelf: "stretch" }} />
     </Center>
   );
 }
@@ -204,22 +205,22 @@ function Sending({ t, settings, importId, items, onDone }: { t: Theme; settings:
 
   return (
     <Center t={t}>
-      <Text style={[s.huge, { color: t.ink }]}>{Math.round((handled / Math.max(st.total, 1)) * 100)} %</Text>
+      <Text style={[s.huge, { color: t.ink }]}>{formatPercent(handled / Math.max(st.total, 1))}</Text>
       <View style={[s.track, { backgroundColor: t.hairline }]}>
         <View style={[s.bar, { backgroundColor: t.accent, width: `${(handled / Math.max(st.total, 1)) * 100}%` }]} />
       </View>
       <Text style={[s.lead, { color: t.muted }]}>
-        {handled.toLocaleString("fr-FR")} sur {st.total.toLocaleString("fr-FR")}
-        {st.duplicates > 0 ? `, dont ${st.duplicates} déjà dans Atlas` : ""}
+        {tr("import.progress", { done: handled, total: st.total })}
+        {st.duplicates > 0 ? tr("import.duplicates", { count: st.duplicates }) : ""}
       </Text>
-      {!finished && <Text style={[s.lead, { color: t.muted }]}>Garde Atlas ouvert le temps de l'envoi.</Text>}
+      {!finished && <Text style={[s.lead, { color: t.muted }]}>{tr("import.keepOpen")}</Text>}
       {finished && st.failed.length > 0 && (
         <>
           <Text style={[s.lead, { color: t.danger }]}>
-            {st.failed.length} fichier{st.failed.length > 1 ? "s n'ont" : " n'a"} pas pu partir ({st.failed[0].error}).
+            {tr("import.failed", { count: st.failed.length, error: st.failed[0].error })}
           </Text>
-          <Button title="Réessayer" onPress={() => queue.retryFailed()} style={{ alignSelf: "stretch" }} />
-          <Button title="Continuer sans eux" kind="quiet" onPress={onDone} style={{ alignSelf: "stretch" }} />
+          <Button title={tr("import.retry")} onPress={() => queue.retryFailed()} style={{ alignSelf: "stretch" }} />
+          <Button title={tr("import.continue")} kind="quiet" onPress={onDone} style={{ alignSelf: "stretch" }} />
         </>
       )}
     </Center>

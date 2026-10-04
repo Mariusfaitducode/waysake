@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
 import { Sheet } from "./Sheet.js";
+import { t } from "../i18n/index.js";
+import { rich } from "../i18n/rich.js";
 import "./BadgeSheet.css";
 
 type NdefWriter = { write: (msg: { records: { recordType: string; data: string }[] }) => Promise<void> };
@@ -35,43 +37,32 @@ export function BadgeSheet({ slug, title, onClose }: { slug: string; title: stri
   }
 
   return (
-    <Sheet title="Badge du frigo" onClose={onClose}>
-      <p className="badge__lead">
-        Ce lien ouvre directement <strong>{title}</strong>. Il ne change jamais, même si tu renommes le voyage.
-      </p>
+    <Sheet title={t("badge.title")} onClose={onClose}>
+      <p className="badge__lead">{rich(t("badge.lead", { title }))}</p>
       <div className="badge__card">
         <div className="badge__qr" dangerouslySetInnerHTML={{ __html: svg }} />
         <div className="badge__link">
           <code>{url.replace(/^https?:\/\//, "")}</code>
-          <button
-            className="button button--quiet button--small"
-            onClick={() => navigator.clipboard?.writeText(url).then(() => setCopied(true))}
-          >
-            {copied ? "Lien copié" : "Copier le lien"}
+          <button className="button button--quiet button--small" onClick={() => navigator.clipboard?.writeText(url).then(() => setCopied(true))}>
+            {copied ? t("badge.copied") : t("badge.copy")}
           </button>
         </div>
       </div>
 
-      {isPrivateHost(location.hostname) && (
-        <p className="badge__warn">
-          Tu utilises Atlas via une adresse locale. Pour un badge qui marche partout, ouvre Atlas avec son adresse Tailscale (https://…ts.net), puis reviens ici.
-        </p>
-      )}
+      {isPrivateHost(location.hostname) && <p className="badge__warn">{t("badge.localAddress")}</p>}
 
       {canWriteNfc ? (
         <div className="badge__nfc">
           <button className="button" onClick={writeNfc} disabled={nfc === "waiting"}>
-            {nfc === "waiting" ? "Approche le badge du téléphone…" : nfc === "done" ? "Badge écrit" : "Écrire sur un badge NFC"}
+            {nfc === "waiting" ? t("badge.nfc.waiting") : nfc === "done" ? t("badge.nfc.done") : t("badge.nfc.write")}
           </button>
-          {nfc === "error" && <p className="badge__warn">Le badge n'a pas pu être écrit. Réessaie en le tenant contre le haut du téléphone.</p>}
+          {nfc === "error" && <p className="badge__warn">{t("badge.nfc.error")}</p>}
         </div>
       ) : (
         <ol className="badge__steps">
-          <li>Installe l'app gratuite <strong>NFC Tools</strong> sur ton iPhone.</li>
-          <li>
-            Ouvre <em>Écrire</em> → <em>Ajouter un enregistrement</em> → <em>URL / URI</em>, et colle le lien.
-          </li>
-          <li>Touche <em>Écrire</em>, puis approche le badge du haut de l'iPhone. C'est fini : un simple contact ouvrira ce voyage.</li>
+          <li>{rich(t("badge.ios.step1"))}</li>
+          <li>{rich(t("badge.ios.step2"))}</li>
+          <li>{rich(t("badge.ios.step3"))}</li>
         </ol>
       )}
     </Sheet>

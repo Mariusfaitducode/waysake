@@ -1,5 +1,15 @@
 import { File, UploadType } from "expo-file-system";
 import type { Settings } from "./storage";
+import { tr } from "./i18n";
+import { fr } from "./i18n/fr";
+
+/** La tour renvoie `{ error, code }` : on traduit le code connu, sinon on garde son texte (en français). */
+function errorMessage(body: { error?: string; code?: string; file?: string; seconds?: number }, status: number): string {
+  const key = `api.${body.code}`;
+  const params = { file: body.file ?? "", seconds: body.seconds ?? 0 };
+  if (body.code && key in fr) return (tr as (k: string, p: Record<string, string | number>) => string)(key, params);
+  return body.error ?? tr("api.status", { status });
+}
 
 export type Person = { id: string; name: string; color: string };
 
@@ -15,18 +25,19 @@ const headers = (s: Settings): Record<string, string> => ({
 
 /** La tour refuse : mot de passe absent, faux ou changé depuis. */
 export class PasswordError extends Error {}
-const PASSWORD_MESSAGE = "La tour demande le mot de passe du foyer (ou il a changé). Ouvre les réglages d'Atlas pour le saisir.";
+/** Traduit au moment de l'erreur : la langue a pu changer depuis le lancement. */
+const passwordError = () => new PasswordError(tr("password.needed"));
 
 async function call<T>(s: Settings, path: string, init: RequestInit = {}): Promise<T> {
   let res: Response;
   try {
     res = await fetch(`${s.server}${path}`, { ...init, headers: { ...headers(s), ...(init.headers ?? {}) } });
   } catch {
-    throw new Error("La tour ne répond pas. Vérifie que Tailscale est connecté sur ton téléphone.");
+    throw new Error(tr("api.unreachable"));
   }
   const body = await res.json().catch(() => ({}));
-  if (res.status === 401 && body.code === "AUTH_REQUIRED") throw new PasswordError(PASSWORD_MESSAGE);
-  if (!res.ok) throw new Error(body.error ?? `La tour a répondu ${res.status}.`);
+  if (res.status === 401 && body.code === "AUTH_REQUIRED") throw passwordError();
+  if (!res.ok) throw new Error(errorMessage(body, res.status));
   return body as T;
 }
 
@@ -43,12 +54,12 @@ export const tower = {
       parameters: fields,
       headers: headers(s),
     });
-    let body: { duplicate?: boolean; error?: string; code?: string } = {};
+    let body: { duplicate?: boolean; error?: string; code?: string; file?: string; seconds?: number } = {};
     try {
       body = JSON.parse(r.body);
     } catch {}
-    if (r.status === 401 && body.code === "AUTH_REQUIRED") throw new PasswordError(PASSWORD_MESSAGE);
-    if (r.status >= 400) throw new Error(body.error ?? `Erreur ${r.status}`);
+    if (r.status === 401 && body.code === "AUTH_REQUIRED") throw passwordError();
+    if (r.status >= 400) throw new Error(errorMessage(body, r.status));
     return { duplicate: !!body.duplicate };
   },
 };

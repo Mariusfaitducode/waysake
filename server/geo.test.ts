@@ -48,6 +48,9 @@ describe("searchPlaces", () => {
     expect(searchPlaces("lisbo")[0]).toMatchObject({ countryCode: "PT" });
     expect(searchPlaces("reykjavik")[0]).toMatchObject({ countryCode: "IS" });
   });
+  it("trouve aussi un pays par son nom anglais (interface en anglais)", () => {
+    expect(searchPlaces("icel")[0]).toMatchObject({ name: "Islande", countryCode: "IS", kind: "country" });
+  });
   it("trouve un pays par son nom français", () => {
     expect(searchPlaces("japon")[0]).toMatchObject({ name: "Japon", countryCode: "JP", kind: "country" });
   });

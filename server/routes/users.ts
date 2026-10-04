@@ -29,7 +29,7 @@ export function userRoutes(app: FastifyInstance, db: Db) {
 
   app.post<{ Body: { userId?: string } }>("/api/me", async (req, reply) => {
     const user = db.prepare("SELECT id, name, color FROM user WHERE id = ?").get(req.body?.userId ?? "") as User | undefined;
-    if (!user) return reply.code(400).send({ error: "Profil inconnu" });
+    if (!user) return reply.code(400).send({ error: "Profil inconnu", code: "unknown_profile" });
     reply.setCookie(COOKIE, user.id, { path: "/", httpOnly: true, sameSite: "lax", maxAge: 60 * 60 * 24 * 365 });
     return { user };
   });

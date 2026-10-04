@@ -33,6 +33,15 @@ describe("site statique", () => {
 
   it("répond 404 pour l'APK quand il n'a pas été déposé", async () => {
     const app = await buildApp({ dataDir: mkdtempSync(join(tmpdir(), "atlas-")) });
-    expect((await app.inject({ url: "/atlas.apk" })).statusCode).toBe(404);
+    const res = await app.inject({ url: "/atlas.apk" });
+    expect(res.statusCode).toBe(404);
+    // Texte français pour les anciens clients, code stable pour l'interface traduite.
+    expect(res.json()).toEqual({ error: "L'app Android n'a pas encore été déposée sur la tour.", code: "apk_missing" });
+  });
+
+  it("joint un code stable aux erreurs génériques", async () => {
+    const app = await buildApp({ dataDir: mkdtempSync(join(tmpdir(), "atlas-")) });
+    expect((await app.inject({ url: "/api/trips/inconnu" })).json()).toMatchObject({ code: "trip_not_found" });
+    expect((await app.inject({ method: "POST", url: "/api/wishes", payload: {} })).json()).toMatchObject({ code: "profile_required" });
   });
 });

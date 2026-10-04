@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { api, type ImportMedia, type Proposal, type ProposedTrip } from "../api.js";
 import { useDataVersion } from "../data.js";
-import { count, dateRange, flags } from "../format.js";
+import { dateRange, flags } from "../format.js";
+import { t } from "../i18n/index.js";
+import { placeName, placeTitle } from "../i18n/places.js";
 import { Sign } from "../components/Sign.js";
 import { PhotoGrid } from "../components/PhotoGrid.js";
 import { TripMap } from "../components/TripMap.js";
@@ -25,8 +27,8 @@ export function ImportReview() {
   useEffect(() => {
     load();
     // Pendant qu'un téléphone envoie encore, la proposition s'enrichit toute seule.
-    const t = setInterval(load, 4000);
-    return () => clearInterval(t);
+    const timer = setInterval(load, 4000);
+    return () => clearInterval(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
@@ -49,15 +51,15 @@ export function ImportReview() {
     }
   }
 
-  if (error && !p) return <EmptyState title="Cet import est introuvable." text={error} />;
+  if (error && !p) return <EmptyState title={t("review.notFound")} text={error} />;
   if (!p) return <div className="review"><div className="skeleton review__skeleton" /></div>;
   if (p.status !== "pending")
     return (
       <EmptyState
-        title={p.status === "confirmed" ? "Cet import est déjà dans Atlas." : "Cet import a été annulé."}
-        text={p.status === "confirmed" ? "Ses photos sont rangées dans vos voyages." : "Aucune de ses photos n'a été gardée."}
+        title={p.status === "confirmed" ? t("review.confirmed.title") : t("review.cancelled.title")}
+        text={p.status === "confirmed" ? t("review.confirmed.text") : t("review.cancelled.text")}
       >
-        <Link className="button" to="/voyages">Voir les voyages</Link>
+        <Link className="button" to="/voyages">{t("review.seeTrips")}</Link>
       </EmptyState>
     );
 
@@ -66,26 +68,26 @@ export function ImportReview() {
     <div className="review">
       <header className="review__head">
         <Link to="/" className="back-link"><IconBack /> Atlas</Link>
-        <h1 className="review__title">{nothing ? "En attente des photos…" : "Voici ce qu'Atlas a trouvé"}</h1>
+        <h1 className="review__title">{nothing ? t("review.waiting") : t("review.found")}</h1>
         <p className="review__lead">
           {nothing
-            ? "Les photos apparaîtront ici dès qu'elles arrivent sur la tour."
-            : `${count(p.counts.received, "photo analysée", "photos analysées")}${p.counts.duplicates ? `, ${count(p.counts.duplicates, "était déjà", "étaient déjà")} dans Atlas` : ""}. Vérifie, décoche ce que tu ne veux pas garder, puis importe.`}
+            ? t("review.waiting.text")
+            : `${t("review.analyzed", { count: p.counts.received })}${p.counts.duplicates ? t("review.duplicates", { count: p.counts.duplicates }) : ""}${t("review.instructions")}`}
         </p>
       </header>
 
-      {p.newTrips.map((t) => (
-        <ProposedTripCard key={`${t.title}-${t.startAt}`} trip={t} onToggle={toggle} />
+      {p.newTrips.map((trip) => (
+        <ProposedTripCard key={`${trip.title}-${trip.startAt}`} trip={trip} onToggle={toggle} />
       ))}
 
       {p.extendedTrips.length > 0 && (
         <section className="review__block">
-          <h2 className="review__h2">Viennent compléter un voyage</h2>
+          <h2 className="review__h2">{t("review.extended")}</h2>
           <ul className="review__list">
             {p.extendedTrips.map((e) => (
               <li key={e.slug}>
-                <strong>{e.title}</strong>
-                <span>+ {count(e.added, "photo", "photos")}</span>
+                <strong>{placeTitle(e.title)}</strong>
+                <span>+ {t("count.photos", { count: e.added })}</span>
               </li>
             ))}
           </ul>
@@ -93,19 +95,19 @@ export function ImportReview() {
       )}
 
       {p.otherPhotos.length > 0 && (
-        <Group title={`${count(p.otherPhotos.length, "photo", "photos")} hors voyage`} hint="Sans lieu ni date de voyage : elles iront dans Photos." items={p.otherPhotos} onToggle={toggle} />
+        <Group title={t("review.other", { count: p.otherPhotos.length })} hint={t("review.other.hint")} items={p.otherPhotos} onToggle={toggle} />
       )}
 
       {(p.setAside.screenshots.length > 0 || p.setAside.home.length > 0) && (
         <section className="review__block">
-          <h2 className="review__h2">Mises de côté</h2>
-          <p className="review__hint">Atlas ne les importera pas, sauf si tu changes d'avis.</p>
+          <h2 className="review__h2">{t("review.setAside")}</h2>
+          <p className="review__hint">{t("review.setAside.hint")}</p>
           {p.setAside.home.length > 0 && (
             <div className="review__aside">
               <label className="switch">
                 <span>
-                  <strong>{count(p.setAside.home.length, "photo prise à la maison", "photos prises à la maison")}</strong>
-                  <small>Le quotidien, pas un voyage.</small>
+                  <strong>{t("review.home", { count: p.setAside.home.length })}</strong>
+                  <small>{t("review.home.hint")}</small>
                 </span>
                 <input
                   type="checkbox"
@@ -121,8 +123,8 @@ export function ImportReview() {
           )}
           {p.setAside.screenshots.length > 0 && (
             <Group
-              title={count(p.setAside.screenshots.length, "capture d'écran", "captures d'écran")}
-              hint="Touche une capture pour la garder quand même."
+              title={t("review.screenshots", { count: p.setAside.screenshots.length })}
+              hint={t("review.screenshots.hint")}
               items={p.setAside.screenshots}
               onToggle={toggle}
               collapsed
@@ -134,21 +136,21 @@ export function ImportReview() {
       {!nothing && (
         <div className="review__bar">
           <button className="button button--quiet" onClick={() => setConfirmCancel(true)} disabled={busy}>
-            Annuler
+            {t("common.cancel")}
           </button>
           <button className="button review__go" onClick={confirm} disabled={busy || p.counts.toImport === 0}>
-            {busy ? "Import…" : `Importer ${count(p.counts.toImport, "photo", "photos")}`}
+            {busy ? t("review.importing") : t("review.import", { count: p.counts.toImport })}
           </button>
         </div>
       )}
 
       {confirmCancel && (
         <ActionSheet
-          title="Annuler cet import ?"
+          title={t("review.cancel.title")}
           actions={[
             {
-              label: "Annuler l'import",
-              hint: "Les photos envoyées seront supprimées de la tour. Elles restent sur ton téléphone.",
+              label: t("review.cancel"),
+              hint: t("review.cancel.hint"),
               danger: true,
               onSelect: () => api.cancelImport(id).then(() => navigate("/", { replace: true })),
             },
@@ -167,21 +169,21 @@ function ProposedTripCard({ trip, onToggle }: { trip: ProposedTrip; onToggle: (m
       <div className="proposed__hero">
         {trip.coverLarge && <img src={trip.coverLarge} alt="" />}
         <div className="proposed__shade" aria-hidden="true" />
-        <span className="proposed__badge">Nouveau voyage</span>
+        <span className="proposed__badge">{t("review.newTrip")}</span>
         <div className="proposed__text">
           <span aria-hidden="true" className="proposed__flags">{flags(trip.countryCodes)}</span>
-          <Sign size="md">{trip.title}</Sign>
+          <Sign size="md">{placeTitle(trip.title)}</Sign>
           <p>{dateRange(trip.startAt, trip.endAt)}</p>
         </div>
       </div>
       <div className="proposed__body">
         <p className="proposed__facts">
-          {count(trip.count, "photo", "photos")}
-          {trip.withPeople > 0 && `, dont ${trip.withPeople} avec des personnes`}
-          {trip.chapters.length > 1 && `, en ${trip.chapters.length} étapes`}
+          {t("count.photos", { count: trip.count })}
+          {trip.withPeople > 0 && t("review.withPeople", { count: trip.withPeople })}
+          {trip.chapters.length > 1 && t("review.inStops", { stops: t("count.stops", { count: trip.chapters.length }) })}
         </p>
         {trip.chapters.length === 1 && trip.chapters[0].places.length > 0 && (
-          <p className="review__hint">{trip.chapters[0].places.join(", ")}</p>
+          <p className="review__hint">{trip.chapters[0].places.map((x) => placeName(x)).join(", ")}</p>
         )}
         {trip.chapters.length > 1 && (
           <ol className="proposed__stops">
@@ -189,8 +191,8 @@ function ProposedTripCard({ trip, onToggle }: { trip: ProposedTrip; onToggle: (m
               <li key={i}>
                 <Sign size="sm">{i + 1}</Sign>
                 <span>
-                  <strong>{c.title}</strong>
-                  {c.places.length > 0 && <small>{c.places.join(", ")}</small>}
+                  <strong>{placeTitle(c.title)}</strong>
+                  {c.places.length > 0 && <small>{c.places.map((x) => placeName(x)).join(", ")}</small>}
                 </span>
               </li>
             ))}
@@ -198,11 +200,11 @@ function ProposedTripCard({ trip, onToggle }: { trip: ProposedTrip; onToggle: (m
         )}
         {trip.route.length > 1 && <TripMap route={trip.route} chapters={trip.chapters} compact />}
         <button className="proposed__toggle" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
-          {open ? "Masquer les photos" : "Vérifier les photos"}
+          {open ? t("review.hidePhotos") : t("review.checkPhotos")}
         </button>
         {open && (
           <>
-            <p className="review__hint">Touche une photo pour ne pas l'importer.</p>
+            <p className="review__hint">{t("review.tapToSkip")}</p>
             <PhotoGrid items={trip.media} onOpen={onToggle} selected={(m) => !m.excluded} />
           </>
         )}
@@ -217,7 +219,7 @@ function Group({ title, hint, items, onToggle, collapsed }: { title: string; hin
     <div className="review__group">
       <button className="review__group-head" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
         <strong>{title}</strong>
-        <span>{open ? "Masquer" : "Voir"}</span>
+        <span>{open ? t("review.hide") : t("review.show")}</span>
       </button>
       {open && (
         <>
@@ -233,7 +235,7 @@ function flip(p: Proposal, id: number): Proposal {
   const f = (list: ImportMedia[]) => list.map((m) => (m.id === id ? { ...m, excluded: !m.excluded } : m));
   return {
     ...p,
-    newTrips: p.newTrips.map((t) => ({ ...t, media: f(t.media) })),
+    newTrips: p.newTrips.map((trip) => ({ ...trip, media: f(trip.media) })),
     otherPhotos: f(p.otherPhotos),
     setAside: { screenshots: f(p.setAside.screenshots), home: f(p.setAside.home) },
   };

@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Button, Sign } from "../components";
+import { Button, LanguageSwitch, Sign } from "../components";
 import { PasswordError, tower, type Person } from "../server";
 import { normalizeServer, saveSettings, type Settings } from "../storage";
 import { font, useTheme } from "../theme";
+import { locale, tr, type Locale } from "../i18n";
 
 /** Premier lancement : relier le téléphone à la tour, donner le mot de passe du foyer s'il y en a un, puis dire qui l'utilise. */
-export function SetupScreen({ initial, onDone }: { initial: Settings | null; onDone: (s: Settings) => void }) {
+export function SetupScreen({ initial, onDone, onLang }: { initial: Settings | null; onDone: (s: Settings) => void; onLang: (l: Locale) => void }) {
   const t = useTheme();
   const [address, setAddress] = useState(initial?.server.replace(/^https?:\/\//, "") ?? "");
   const [server, setServer] = useState<string | null>(null);
@@ -30,7 +31,7 @@ export function SetupScreen({ initial, onDone }: { initial: Settings | null; onD
       setPeople(found);
       setServer(url);
     } catch (e) {
-      setError(`${(e as Error).message}\nAdresse essayée : ${url}`);
+      setError(`${(e as Error).message}\n${tr("setup.tried", { url })}`);
     } finally {
       setBusy(false);
     }
@@ -42,7 +43,7 @@ export function SetupScreen({ initial, onDone }: { initial: Settings | null; onD
     try {
       setPeople(await tower.users({ server: server!, user: "", password }));
     } catch (e) {
-      setError(e instanceof PasswordError ? "Ce n'est pas le bon mot de passe." : (e as Error).message);
+      setError(e instanceof PasswordError ? tr("setup.password.wrong") : (e as Error).message);
     } finally {
       setBusy(false);
     }
@@ -58,17 +59,20 @@ export function SetupScreen({ initial, onDone }: { initial: Settings | null; onD
     <SafeAreaView style={[styles.screen, { backgroundColor: t.paper }]}>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-          <Sign size={34}>Atlas</Sign>
+          <View style={styles.top}>
+            <Sign size={34}>Atlas</Sign>
+            <LanguageSwitch value={locale()} onChange={onLang} />
+          </View>
           {!server ? (
             <>
-              <Text style={[styles.title, { color: t.ink }]}>Relie ton téléphone à la tour</Text>
+              <Text style={[styles.title, { color: t.ink }]}>{tr("setup.title")}</Text>
               <Text style={[styles.lead, { color: t.muted }]}>
-                Tape l'adresse affichée par Atlas sur l'ordinateur (page « App »). Tailscale doit être activé sur ce téléphone.
+                {tr("setup.lead")}
               </Text>
               <TextInput
                 value={address}
                 onChangeText={setAddress}
-                placeholder="tour.tail1234.ts.net"
+                placeholder={tr("setup.placeholder")}
                 placeholderTextColor={t.muted}
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -78,12 +82,12 @@ export function SetupScreen({ initial, onDone }: { initial: Settings | null; onD
                 style={[styles.input, { color: t.ink, backgroundColor: t.hairline }]}
               />
               {error && <Text style={[styles.error, { color: t.danger }]}>{error}</Text>}
-              <Button title="Se connecter" onPress={connect} busy={busy} disabled={!address.trim()} />
+              <Button title={tr("setup.connect")} onPress={connect} busy={busy} disabled={!address.trim()} />
             </>
           ) : !people ? (
             <>
-              <Text style={[styles.title, { color: t.ink }]}>Mot de passe</Text>
-              <Text style={[styles.lead, { color: t.muted }]}>Ta tour est protégée. Tape le mot de passe du foyer : Atlas s'en souviendra sur ce téléphone.</Text>
+              <Text style={[styles.title, { color: t.ink }]}>{tr("setup.password.title")}</Text>
+              <Text style={[styles.lead, { color: t.muted }]}>{tr("setup.password.lead")}</Text>
               <TextInput
                 value={password}
                 onChangeText={setPassword}
@@ -95,16 +99,16 @@ export function SetupScreen({ initial, onDone }: { initial: Settings | null; onD
                 autoComplete="current-password"
                 returnKeyType="go"
                 onSubmitEditing={unlock}
-                accessibilityLabel="Mot de passe du foyer"
+                accessibilityLabel={tr("setup.password.label")}
                 style={[styles.input, { color: t.ink, backgroundColor: t.hairline }]}
               />
               {error && <Text style={[styles.error, { color: t.danger }]}>{error}</Text>}
-              <Button title="Continuer" onPress={unlock} busy={busy} disabled={!password} />
+              <Button title={tr("setup.password.continue")} onPress={unlock} busy={busy} disabled={!password} />
             </>
           ) : (
             <>
-              <Text style={[styles.title, { color: t.ink }]}>Qui es-tu ?</Text>
-              <Text style={[styles.lead, { color: t.muted }]}>Atlas s'en souviendra sur ce téléphone.</Text>
+              <Text style={[styles.title, { color: t.ink }]}>{tr("setup.who")}</Text>
+              <Text style={[styles.lead, { color: t.muted }]}>{tr("setup.remember")}</Text>
               <View style={styles.people}>
                 {people.map((p) => (
                   <Pressable key={p.id} onPress={() => pick(p.id)} style={({ pressed }) => [styles.person, { transform: [{ scale: pressed ? 0.96 : 1 }] }]} accessibilityRole="button" accessibilityLabel={p.name}>
@@ -126,6 +130,7 @@ export function SetupScreen({ initial, onDone }: { initial: Settings | null; onD
 const styles = StyleSheet.create({
   screen: { flex: 1 },
   content: { padding: 24, paddingTop: 48, gap: 16 },
+  top: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   title: { fontFamily: font.sign, fontSize: 44, lineHeight: 46, marginTop: 24 },
   lead: { fontSize: 17, lineHeight: 24 },
   input: { borderRadius: 14, paddingHorizontal: 16, paddingVertical: 16, fontSize: 18 },

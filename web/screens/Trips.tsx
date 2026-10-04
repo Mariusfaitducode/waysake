@@ -4,30 +4,30 @@ import { Header } from "../components/Header.js";
 import { EmptyState } from "../components/EmptyState.js";
 import { TripCard } from "../components/TripCard.js";
 import { useUpload } from "../shell/upload.js";
-import { count } from "../format.js";
+import { t } from "../i18n/index.js";
 import "./Trips.css";
 
 export function Trips() {
   const { data: trips } = useApi(api.trips);
   const { open } = useUpload();
   const years = new Map<number, typeof trips>();
-  for (const t of trips ?? []) {
-    const y = new Date(t.startAt).getUTCFullYear();
-    years.set(y, [...(years.get(y) ?? []), t]);
+  for (const trip of trips ?? []) {
+    const y = new Date(trip.startAt).getUTCFullYear();
+    years.set(y, [...(years.get(y) ?? []), trip]);
   }
 
   return (
     <div className="trips">
-      <Header title="Voyages" subtitle={trips && trips.length > 0 ? `${count(trips.length, "voyage", "voyages")}, rangés tout seuls.` : undefined} />
+      <Header title={t("trips.title")} subtitle={trips && trips.length > 0 ? t("trips.subtitle", { trips: t("count.trips", { count: trips.length }) }) : undefined} />
       {!trips && (
         <div className="trips__list">
           <div className="skeleton" style={{ aspectRatio: "4 / 5" }} />
         </div>
       )}
       {trips?.length === 0 && (
-        <EmptyState title="Aucun voyage pour l'instant." text="Ajoute vos photos : Atlas reconnaît les voyages, les pays et les étapes grâce à la date et au lieu de chaque photo.">
+        <EmptyState title={t("trips.empty.title")} text={t("trips.empty.text")}>
           <button className="button" onClick={open}>
-            Ajouter des photos
+            {t("common.addPhotos")}
           </button>
         </EmptyState>
       )}
@@ -35,8 +35,8 @@ export function Trips() {
         <section key={year} className="trips__year">
           <h2 className="trips__year-title">{year}</h2>
           <div className="trips__list">
-            {list!.map((t, j) => (
-              <TripCard key={t.slug} trip={t} size={i === 0 && j === 0 ? "lg" : "md"} />
+            {list!.map((trip, j) => (
+              <TripCard key={trip.slug} trip={trip} size={i === 0 && j === 0 ? "lg" : "md"} />
             ))}
           </div>
         </section>

@@ -107,7 +107,7 @@ export function setupAuth(app: FastifyInstance, db: Db, rawPassword: string | un
   };
 
   function tooMany(reply: FastifyReply, seconds: number) {
-    return reply.code(429).header("Retry-After", String(seconds)).send({ error: `Trop d'essais. Réessaie dans ${seconds} s.` });
+    return reply.code(429).header("Retry-After", String(seconds)).send({ error: `Trop d'essais. Réessaie dans ${seconds} s.`, code: "too_many_attempts", seconds });
   }
 
   app.addHook("onRequest", async (req, reply) => {
@@ -145,7 +145,7 @@ export function setupAuth(app: FastifyInstance, db: Db, rawPassword: string | un
     const given = body && typeof body === "object" && typeof body.password === "string" ? body.password : "";
     if (!given || !safeEqual(given, password)) {
       throttle.fail(req.ip);
-      return reply.code(401).send({ error: "Ce n'est pas le bon mot de passe." });
+      return reply.code(401).send({ error: "Ce n'est pas le bon mot de passe.", code: "wrong_password" });
     }
     throttle.succeed(req.ip);
     const token = randomBytes(32).toString("base64url");

@@ -210,6 +210,9 @@ const countryHits: PlaceHit[] = countries.map((c) => {
     lon: capital ? capital[2] : (c.bbox[0] + c.bbox[2]) / 2,
   };
 });
+// Nom anglais des pays : l'interface anglaise cherche « Iceland », pas « Islande ». Les villes ont déjà leur nom GeoNames (anglais).
+const enRegion = new Intl.DisplayNames(["en"], { type: "region" });
+const englishCountry = new Map(countries.map((c) => [c.code, fold(enRegion.of(c.code) ?? c.code)]));
 // Tous les lieux, du plus peuplé au plus petit : on doit trouver Sirmione ou Braies, pas seulement Rome.
 const placesByPop = [...index.places].sort((a, b) => b[5] - a[5]);
 
@@ -230,7 +233,7 @@ export function searchPlaces(q: string, limit = 8): PlaceHit[] {
   if (!needle) return [];
   const out: PlaceHit[] = [
     ...regionHits.filter((r) => fold(r.name).startsWith(needle)).slice(0, 2),
-    ...countryHits.filter((c) => fold(c.name).startsWith(needle)).slice(0, 3),
+    ...countryHits.filter((c) => fold(c.name).startsWith(needle) || englishCountry.get(c.countryCode)?.startsWith(needle)).slice(0, 3),
   ];
   for (const p of placesByPop) {
     if (out.length >= limit) break;

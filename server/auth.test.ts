@@ -173,6 +173,7 @@ describe("avec ATLAS_PASSWORD", () => {
     for (const [i, payload] of [{ password: "nope" }, { password: "" }, {}, { password: 123 }].entries()) {
       const res = await app.inject({ method: "POST", url: "/api/login", payload, remoteAddress: `10.0.1.${i}` });
       expect(res.statusCode).toBe(401);
+      expect(res.json().code).toBe("wrong_password"); // traduit par l'interface (api.wrong_password)
       expect(res.cookies.find((c) => c.name === "atlas_session")).toBeUndefined();
     }
     // Un formulaire posté depuis un autre site (text/plain) n'est pas un login.
@@ -194,6 +195,7 @@ describe("avec ATLAS_PASSWORD", () => {
     const blocked = await app.inject({ method: "POST", url: "/api/login", payload: { password: PASSWORD } });
     expect(blocked.statusCode).toBe(429);
     expect(Number(blocked.headers["retry-after"])).toBeGreaterThan(0);
+    expect(blocked.json()).toMatchObject({ code: "too_many_attempts", seconds: Number(blocked.headers["retry-after"]) });
     // Le bearer passe par le même frein.
     expect((await app.inject({ url: "/api/trips", headers: { authorization: `Bearer ${PASSWORD}` } })).statusCode).toBe(429);
     // Une autre adresse n'est pas pénalisée.

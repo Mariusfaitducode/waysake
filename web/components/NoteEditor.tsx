@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { api } from "../api.js";
+import { t } from "../i18n/index.js";
 import "./NoteEditor.css";
 
 type Status = "idle" | "saving" | "saved" | "error";
@@ -20,10 +21,10 @@ export function NoteEditor({ tripId, chapterId, initial, placeholder }: { tripId
 
   // La zone de texte grandit avec le contenu.
   useEffect(() => {
-    const t = area.current;
-    if (!t) return;
-    t.style.height = "auto";
-    t.style.height = `${t.scrollHeight}px`;
+    const el = area.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
   }, [value]);
 
   // Ne rien perdre en quittant la page au milieu d'une phrase.
@@ -57,7 +58,7 @@ export function NoteEditor({ tripId, chapterId, initial, placeholder }: { tripId
         }}
       />
       <span className={`note__status is-${status}`} aria-live="polite">
-        {status === "saving" ? "…" : status === "saved" ? "Enregistré" : status === "error" ? "Non enregistré — vérifie la connexion" : ""}
+        {status === "saving" ? "…" : status === "saved" ? t("note.saved") : status === "error" ? t("note.error") : ""}
       </span>
     </div>
   );

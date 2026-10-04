@@ -4,6 +4,8 @@ import type { Map as MlMap, Marker } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { TripSummary, Wish } from "../api.js";
 import { cluster, kmForPixels } from "../cluster.js";
+import { t } from "../i18n/index.js";
+import { autoName } from "../i18n/places.js";
 import "./GlobeMap.css";
 
 type Props = {
@@ -129,7 +131,7 @@ export function GlobeMap({ trips, wishes, visited, selected, onSelect }: Props) 
         const holder = document.createElement("div");
         const node = document.createElement("button");
         node.className = g.length > 1 ? "pin pin--group" : "pin";
-        node.setAttribute("aria-label", g.length > 1 ? `${g.length} voyages : ${g.map((p) => p.t.title).join(", ")}` : `${lead.title}, ${lead.mediaCount} photos`);
+        node.setAttribute("aria-label", g.length > 1 ? t("globe.group", { trips: t("count.trips", { count: g.length }), titles: g.map((p) => autoName(p.t)).join(", ") }) : `${autoName(lead)}, ${t("count.photos", { count: lead.mediaCount })}`);
         node.innerHTML = `${lead.cover ? `<img src="${lead.cover}" alt="" draggable="false">` : ""}<span>${g.length > 1 ? g.length : total}</span>`;
         node.addEventListener("click", (e) => {
           e.stopPropagation();

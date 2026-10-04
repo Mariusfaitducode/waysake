@@ -1,3 +1,6 @@
+import { t } from "./i18n/index.js";
+import { fr } from "./i18n/fr.js";
+
 export type User = { id: string; name: string; color: string };
 export type Media = {
   id: number;
@@ -111,18 +114,42 @@ export type PlaceHit = { kind: "country" | "region" | "place"; name: string; cou
 export class AuthRequiredError extends Error {}
 export const AUTH_EVENT = "atlas:auth-required";
 
+/**
+ * La tour renvoie `{ error, code }` : `error` est un texte français, `code` un identifiant stable
+ * que l'interface traduit. Sans code connu, on garde le texte de la tour (en français).
+ */
+type ErrorBody = { error?: string; code?: string; file?: string; seconds?: number };
+export function errorMessage(body: ErrorBody): string {
+  const key = `api.${body.code}`;
+  const params = { file: body.file ?? "", seconds: body.seconds ?? 0 };
+  if (body.code && key in fr) return (t as (k: string, p: Record<string, string | number>) => string)(key, params);
+  return body.error ?? t("api.unreachable");
+}
+
 async function json<T>(res: Response): Promise<T> {
   const body = await res.json().catch(() => ({}));
   if (res.status === 401 && body.code === "AUTH_REQUIRED") {
     window.dispatchEvent(new Event(AUTH_EVENT));
-    throw new AuthRequiredError(body.error);
+    throw new AuthRequiredError(errorMessage(body));
   }
-  if (!res.ok) throw new Error(body.error ?? "La tour ne répond pas. Vérifie que Tailscale est connecté.");
+  if (!res.ok) throw new ApiError(body);
   return body as T;
 }
-const get = <T,>(url: string) => fetch(url).then((r) => json<T>(r));
+
+/** Erreur de la tour, gardée avec sa réponse : un écran peut la retraduire si la langue change entre-temps. */
+export class ApiError extends Error {
+  constructor(readonly body: ErrorBody) {
+    super(errorMessage(body));
+  }
+}
+/** Réseau coupé : « Failed to fetch » ne dit rien à personne. */
+const call = (url: string, init?: RequestInit) =>
+  fetch(url, init).catch(() => {
+    throw new Error(t("api.unreachable"));
+  });
+const get = <T,>(url: string) => call(url).then((r) => json<T>(r));
 const send = <T,>(method: string, url: string, body?: unknown) =>
-  fetch(url, {
+  call(url, {
     method,
     headers: body === undefined ? undefined : { "content-type": "application/json" },
     body: body === undefined ? undefined : JSON.stringify(body),
@@ -148,7 +175,7 @@ export const api = {
   upload(file: File, importId?: number): Promise<{ id: number; duplicate: boolean }> {
     const body = new FormData();
     body.append("file", file, file.name);
-    return fetch(importId ? `/api/media?import=${importId}` : "/api/media", { method: "POST", body }).then((r) => json(r));
+    return call(importId ? `/api/media?import=${importId}` : "/api/media", { method: "POST", body }).then((r) => json(r));
   },
   newImport: () => send<{ id: number }>("POST", "/api/imports"),
   importProposal: (id: number) => get<Proposal>(`/api/imports/${id}`),

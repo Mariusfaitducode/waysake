@@ -3,6 +3,8 @@ import type { Media } from "../api.js";
 import { useAuthorName } from "../data.js";
 import { fullDate } from "../format.js";
 import { IconBack, IconClose } from "../shell/icons.js";
+import { t } from "../i18n/index.js";
+import { placeTitle } from "../i18n/places.js";
 import "./Viewer.css";
 
 type Props = {
@@ -41,13 +43,13 @@ export function Viewer({ items, index, onIndex, onClose, action }: Props) {
   }, [index, items]);
 
   const who = authorName(m.uploadedBy);
-  const meta = [m.place, m.takenAtLocal ? fullDate(m.takenAtLocal) : "Date inconnue"].filter(Boolean).join(", ");
+  const meta = [m.place && placeTitle(m.place), m.takenAtLocal ? fullDate(m.takenAtLocal) : t("common.unknownDate")].filter(Boolean).join(", ");
 
   return (
     <dialog
       ref={ref}
       className="viewer"
-      aria-label="Photo"
+      aria-label={t("viewer.label")}
       onClose={onClose}
       onTouchStart={(e) => (touch.current = { x: e.touches[0].clientX, y: e.touches[0].clientY })}
       onTouchEnd={(e) => {
@@ -65,7 +67,7 @@ export function Viewer({ items, index, onIndex, onClose, action }: Props) {
         <img key={m.id} className="viewer__media" src={m.preview} alt={meta} />
       )}
       <div className="viewer__bar">
-        <button className="icon-button icon-button--glass" onClick={() => ref.current?.close()} aria-label="Fermer">
+        <button className="icon-button icon-button--glass" onClick={() => ref.current?.close()} aria-label={t("common.close")}>
           <IconClose />
         </button>
         <span className="viewer__count">
@@ -73,28 +75,28 @@ export function Viewer({ items, index, onIndex, onClose, action }: Props) {
         </span>
       </div>
       {index > 0 && (
-        <button className="viewer__nav viewer__nav--prev icon-button icon-button--glass" onClick={() => go(-1)} aria-label="Photo précédente">
+        <button className="viewer__nav viewer__nav--prev icon-button icon-button--glass" onClick={() => go(-1)} aria-label={t("viewer.prev")}>
           <IconBack />
         </button>
       )}
       {index < items.length - 1 && (
-        <button className="viewer__nav viewer__nav--next icon-button icon-button--glass" onClick={() => go(1)} aria-label="Photo suivante">
+        <button className="viewer__nav viewer__nav--next icon-button icon-button--glass" onClick={() => go(1)} aria-label={t("viewer.next")}>
           <IconBack />
         </button>
       )}
       <footer className="viewer__info">
         <div>
           <p className="viewer__place">{meta}</p>
-          <p className="viewer__who">Par {who}</p>
+          <p className="viewer__who">{t("viewer.by", { name: who })}</p>
         </div>
         <div className="viewer__actions">
           {action && (
             <button className="viewer__action" onClick={() => action.run(m).then(() => setDone(m.id))} disabled={done === m.id}>
-              {done === m.id ? "C'est fait" : action.label}
+              {done === m.id ? t("viewer.done") : action.label}
             </button>
           )}
           <a className="viewer__action" href={m.original} download>
-            Télécharger
+            {t("viewer.download")}
           </a>
         </div>
       </footer>

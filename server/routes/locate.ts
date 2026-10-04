@@ -36,7 +36,7 @@ export function locateRoutes(app: FastifyInstance, db: Db) {
       Array.isArray(ids) && ids.length > 0 && ids.length <= 5000 && ids.every((x) => Number.isInteger(x)) &&
       typeof lat === "number" && Number.isFinite(lat) && Math.abs(lat) <= 90 &&
       typeof lon === "number" && Number.isFinite(lon) && Math.abs(lon) <= 180;
-    if (!valid) return reply.code(400).send({ error: "Lieu ou photos invalides." });
+    if (!valid) return reply.code(400).send({ error: "Lieu ou photos invalides.", code: "invalid_place" });
     // Un GPS d'origine (fichier ou téléphone) n'est jamais remplacé ; un lieu manuel ou de jeu peut être corrigé.
     const { changes } = db
       .prepare(

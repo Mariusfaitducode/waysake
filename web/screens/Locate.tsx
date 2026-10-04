@@ -2,19 +2,14 @@ import { useState } from "react";
 import { Link } from "react-router";
 import { api, type UnlocatedDay } from "../api.js";
 import { useApi, useDataVersion } from "../data.js";
-import { count } from "../format.js";
+import { dayLabel, hitName, timeLabel as hour } from "../format.js";
+import { t } from "../i18n/index.js";
 import { Header } from "../components/Header.js";
 import { EmptyState } from "../components/EmptyState.js";
 import { PlacePicker } from "../components/PlacePicker.js";
 import { IconBack } from "../shell/icons.js";
 import "./Locate.css";
 
-const dayFmt = new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
-const dayLabel = (d: string) => {
-  const s = dayFmt.format(new Date(`${d}T12:00:00Z`));
-  return s.charAt(0).toUpperCase() + s.slice(1);
-};
-const hour = (local: string) => local.slice(11, 16).replace(":", "h");
 
 /** Les photos sans lieu, par journée et par moment : un lieu posé localise tout le groupe. */
 export function Locate() {
@@ -26,17 +21,17 @@ export function Locate() {
   return (
     <div className="locate">
       <Link to="/photos" className="back-link">
-        <IconBack /> Photos
+        <IconBack /> {t("nav.photos")}
       </Link>
       <Header
-        title="À localiser"
+        title={t("locate.title")}
         subtitle={
           data && data.total > 0
-            ? `${count(data.total, "photo n'a", "photos n'ont")} pas de lieu. Choisis une journée et dis où vous étiez : Atlas range le reste.`
+            ? t("locate.subtitle", { count: data.total })
             : undefined
         }
       />
-      {data?.total === 0 && <EmptyState title="Toutes vos photos ont un lieu." text="Bravo. Les voyages, les étapes et les itinéraires sont complets." />}
+      {data?.total === 0 && <EmptyState title={t("locate.empty.title")} text={t("locate.empty.text")} />}
       <div className="locate__days">
         {data?.days.map((d) => (
           <DayCard key={d.day} day={d} onLocate={(ids, preview) => setTarget({ ids, preview })} />
@@ -53,7 +48,7 @@ export function Locate() {
           preview={target.preview}
           onClose={() => setTarget(null)}
           onDone={(place, updated) => {
-            setToast(`${count(updated, "photo localisée", "photos localisées")} à ${place.name}`);
+            setToast(t("locate.done", { count: updated, place: hitName(place) }));
             reload();
             bump();
           }}
@@ -72,12 +67,12 @@ function DayCard({ day, onLocate }: { day: UnlocatedDay; onLocate: (ids: number[
         <div>
           <h2>{dayLabel(day.day)}</h2>
           <p>
-            {count(day.count, "photo", "photos")}
-            {day.moments.length > 1 && `, ${day.moments.length} moments`}
+            {t("count.photos", { count: day.count })}
+            {day.moments.length > 1 && `, ${t("locate.moments", { count: day.moments.length })}`}
           </p>
         </div>
         <button className="button button--small" onClick={() => onLocate(day.media.map((m) => m.id), byId.get(day.media[0].id)?.preview)}>
-          Ajouter un lieu
+          {t("locate.addPlace")}
         </button>
       </div>
       <div className="lday__strip">
@@ -89,7 +84,7 @@ function DayCard({ day, onLocate }: { day: UnlocatedDay; onLocate: (ids: number[
       {day.moments.length > 1 && (
         <>
           <button className="lday__toggle" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
-            {open ? "Masquer les moments" : "Plusieurs endroits ? Moment par moment"}
+            {open ? t("locate.hideMoments") : t("locate.showMoments")}
           </button>
           {open && (
             <ul className="lday__moments">
@@ -102,10 +97,10 @@ function DayCard({ day, onLocate }: { day: UnlocatedDay; onLocate: (ids: number[
                   </div>
                   <div className="lmoment__text">
                     <strong>{m.start === m.end ? hour(m.start) : `${hour(m.start)} – ${hour(m.end)}`}</strong>
-                    <span>{count(m.count, "photo", "photos")}</span>
+                    <span>{t("count.photos", { count: m.count })}</span>
                   </div>
                   <button className="button button--quiet button--small" onClick={() => onLocate(m.ids, byId.get(m.ids[0])?.preview)}>
-                    Lieu
+                    {t("locate.place")}
                   </button>
                 </li>
               ))}

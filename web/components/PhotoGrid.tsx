@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from "react";
 type GridItem = { id: number; width: number | null; height: number | null; hasThumbs: boolean; thumb: string; kind?: string };
 import { justify } from "../justify.js";
+import { t } from "../i18n/index.js";
 import "./PhotoGrid.css";
 
 const ratio = (m: GridItem) => (m.width && m.height ? m.width / m.height : 1);
@@ -55,7 +56,7 @@ export function PhotoGrid<T extends GridItem>({
                   <span className="grid__video" aria-hidden="true">▶</span>
                 )}
                 {selected && <span className="grid__check" aria-hidden="true" />}
-                <span className="sr-only">{selected ? "Garder cette photo" : "Ouvrir la photo"}</span>
+                <span className="sr-only">{selected ? t("grid.keep") : t("grid.open")}</span>
               </button>
             );
           })}

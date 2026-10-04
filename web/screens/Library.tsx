@@ -2,7 +2,8 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router";
 import { api, type Media } from "../api.js";
 import { useApi } from "../data.js";
-import { count, monthLabel } from "../format.js";
+import { monthLabel } from "../format.js";
+import { t } from "../i18n/index.js";
 import { Header } from "../components/Header.js";
 import { EmptyState } from "../components/EmptyState.js";
 import { PhotoGrid } from "../components/PhotoGrid.js";
@@ -16,7 +17,7 @@ function sections(media: Media[]): Section[] {
   const map = new Map<string, Section>();
   for (const m of media) {
     const key = m.takenAtLocal?.slice(0, 7) ?? "undated";
-    if (!map.has(key)) map.set(key, { key, title: m.takenAtLocal ? monthLabel(m.takenAtLocal) : "Sans date", items: [] });
+    if (!map.has(key)) map.set(key, { key, title: m.takenAtLocal ? monthLabel(m.takenAtLocal) : t("library.undated"), items: [] });
     map.get(key)!.items.push(m);
   }
   // Le mois le plus récent en haut ; « Sans date » toujours en dernier.
@@ -33,23 +34,23 @@ export function Library() {
 
   return (
     <div className="library">
-      <Header title="Photos" subtitle={media && media.length > 0 ? `${count(media.length, "photo", "photos et vidéos")}, de vous deux.` : undefined} />
+      <Header title={t("library.title")} subtitle={media && media.length > 0 ? t("library.subtitle", { media: t("count.media", { count: media.length }) }) : undefined} />
 
       {unlocated && unlocated.total > 0 && (
         <Link to="/photos/a-localiser" className="library__locate">
           <span className="library__locate-pin" aria-hidden="true" />
           <span>
-            <strong>{count(unlocated.total, "photo sans lieu", "photos sans lieu")}</strong>
-            <small>Ajoute les lieux en quelques gestes : les voyages se rangeront tout seuls.</small>
+            <strong>{t("library.unlocated", { count: unlocated.total })}</strong>
+            <small>{t("library.unlocatedHint")}</small>
           </span>
           <span className="library__locate-go" aria-hidden="true">›</span>
         </Link>
       )}
 
       {media?.length === 0 && (
-        <EmptyState title="Le premier voyage commence ici." text="Ajoute les photos d'un voyage : Atlas les range toutes seules par date et par lieu.">
+        <EmptyState title={t("library.empty.title")} text={t("library.empty.text")}>
           <button className="button" onClick={openUpload}>
-            Ajouter des photos
+            {t("common.addPhotos")}
           </button>
         </EmptyState>
       )}

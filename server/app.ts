@@ -51,17 +51,18 @@ export async function buildApp(opts: {
     db.close();
   });
 
-  // Messages d'erreur en français, jamais de détails techniques côté interface.
+  // Messages d'erreur en français (et un `code` que l'interface traduit), jamais de détails techniques.
   app.setErrorHandler((err: { statusCode?: number; code?: string }, _req, reply) => {
     const status = err.statusCode && err.statusCode >= 400 ? err.statusCode : 500;
     if (status >= 500) app.log.error(err);
-    const message =
+    // `code` : identifiant stable que l'interface traduit (le texte français reste pour les anciens clients).
+    const [code, message] =
       err.code === "FST_REQ_FILE_TOO_LARGE" || status === 413
-        ? "Fichier trop lourd (2 Go maximum)."
+        ? ["file_too_large", "Fichier trop lourd (2 Go maximum)."]
         : status >= 500
-          ? "La tour n'a pas pu terminer. Réessaie dans un instant."
-          : "Requête invalide.";
-    return reply.code(status).send({ error: message });
+          ? ["server_error", "La tour n'a pas pu terminer. Réessaie dans un instant."]
+          : ["invalid_request", "Requête invalide."];
+    return reply.code(status).send({ error: message, code });
   });
 
   await app.register(cookie);
@@ -76,7 +77,7 @@ export async function buildApp(opts: {
   app.addHook("preHandler", async (req, reply) => {
     if (req.method === "GET" || req.method === "HEAD") return;
     if (req.method === "POST" && ["/api/me", "/api/login", "/api/logout"].includes(req.routeOptions.url ?? "")) return;
-    if (!identify(db, req)) return reply.code(401).send({ error: "Choisis ton profil d'abord." });
+    if (!identify(db, req)) return reply.code(401).send({ error: "Choisis ton profil d'abord.", code: "profile_required" });
   });
   await app.register(multipart, { limits: { fileSize: 2 * 1024 ** 3, files: 1 } });
   // Originaux servis avec prise en charge des plages (Range) : indispensable aux vidéos sur iPhone.
@@ -87,7 +88,7 @@ export async function buildApp(opts: {
     const inData = resolve(opts.dataDir, "app", "atlas.apk");
     const inWeb = opts.webDir ? resolve(opts.webDir, "atlas.apk") : null;
     const file = existsSync(inData) ? inData : inWeb && existsSync(inWeb) ? inWeb : null;
-    if (!file) return reply.code(404).send({ error: "L'app Android n'a pas encore été déposée sur la tour." });
+    if (!file) return reply.code(404).send({ error: "L'app Android n'a pas encore été déposée sur la tour.", code: "apk_missing" });
     return reply
       .type("application/vnd.android.package-archive")
       .header("Content-Disposition", 'attachment; filename="Atlas.apk"')
@@ -105,7 +106,7 @@ export async function buildApp(opts: {
     // wildcard : les fichiers d'une nouvelle version du site sont servis sans redémarrer la tour.
     await app.register(fastifyStatic, { root: webDir, wildcard: true, decorateReply: false });
     app.setNotFoundHandler((req, reply) =>
-      req.url.startsWith("/api/") ? reply.code(404).send({ error: "Introuvable" }) : reply.sendFile("index.html", webDir),
+      req.url.startsWith("/api/") ? reply.code(404).send({ error: "Introuvable", code: "not_found" }) : reply.sendFile("index.html", webDir),
     );
   }
 

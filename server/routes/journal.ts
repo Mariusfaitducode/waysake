@@ -43,13 +43,13 @@ export function journalRoutes(app: FastifyInstance, db: Db) {
 
   app.put<{ Body: { tripId?: unknown; chapterId?: unknown; body?: unknown } }>("/api/notes", async (req, reply) => {
     const user = who(req);
-    if (!user) return reply.code(401).send({ error: "Choisis ton profil d'abord." });
+    if (!user) return reply.code(401).send({ error: "Choisis ton profil d'abord.", code: "profile_required" });
     const { tripId, chapterId = null, body = "" } = req.body ?? {};
     if (!Number.isInteger(tripId) || (chapterId !== null && !Number.isInteger(chapterId)) || typeof body !== "string")
-      return reply.code(400).send({ error: "Note invalide." });
-    if (!db.prepare("SELECT 1 FROM trip WHERE id = ?").get(tripId)) return reply.code(400).send({ error: "Voyage inconnu." });
+      return reply.code(400).send({ error: "Note invalide.", code: "invalid_note" });
+    if (!db.prepare("SELECT 1 FROM trip WHERE id = ?").get(tripId)) return reply.code(400).send({ error: "Voyage inconnu.", code: "unknown_trip" });
     if (chapterId !== null && !db.prepare("SELECT 1 FROM chapter WHERE id = ? AND trip_id = ?").get(chapterId, tripId))
-      return reply.code(400).send({ error: "Étape inconnue." });
+      return reply.code(400).send({ error: "Étape inconnue.", code: "unknown_chapter" });
     const existing = db.prepare("SELECT id FROM note WHERE trip_id = ? AND chapter_id IS ?").get(tripId, chapterId) as { id: number } | undefined;
     const text = body.trim() ? body.slice(0, 20_000) : "";
     if (!text) {
@@ -109,15 +109,15 @@ export function journalRoutes(app: FastifyInstance, db: Db) {
 
   app.post<{ Body: Record<string, unknown> }>("/api/wishes", async (req, reply) => {
     const user = who(req);
-    if (!user) return reply.code(401).send({ error: "Choisis ton profil d'abord." });
+    if (!user) return reply.code(401).send({ error: "Choisis ton profil d'abord.", code: "profile_required" });
     let b: ReturnType<typeof parseWish>;
     try {
       b = parseWish(req.body ?? {});
     } catch {
-      return reply.code(400).send({ error: "Envie invalide." });
+      return reply.code(400).send({ error: "Envie invalide.", code: "invalid_wish" });
     }
     const title = b.title;
-    if (!title) return reply.code(400).send({ error: "Donne un nom à cette envie." });
+    if (!title) return reply.code(400).send({ error: "Donne un nom à cette envie.", code: "wish_title_required" });
     const { id } = db
       .prepare("INSERT INTO wish (title, country_code, lat, lon, month, note, author, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING id")
       .get(title, b.countryCode ?? null, b.lat ?? null, b.lon ?? null, b.month ?? null, b.note ?? "", user.id, Date.now()) as { id: number };
@@ -130,11 +130,11 @@ export function journalRoutes(app: FastifyInstance, db: Db) {
     try {
       b = parseWish(req.body ?? {});
     } catch {
-      return reply.code(400).send({ error: "Envie invalide." });
+      return reply.code(400).send({ error: "Envie invalide.", code: "invalid_wish" });
     }
-    if (!db.prepare("SELECT 1 FROM wish WHERE id = ?").get(id)) return reply.code(404).send({ error: "Introuvable" });
+    if (!db.prepare("SELECT 1 FROM wish WHERE id = ?").get(id)) return reply.code(404).send({ error: "Introuvable", code: "not_found" });
     if (b.title !== undefined) {
-      if (!b.title) return reply.code(400).send({ error: "Donne un nom à cette envie." });
+      if (!b.title) return reply.code(400).send({ error: "Donne un nom à cette envie.", code: "wish_title_required" });
       db.prepare("UPDATE wish SET title = ? WHERE id = ?").run(b.title, id);
     }
     if (b.note !== undefined && b.note !== null) db.prepare("UPDATE wish SET note = ? WHERE id = ?").run(b.note, id);

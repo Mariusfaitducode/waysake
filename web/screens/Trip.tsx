@@ -2,7 +2,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { api, type Chapter, type Media, type Trip } from "../api.js";
 import { useApi, useDataVersion } from "../data.js";
-import { count, dateRange, days, flags } from "../format.js";
+import { dateRange, days, flags } from "../format.js";
+import { t } from "../i18n/index.js";
+import { localizeTrip } from "../i18n/places.js";
 import { Sign } from "../components/Sign.js";
 import { PhotoGrid } from "../components/PhotoGrid.js";
 import { Viewer } from "../components/Viewer.js";
@@ -26,7 +28,9 @@ export function TripScreen() {
   const { slug = "" } = useParams();
   const navigate = useNavigate();
   const { bump } = useDataVersion();
-  const { data: trip, error, loading } = useApi(() => api.trip(slug), [slug]);
+  const { data: raw, error, loading } = useApi(() => api.trip(slug), [slug]);
+  // En anglais, les noms automatiques (calculés en français par la tour) sont traduits ; un nom choisi reste tel quel.
+  const trip = useMemo(() => raw && localizeTrip(raw), [raw]);
   const [overlay, setOverlay] = useState<Overlay | null>(null);
   const [viewer, setViewer] = useState<number | null>(null);
   const chapterRefs = useRef<(HTMLElement | null)[]>([]);
@@ -44,9 +48,9 @@ export function TripScreen() {
 
   if (!trip && error)
     return (
-      <EmptyState title="Ce voyage est introuvable." text="Le lien est peut-être ancien, ou ses photos ont été retirées.">
+      <EmptyState title={t("trip.notFound.title")} text={t("trip.notFound.text")}>
         <Link className="button" to="/voyages">
-          Voir tous les voyages
+          {t("trip.notFound.action")}
         </Link>
       </EmptyState>
     );
@@ -56,9 +60,9 @@ export function TripScreen() {
   const back = () => (history.length > 1 ? navigate(-1) : navigate("/voyages"));
 
   const tripActions: Action[] = [
-    { label: "Renommer le voyage", onSelect: () => setOverlay({ kind: "rename-trip" }) },
-    { label: "Changer la photo de couverture", hint: "Ouvre une photo, puis « Utiliser comme couverture »", onSelect: () => setOverlay({ kind: "cover-help" }) },
-    { label: "Créer un badge pour le frigo", hint: "QR code ou badge NFC", onSelect: () => setOverlay({ kind: "badge" }) },
+    { label: t("trip.rename"), onSelect: () => setOverlay({ kind: "rename-trip" }) },
+    { label: t("trip.changeCover"), hint: t("trip.changeCover.hint"), onSelect: () => setOverlay({ kind: "cover-help" }) },
+    { label: t("trip.badge"), hint: t("trip.badge.hint"), onSelect: () => setOverlay({ kind: "badge" }) },
   ];
 
   return (
@@ -67,14 +71,14 @@ export function TripScreen() {
         {trip.coverLarge && <img className="trip-hero__img" src={trip.coverLarge} alt="" />}
         <div className="trip-hero__shade" aria-hidden="true" />
         <div className="trip-hero__bar">
-          <button className="icon-button icon-button--glass" onClick={back} aria-label="Retour">
+          <button className="icon-button icon-button--glass" onClick={back} aria-label={t("common.back")}>
             <IconBack />
           </button>
           <div className="trip-hero__actions">
-            <button className="icon-button icon-button--glass" onClick={() => setOverlay({ kind: "badge" })} aria-label="Badge du frigo">
+            <button className="icon-button icon-button--glass" onClick={() => setOverlay({ kind: "badge" })} aria-label={t("badge.title")}>
               <IconNfc />
             </button>
-            <button className="icon-button icon-button--glass" onClick={() => setOverlay({ kind: "trip-menu" })} aria-label="Options du voyage">
+            <button className="icon-button icon-button--glass" onClick={() => setOverlay({ kind: "trip-menu" })} aria-label={t("trip.options")}>
               <IconMore />
             </button>
           </div>
@@ -83,14 +87,14 @@ export function TripScreen() {
           <span className="trip-hero__flags" aria-hidden="true">{flags(trip.countryCodes)}</span>
           <Sign as="h1" size="lg">{trip.title}</Sign>
           <p className="trip-hero__meta">
-            {dateRange(trip.startAt, trip.endAt)}, {count(days(trip.startAt, trip.endAt), "jour", "jours")}, {count(trip.mediaCount, "photo", "photos")}
+            {dateRange(trip.startAt, trip.endAt)}, {t("count.days", { count: days(trip.startAt, trip.endAt) })}, {t("count.photos", { count: trip.mediaCount })}
           </p>
         </div>
       </header>
 
       <div className="trip__body">
         {trip.route.length > 1 && (
-          <section className="trip__section" aria-label="Itinéraire">
+          <section className="trip__section" aria-label={t("trip.route")}>
             <TripMap route={trip.route} chapters={trip.chapters} onChapter={(i) => chapterRefs.current[i]?.scrollIntoView({ behavior: "smooth", block: "start" })} />
             <ol className="trip__stops">
               {trip.chapters.map((c, i) => (
@@ -106,7 +110,7 @@ export function TripScreen() {
         )}
 
         <section className="trip__section">
-          <NoteEditor key={`t-${trip.id}`} tripId={trip.id} chapterId={null} initial={noteFor(null)} placeholder="Raconte ce voyage : ce qu'il ne faut pas oublier, les fous rires, les adresses…" />
+          <NoteEditor key={`t-${trip.id}`} tripId={trip.id} chapterId={null} initial={noteFor(null)} placeholder={t("trip.notePlaceholder")} />
         </section>
 
         {trip.chapters.map((c, i) => (
@@ -120,7 +124,7 @@ export function TripScreen() {
                   {dateRange(c.startAt, c.endAt)}
                 </p>
               </div>
-              <button className="icon-button chapter__more" onClick={() => setOverlay({ kind: "chapter-menu", chapter: c, index: i })} aria-label={`Options de l'étape ${c.title}`}>
+              <button className="icon-button chapter__more" onClick={() => setOverlay({ kind: "chapter-menu", chapter: c, index: i })} aria-label={t("chapter.options", { title: c.title })}>
                 <IconMore />
               </button>
             </div>
@@ -136,7 +140,7 @@ export function TripScreen() {
           index={viewer}
           onIndex={setViewer}
           onClose={() => setViewer(null)}
-          action={{ label: "Utiliser comme couverture", run: (m: Media) => api.updateTrip(trip.slug, { coverMediaId: m.id }).then(bump) }}
+          action={{ label: t("trip.useAsCover"), run: (m: Media) => api.updateTrip(trip.slug, { coverMediaId: m.id }).then(bump) }}
         />
       )}
 
@@ -144,17 +148,17 @@ export function TripScreen() {
       {overlay?.kind === "badge" && <BadgeSheet slug={trip.slug} title={trip.title} onClose={() => setOverlay(null)} />}
       {overlay?.kind === "cover-help" && (
         <ActionSheet
-          title="Choisir la couverture"
-          actions={[{ label: "Ouvrir la première photo", hint: "Fais défiler, puis touche « Utiliser comme couverture »", onSelect: () => setViewer(0) }]}
+          title={t("trip.chooseCover")}
+          actions={[{ label: t("trip.openFirst"), hint: t("trip.openFirst.hint"), onSelect: () => setViewer(0) }]}
           onClose={() => setOverlay(null)}
         />
       )}
       {overlay?.kind === "rename-trip" && (
         <PromptSheet
-          title="Renommer le voyage"
+          title={t("trip.rename")}
           initial={trip.title}
           placeholder={trip.autoTitle}
-          hint={`Laisse vide pour revenir au nom automatique : « ${trip.autoTitle} ». Le lien du badge ne change pas.`}
+          hint={t("trip.rename.hint", { auto: trip.autoTitle })}
           onSubmit={(v) => api.updateTrip(trip.slug, { title: v.trim() || null }).then(bump)}
           onClose={() => setOverlay(null)}
         />
@@ -163,9 +167,9 @@ export function TripScreen() {
         <ActionSheet
           title={overlay.chapter.title}
           actions={[
-            { label: "Renommer l'étape", onSelect: () => setOverlay({ kind: "rename-chapter", chapter: overlay.chapter }) },
+            { label: t("chapter.rename"), onSelect: () => setOverlay({ kind: "rename-chapter", chapter: overlay.chapter }) },
             ...(overlay.index > 0
-              ? [{ label: `Fusionner avec « ${trip.chapters[overlay.index - 1].title} »`, hint: "Les deux étapes n'en feront plus qu'une", onSelect: () => api.mergeChapter(overlay.chapter.id).then(bump) }]
+              ? [{ label: t("chapter.merge", { title: trip.chapters[overlay.index - 1].title }), hint: t("chapter.merge.hint"), onSelect: () => api.mergeChapter(overlay.chapter.id).then(bump) }]
               : []),
           ]}
           onClose={() => setOverlay(null)}
@@ -173,10 +177,10 @@ export function TripScreen() {
       )}
       {overlay?.kind === "rename-chapter" && (
         <PromptSheet
-          title="Renommer l'étape"
+          title={t("chapter.rename")}
           initial={overlay.chapter.title}
           placeholder={overlay.chapter.autoTitle}
-          hint={`Laisse vide pour revenir à « ${overlay.chapter.autoTitle} ».`}
+          hint={t("chapter.rename.hint", { auto: overlay.chapter.autoTitle })}
           onSubmit={(v) => api.renameChapter(overlay.chapter.id, v.trim() || null).then(bump)}
           onClose={() => setOverlay(null)}
         />
@@ -191,12 +195,12 @@ function ChapterNote({ trip, chapter, initial }: { trip: Trip; chapter: Chapter;
   if (!open)
     return (
       <button className="chapter__add-note" onClick={() => setOpen(true)}>
-        Ajouter un souvenir à cette étape
+        {t("chapter.addNote")}
       </button>
     );
   return (
     <div className="chapter__note">
-      <NoteEditor key={`c-${chapter.id}`} tripId={trip.id} chapterId={chapter.id} initial={initial} placeholder={`Un souvenir de ${chapter.title}…`} />
+      <NoteEditor key={`c-${chapter.id}`} tripId={trip.id} chapterId={chapter.id} initial={initial} placeholder={t("chapter.notePlaceholder", { title: chapter.title })} />
     </div>
   );
 }

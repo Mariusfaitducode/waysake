@@ -3,6 +3,7 @@ import * as maplibregl from "maplibre-gl";
 import type { Map as MlMap } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 type Stop = { title: string; centerLat: number; centerLon: number };
+import { locale, t } from "../i18n/index.js";
 import "./TripMap.css";
 
 const dark = () => matchMedia("(prefers-color-scheme: dark)").matches;
@@ -26,9 +27,9 @@ export function TripMap({ route, chapters, onChapter, compact }: { route: [numbe
         bounds: bounds(route, chapters),
         fitBoundsOptions: { padding: 48, maxZoom: 9 },
         locale: {
-          "CooperativeGesturesHandler.WindowsHelpText": "Ctrl + molette pour zoomer",
-          "CooperativeGesturesHandler.MacHelpText": "⌘ + molette pour zoomer",
-          "CooperativeGesturesHandler.MobileHelpText": "Deux doigts pour déplacer la carte",
+          "CooperativeGesturesHandler.WindowsHelpText": t("map.zoomWindows"),
+          "CooperativeGesturesHandler.MacHelpText": t("map.zoomMac"),
+          "CooperativeGesturesHandler.MobileHelpText": t("map.twoFingers"),
         },
       });
     } catch {
@@ -38,11 +39,11 @@ export function TripMap({ route, chapters, onChapter, compact }: { route: [numbe
     const credits = new maplibregl.AttributionControl({ compact: true });
     m.addControl(credits, "bottom-right");
     m.once("load", () => m.getContainer().querySelector(".maplibregl-ctrl-attrib")?.classList.remove("maplibregl-compact-show"));
-    // Noms de lieux en français quand ils existent.
+    // Noms de lieux dans la langue de l'interface quand ils existent.
     m.once("styledata", () => {
       for (const layer of m.getStyle().layers ?? []) {
         if (layer.type === "symbol" && m.getLayoutProperty(layer.id, "text-field") !== undefined)
-          m.setLayoutProperty(layer.id, "text-field", ["coalesce", ["get", "name:fr"], ["get", "name"]]);
+          m.setLayoutProperty(layer.id, "text-field", ["coalesce", ["get", `name:${locale()}`], ["get", "name"]]);
       }
     });
     const color = getComputedStyle(document.documentElement).getPropertyValue("--autostrada").trim() || "#0b7a4b";
@@ -56,7 +57,7 @@ export function TripMap({ route, chapters, onChapter, compact }: { route: [numbe
       const node = document.createElement("button");
       holder.appendChild(node);
       node.className = "stop";
-      node.setAttribute("aria-label", `Étape ${i + 1} : ${c.title}`);
+      node.setAttribute("aria-label", t("map.stop", { n: i + 1, title: c.title }));
       node.innerHTML = `<span>${i + 1}</span>`;
       node.addEventListener("click", () => onChapter?.(i));
       new maplibregl.Marker({ element: holder }).setLngLat([c.centerLon, c.centerLat]).addTo(m);

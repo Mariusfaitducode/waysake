@@ -1,7 +1,8 @@
 /** Pont avec l'app Android : présent seulement quand Atlas tourne dans l'app (WebView). */
 declare global {
   interface Window {
-    __ATLAS_APP__?: { user: string; platform: string; password?: string };
+    /** `lang` : langue choisie dans l'app (celle du téléphone par défaut), « fr » ou « en ». */
+    __ATLAS_APP__?: { user: string; platform: string; lang?: string; password?: string };
     ReactNativeWebView?: { postMessage: (msg: string) => void };
   }
 }

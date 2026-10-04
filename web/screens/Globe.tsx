@@ -7,6 +7,8 @@ import { TripCard } from "../components/TripCard.js";
 import { useUpload } from "../shell/upload.js";
 import { useProfile } from "../profile.js";
 import { IconPlus } from "../shell/icons.js";
+import { t } from "../i18n/index.js";
+import { number } from "../format.js";
 import "./Globe.css";
 
 export function GlobeScreen() {
@@ -36,15 +38,15 @@ export function GlobeScreen() {
           <h1 className="globe__title">Atlas</h1>
           {overview && overview.trips > 0 && (
             <Link to="/pays" className="globe__stats">
-              {overview.countries} pays, {overview.trips} voyages, {overview.km.toLocaleString("fr-FR")} km de route
+              {t("globe.stats", { countries: t("count.countries", { count: overview.countries }), trips: t("count.trips", { count: overview.trips }), km: number(overview.km) })}
             </Link>
           )}
         </div>
         <div className="globe__actions">
-          <button className="icon-button" onClick={openUpload} aria-label="Ajouter des photos">
+          <button className="icon-button" onClick={openUpload} aria-label={t("common.addPhotos")}>
             <IconPlus />
           </button>
-          <button className="globe__me" onClick={switchProfile} style={{ "--c": me.color } as React.CSSProperties} aria-label={`${me.name} — changer de profil`}>
+          <button className="globe__me" onClick={switchProfile} style={{ "--c": me.color } as React.CSSProperties} aria-label={t("profile.switch", { name: me.name })}>
           {me.name[0]}
           </button>
         </div>
@@ -52,15 +54,15 @@ export function GlobeScreen() {
 
       {trips && trips.length === 0 && (
         <div className="globe__empty">
-          <p>Ajoute les photos d'un voyage : il apparaîtra ici, sur le globe.</p>
+          <p>{t("globe.empty")}</p>
           <button className="button" onClick={openUpload}>
-            Ajouter des photos
+            {t("common.addPhotos")}
           </button>
         </div>
       )}
 
       {trips && trips.length > 0 && (
-        <div className="globe__strip" ref={strip} aria-label="Vos voyages">
+        <div className="globe__strip" ref={strip} aria-label={t("globe.yourTrips")}>
           {trips.map((t) => (
             <div key={t.slug} data-slug={t.slug} className={`globe__slot${selected === t.slug ? " is-selected" : ""}`} onPointerEnter={() => matchMedia("(hover: hover)").matches && setSelected(t.slug)}>
               <TripCard trip={t} size="sm" />

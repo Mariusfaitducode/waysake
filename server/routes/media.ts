@@ -71,15 +71,15 @@ function toDto(r: MediaRow) {
 export function mediaRoutes(app: FastifyInstance, db: Db, dataDir: string, onIngested: () => void = () => {}) {
   app.post<{ Querystring: { import?: string } }>("/api/media", async (req, reply) => {
     const user = identify(db, req);
-    if (!user) return reply.code(401).send({ error: "Choisis ton profil d'abord" });
+    if (!user) return reply.code(401).send({ error: "Choisis ton profil d'abord", code: "profile_required" });
     const importId = req.query.import !== undefined ? Number(req.query.import) : undefined;
     if (importId !== undefined && !db.prepare("SELECT 1 FROM import WHERE id = ? AND status = 'pending'").get(importId))
-      return reply.code(404).send({ error: "Cet import est terminé ou n'existe plus." });
+      return reply.code(404).send({ error: "Cet import est terminé ou n'existe plus.", code: "import_closed" });
     const file = await req.file();
-    if (!file) return reply.code(400).send({ error: "Aucun fichier" });
+    if (!file) return reply.code(400).send({ error: "Aucun fichier", code: "no_file" });
     if (!detectType(file.filename)) {
       file.file.resume();
-      return reply.code(415).send({ error: `Format non pris en charge : ${file.filename}` });
+      return reply.code(415).send({ error: `Format non pris en charge : ${file.filename}`, code: "unsupported_format", file: file.filename });
     }
     // Écriture en flux sur disque, hash calculé au passage : une vidéo de 2 Go n'occupe pas 2 Go de RAM.
     const path = tmpPath(dataDir);
@@ -100,7 +100,7 @@ export function mediaRoutes(app: FastifyInstance, db: Db, dataDir: string, onIng
     }
     if (file.file.truncated) {
       rmSync(path, { force: true });
-      return reply.code(413).send({ error: `Fichier trop lourd (2 Go maximum) : ${file.filename}` });
+      return reply.code(413).send({ error: `Fichier trop lourd (2 Go maximum) : ${file.filename}`, code: "file_too_large_named", file: file.filename });
     }
     try {
       const result = await ingestFile(db, dataDir, {
@@ -110,8 +110,8 @@ export function mediaRoutes(app: FastifyInstance, db: Db, dataDir: string, onIng
       if (!result.duplicate) onIngested();
       return reply.code(201).send(result);
     } catch (err) {
-      if (err instanceof UnsupportedTypeError) return reply.code(415).send({ error: err.message });
-      if (err instanceof UnreadableImageError) return reply.code(422).send({ error: err.message });
+      if (err instanceof UnsupportedTypeError) return reply.code(415).send({ error: err.message, code: "unsupported_type" });
+      if (err instanceof UnreadableImageError) return reply.code(422).send({ error: err.message, code: "unreadable_image" });
       throw err;
     }
   });
@@ -139,7 +139,7 @@ export function mediaRoutes(app: FastifyInstance, db: Db, dataDir: string, onIng
     app.get<{ Params: { id: string } }>(`/api/media/:id/${route}`, async (req, reply) => {
       const m = find(req.params.id);
       const path = m && derivedPath(dataDir, m.sha256, size);
-      if (!m || !m.has_thumbs || !path || !existsSync(path)) return reply.code(404).send({ error: "Introuvable" });
+      if (!m || !m.has_thumbs || !path || !existsSync(path)) return reply.code(404).send({ error: "Introuvable", code: "not_found" });
       reply.header("Cache-Control", "public, max-age=31536000, immutable").type("image/webp");
       return reply.send(createReadStream(path));
     });
@@ -147,7 +147,7 @@ export function mediaRoutes(app: FastifyInstance, db: Db, dataDir: string, onIng
 
   app.get<{ Params: { id: string } }>("/api/media/:id/original", async (req, reply) => {
     const m = find(req.params.id);
-    if (!m) return reply.code(404).send({ error: "Introuvable" });
+    if (!m) return reply.code(404).send({ error: "Introuvable", code: "not_found" });
     reply
       .type(m.mime)
       .header("Content-Disposition", `inline; filename*=UTF-8''${encodeURIComponent(m.original_name)}`);

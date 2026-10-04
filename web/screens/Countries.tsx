@@ -3,36 +3,35 @@ import { api } from "../api.js";
 import { useApi } from "../data.js";
 import { Header } from "../components/Header.js";
 import { EmptyState } from "../components/EmptyState.js";
-import { count, year } from "../format.js";
+import { countryName, year } from "../format.js";
+import { t } from "../i18n/index.js";
 import { IconBack } from "../shell/icons.js";
 import "./Countries.css";
 
 export function Countries() {
   const { data: countries } = useApi(api.countries);
   const { data: trips } = useApi(api.trips);
-  const latestTrip = (code: string) => trips?.find((t) => t.countryCodes.includes(code));
+  const latestTrip = (code: string) => trips?.find((trip) => trip.countryCodes.includes(code));
 
   return (
     <div className="countries">
       <Link to="/" className="back-link">
-        <IconBack /> Globe
+        <IconBack /> {t("common.globe")}
       </Link>
       <Header
-        title="Pays découverts"
-        subtitle={countries && countries.length > 0 ? `${count(countries.length, "pays", "pays")} ensemble, dans l'ordre où vous les avez découverts.` : undefined}
+        title={t("countries.title")}
+        subtitle={countries && countries.length > 0 ? t("countries.subtitle", { countries: t("count.countries", { count: countries.length }) }) : undefined}
       />
-      {countries?.length === 0 && <EmptyState title="Pas encore de pays." text="Les pays apparaissent dès que des photos de voyage sont ajoutées." />}
+      {countries?.length === 0 && <EmptyState title={t("countries.empty.title")} text={t("countries.empty.text")} />}
       <ol className="countries__grid">
         {countries?.map((c) => {
-          const t = latestTrip(c.code);
+          const trip = latestTrip(c.code);
           return (
             <li key={c.code}>
-              <Link to={t ? `/v/${t.slug}` : "/voyages"} className="country">
+              <Link to={trip ? `/v/${trip.slug}` : "/voyages"} className="country">
                 <span className="country__flag" aria-hidden="true">{c.flag}</span>
-                <span className="country__name">{c.name}</span>
-                <span className="country__meta">
-                  Depuis {year(c.firstVisit)}, {count(c.trips, "voyage", "voyages")}
-                </span>
+                <span className="country__name">{countryName(c.code, c.name)}</span>
+                <span className="country__meta">{t("countries.since", { year: year(c.firstVisit), trips: t("count.trips", { count: c.trips }) })}</span>
               </Link>
             </li>
           );

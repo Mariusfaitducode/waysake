@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { count } from "../format.js";
+import { t } from "../i18n/index.js";
 import type { QueueState, UploadQueue } from "../upload-queue.js";
 import "./Sheet.css";
 import "./UploadSheet.css";
@@ -44,7 +44,7 @@ export function UploadSheet({ queue, importId, onSend, onRetry, onClose }: Props
         <div className="sheet__grip" aria-hidden="true" />
         {s.total === 0 && (
           <>
-            <h2 className="sheet__title">Ajouter des photos</h2>
+            <h2 className="sheet__title">{t("common.addPhotos")}</h2>
             <label
               className={`drop ${dragging ? "is-over" : ""}`}
               onDragOver={(e) => {
@@ -67,15 +67,15 @@ export function UploadSheet({ queue, importId, onSend, onRetry, onClose }: Props
                 className="sr-only"
                 onChange={(e) => e.target.files && onSend([...e.target.files])}
               />
-              <span className="drop__lead">Choisir des photos</span>
-              <span className="drop__hint">ou glisse-les ici, autant que tu veux. Atlas les trie, tu valides ensuite.</span>
+              <span className="drop__lead">{t("upload.choose")}</span>
+              <span className="drop__hint">{t("upload.dropHint")}</span>
             </label>
             <p className="sheet__meta">
-              Sur téléphone, les navigateurs retirent le lieu des photos.{" "}
+              {t("upload.phone.before")}{" "}
               <a href="/app" onClick={(e) => { e.preventDefault(); dialog.current?.close(); navigate("/app"); }}>
-                Installe l'app Atlas
-              </a>{" "}
-              pour tout importer avec les lieux.
+                {t("upload.phone.link")}
+              </a>
+              {t("upload.phone.after")}
             </p>
           </>
         )}
@@ -83,7 +83,7 @@ export function UploadSheet({ queue, importId, onSend, onRetry, onClose }: Props
         {s.total > 0 && (
           <>
             <h2 className="sheet__title" aria-live="polite">
-              {finished ? (added > 0 ? `${count(added, "photo reçue", "photos reçues")}` : "Rien de nouveau") : "Envoi en cours…"}
+              {finished ? (added > 0 ? t("upload.received", { count: added }) : t("upload.nothingNew")) : t("upload.sending")}
             </h2>
             <div
               className="progress"
@@ -95,12 +95,12 @@ export function UploadSheet({ queue, importId, onSend, onRetry, onClose }: Props
               <div className="progress__bar" style={{ transform: `scaleX(${progress})` }} />
             </div>
             <p className="sheet__meta">
-              {s.done + s.failed.length} sur {s.total}
-              {s.duplicates > 0 && ` · ${count(s.duplicates, "déjà présente", "déjà présentes")}`}
+              {t("upload.progress", { done: s.done + s.failed.length, total: s.total })}
+              {s.duplicates > 0 && ` · ${t("upload.duplicates", { count: s.duplicates })}`}
             </p>
             {s.failed.length > 0 && !busy && (
               <div className="failed">
-                <p>{count(s.failed.length, "fichier n'a pas pu être ajouté", "fichiers n'ont pas pu être ajoutés")} :</p>
+                <p>{t("upload.failed", { count: s.failed.length })}</p>
                 <ul>
                   {s.failed.slice(0, 5).map((f, i) => (
                     <li key={i}>
@@ -109,11 +109,11 @@ export function UploadSheet({ queue, importId, onSend, onRetry, onClose }: Props
                   ))}
                 </ul>
                 <button className="button button--quiet" onClick={onRetry}>
-                  Réessayer
+                  {t("common.retry")}
                 </button>
               </div>
             )}
-            {finished && added > 0 && <p className="sheet__meta">Atlas a trié vos photos. Il ne reste qu'à vérifier et valider.</p>}
+            {finished && added > 0 && <p className="sheet__meta">{t("upload.sorted")}</p>}
             {finished && (
               <div className="sheet__actions">
                 {added > 0 && importId ? (
@@ -125,11 +125,11 @@ export function UploadSheet({ queue, importId, onSend, onRetry, onClose }: Props
                       navigate(to);
                     }}
                   >
-                    Voir le tri proposé
+                    {t("upload.review")}
                   </button>
                 ) : (
                   <button className="button" onClick={() => dialog.current?.close()}>
-                    Fermer
+                    {t("common.close")}
                   </button>
                 )}
               </div>

@@ -1,5 +1,6 @@
 import { Component, type ReactNode } from "react";
 import { EmptyState } from "./EmptyState.js";
+import { t } from "../i18n/index.js";
 
 /** Si un écran plante, on l'annonce simplement, sans page blanche. */
 export class ErrorBoundary extends Component<{ children: ReactNode; resetKey: string }, { failed: boolean }> {
@@ -13,9 +14,9 @@ export class ErrorBoundary extends Component<{ children: ReactNode; resetKey: st
   render() {
     if (!this.state.failed) return this.props.children;
     return (
-      <EmptyState title="Cet écran n'a pas pu s'afficher." text="Vos photos sont en sécurité sur la tour. Recharge la page pour réessayer.">
+      <EmptyState title={t("error.screen.title")} text={t("error.screen.text")}>
         <button className="button" onClick={() => location.reload()}>
-          Recharger
+          {t("common.reload")}
         </button>
       </EmptyState>
     );

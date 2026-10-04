@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { t } from "../i18n/index.js";
 import "./Sheet.css";
 
 /** Feuille modale (dialog natif : focus piégé, Échap, retour du focus). Glisse du bas sur téléphone. */
@@ -94,10 +95,10 @@ export function PromptSheet({
         {error && <p role="alert" className="prompt__error">{error}</p>}
         <div className="prompt__actions">
           <button type="button" className="button button--quiet" onClick={(e) => (e.currentTarget.closest("dialog") as HTMLDialogElement).close()}>
-            Annuler
+            {t("common.cancel")}
           </button>
           <button className="button" disabled={busy}>
-            Enregistrer
+            {t("common.save")}
           </button>
         </div>
       </form>

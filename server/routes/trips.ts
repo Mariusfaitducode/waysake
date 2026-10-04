@@ -14,7 +14,7 @@ export function tripRoutes(app: FastifyInstance, db: Db) {
 
   app.get<{ Params: { slug: string } }>("/api/trips/:slug", async (req, reply) => {
     const t = getTrip(db, req.params.slug);
-    if (!t) return reply.code(404).send({ error: "Ce voyage n'existe pas (ou plus)." });
+    if (!t) return reply.code(404).send({ error: "Ce voyage n'existe pas (ou plus).", code: "trip_not_found" });
     const notes = db
       .prepare("SELECT chapter_id AS chapterId, body, author, updated_at AS updatedAt FROM note WHERE trip_id = ? ORDER BY chapter_id IS NOT NULL, chapter_id")
       .all(t.id);
@@ -31,22 +31,22 @@ export function tripRoutes(app: FastifyInstance, db: Db) {
     "/api/trips/:slug",
     async (req, reply) => {
       const { title, coverMediaId } = req.body ?? {};
-      if (!getTrip(db, req.params.slug)) return reply.code(404).send({ error: "Introuvable" });
+      if (!getTrip(db, req.params.slug)) return reply.code(404).send({ error: "Introuvable", code: "not_found" });
       if (coverMediaId !== undefined && !setCover(db, req.params.slug, coverMediaId))
-        return reply.code(400).send({ error: "Cette photo ne fait pas partie du voyage." });
+        return reply.code(400).send({ error: "Cette photo ne fait pas partie du voyage.", code: "cover_not_in_trip" });
       if (title !== undefined) renameTrip(db, req.params.slug, title);
       return { ok: true };
     },
   );
 
   app.patch<{ Params: { id: string }; Body: { title?: string | null } }>("/api/chapters/:id", async (req, reply) => {
-    if (!renameChapter(db, Number(req.params.id), req.body?.title ?? null)) return reply.code(404).send({ error: "Introuvable" });
+    if (!renameChapter(db, Number(req.params.id), req.body?.title ?? null)) return reply.code(404).send({ error: "Introuvable", code: "not_found" });
     return { ok: true };
   });
 
   app.post<{ Params: { id: string } }>("/api/chapters/:id/merge-previous", async (req, reply) => {
     if (!mergeChapterWithPrevious(db, Number(req.params.id)))
-      return reply.code(400).send({ error: "Cette étape ne peut pas être fusionnée." });
+      return reply.code(400).send({ error: "Cette étape ne peut pas être fusionnée.", code: "chapter_not_mergeable" });
     return { ok: true };
   });
 
@@ -91,7 +91,7 @@ export function tripRoutes(app: FastifyInstance, db: Db) {
   // Lieu d'une photo pour la visionneuse.
   app.get<{ Params: { id: string } }>("/api/media/:id/place", async (req, reply) => {
     const r = db.prepare("SELECT geo FROM media WHERE id = ?").get(Number(req.params.id)) as { geo: string | null } | undefined;
-    if (!r) return reply.code(404).send({ error: "Introuvable" });
+    if (!r) return reply.code(404).send({ error: "Introuvable", code: "not_found" });
     return r.geo ? (JSON.parse(r.geo) as GeoPlace) : null;
   });
 }

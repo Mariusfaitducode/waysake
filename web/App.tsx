@@ -18,8 +18,10 @@ import { Login } from "./screens/Login.js";
 import { ImportReview } from "./screens/ImportReview.js";
 import { GetApp } from "./screens/GetApp.js";
 import { Locate } from "./screens/Locate.js";
+import { useLocale } from "./i18n/index.js";
 
 export function App() {
+  const locale = useLocale();
   const [me, setMe] = useState<User | null | undefined>(undefined);
   // La tour demande le mot de passe du foyer (ATLAS_PASSWORD) : écran de connexion avant le choix du profil.
   const [locked, setLocked] = useState(false);
@@ -75,7 +77,8 @@ export function App() {
   if (me === null) return <ProfilePicker onPick={setMe} />;
   return (
     <ProfileCtx.Provider value={{ me, switchProfile }}>
-      <DataProvider>
+      {/* Changer de langue remonte les écrans : chaque texte, date et nom de pays est relu dans la nouvelle langue. */}
+      <DataProvider key={locale}>
         <BrowserRouter>
           <UploadProvider>
             <Routes>

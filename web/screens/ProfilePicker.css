@@ -67,6 +67,7 @@
 .picker__person:active .picker__avatar { transform: scale(0.97); }
 .picker__name { font-size: 19px; font-weight: 600; }
 .picker__error { color: var(--danger); }
+.picker__lang { margin-top: 40px; }
 @keyframes sign-in {
   from { opacity: 0; transform: translateY(-8px) rotate(-2deg); }
 }

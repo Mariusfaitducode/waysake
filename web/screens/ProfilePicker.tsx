@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { api, type User } from "../api.js";
 import { inApp } from "../native.js";
+import { t } from "../i18n/index.js";
+import { LanguageSwitch } from "../components/LanguageSwitch.js";
 import "./ProfilePicker.css";
 import "./Login.css";
 
@@ -36,8 +38,8 @@ export function ProfilePicker({ onPick }: { onPick: (u: User) => void }) {
       <div className="picker__sign" aria-hidden="true">
         <span>Atlas</span>
       </div>
-      <h1 className="picker__title">Qui es-tu ?</h1>
-      <p className="picker__hint">On s'en souviendra sur cet appareil.</p>
+      <h1 className="picker__title">{t("profile.who")}</h1>
+      <p className="picker__hint">{t("profile.hint")}</p>
       <div className="picker__people">
         {users.map((u) => (
           <button key={u.id} className="picker__person" onClick={() => pick(u)} style={{ "--c": u.color } as React.CSSProperties}>
@@ -47,9 +49,12 @@ export function ProfilePicker({ onPick }: { onPick: (u: User) => void }) {
         ))}
       </div>
       {error && <p role="alert" className="picker__error">{error}</p>}
+      <div className="picker__lang">
+        <LanguageSwitch />
+      </div>
       {locks && (
         <button className="button button--quiet button--small picker__lock" onClick={lock}>
-          Verrouiller cet appareil
+          {t("profile.lock")}
         </button>
       )}
     </main>

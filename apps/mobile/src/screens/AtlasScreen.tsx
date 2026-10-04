@@ -7,6 +7,7 @@ import { WebView, type WebViewMessageEvent } from "react-native-webview";
 import { Button, Sign } from "../components";
 import type { Settings } from "../storage";
 import { font, useTheme } from "../theme";
+import { locale, tr } from "../i18n";
 import { ImportScreen } from "./ImportScreen";
 
 /**
@@ -36,7 +37,7 @@ export function AtlasScreen({ settings, onReset }: { settings: Settings; onReset
   // foyer lui permet d'ouvrir sa session (cookie) sans le redemander : la WebView n'envoie pas d'en-tête
   // Authorization sur les images ni les appels de la page.
   const origin = new URL(settings.server).origin;
-  const bridge = `if (location.origin === ${JSON.stringify(origin)}) { window.__ATLAS_APP__ = ${JSON.stringify({ user: settings.user, platform: "android", password: settings.password })}; } true;`;
+  const bridge = `if (location.origin === ${JSON.stringify(origin)}) { window.__ATLAS_APP__ = ${JSON.stringify({ user: settings.user, platform: "android", lang: locale(), password: settings.password })}; } true;`;
 
   function onMessage(e: WebViewMessageEvent) {
     // Seule la tour peut demander un import ou les réglages.
@@ -53,10 +54,10 @@ export function AtlasScreen({ settings, onReset }: { settings: Settings; onReset
     return (
       <SafeAreaView style={[styles.fallback, { backgroundColor: t.paper }]}>
         <Sign size={30}>Atlas</Sign>
-        <Text style={[styles.title, { color: t.ink }]}>La tour ne répond pas</Text>
-        <Text style={[styles.lead, { color: t.muted }]}>Vérifie que Tailscale est activé sur ce téléphone et que la tour est allumée.{"\n"}Adresse : {settings.server}</Text>
-        <Button title="Réessayer" onPress={() => setFailed(false)} />
-        <Button title="Changer d'adresse" kind="quiet" onPress={onReset} />
+        <Text style={[styles.title, { color: t.ink }]}>{tr("atlas.down.title")}</Text>
+        <Text style={[styles.lead, { color: t.muted }]}>{tr("atlas.down.text")}{"\n"}{tr("atlas.down.address", { url: settings.server })}</Text>
+        <Button title={tr("atlas.retry")} onPress={() => setFailed(false)} />
+        <Button title={tr("atlas.changeAddress")} kind="quiet" onPress={onReset} />
       </SafeAreaView>
     );
 

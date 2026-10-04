@@ -1,11 +1,12 @@
 import { Link } from "react-router";
 import { EmptyState } from "../components/EmptyState.js";
+import { t } from "../i18n/index.js";
 
 export function NotFound() {
   return (
-    <EmptyState title="Cette page n'existe pas." text="Le lien est peut-être ancien. Tous vos voyages sont sur le globe.">
+    <EmptyState title={t("error.notFound.title")} text={t("error.notFound.text")}>
       <Link className="button" to="/">
-        Revenir au globe
+        {t("error.notFound.action")}
       </Link>
     </EmptyState>
   );

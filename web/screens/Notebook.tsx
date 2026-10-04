@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { api, type PlaceHit, type Wish } from "../api.js";
 import { useApi, useAuthorName, useDataVersion } from "../data.js";
-import { wishMonth } from "../format.js";
+import { countryName, hitName, wishMonth } from "../format.js";
+import { t } from "../i18n/index.js";
+import { autoName, placeTitle } from "../i18n/places.js";
 import { Header } from "../components/Header.js";
 import { ActionSheet, Sheet } from "../components/Sheet.js";
 import { IconCheck, IconPin, IconPlus } from "../shell/icons.js";
@@ -23,17 +25,17 @@ export function Notebook() {
 
   return (
     <div className="notebook">
-      <Header title="Carnet" subtitle="Vos envies de voyage et vos souvenirs écrits." />
+      <Header title={t("notebook.title")} subtitle={t("notebook.subtitle")} />
 
       <section className="notebook__section" aria-labelledby="wishes-title">
         <div className="notebook__head">
-          <h2 id="wishes-title">Prochains voyages</h2>
-          <button className="button button--small" onClick={() => setAdding(true)} aria-label="Ajouter une envie">
-            <IconPlus /> Ajouter
+          <h2 id="wishes-title">{t("notebook.wishes")}</h2>
+          <button className="button button--small" onClick={() => setAdding(true)} aria-label={t("notebook.addWish")}>
+            <IconPlus /> {t("notebook.add")}
           </button>
         </div>
         {wishes && todo.length === 0 && (
-          <p className="notebook__empty">Où rêvez-vous d'aller ? Ajoutez une destination : elle apparaîtra sur le globe, en anneau jaune.</p>
+          <p className="notebook__empty">{t("notebook.wishes.empty")}</p>
         )}
         <ul className="wishes">
           {todo.map((w) => (
@@ -42,7 +44,7 @@ export function Notebook() {
         </ul>
         {done.length > 0 && (
           <>
-            <h3 className="notebook__sub">Réalisées</h3>
+            <h3 className="notebook__sub">{t("notebook.done")}</h3>
             <ul className="wishes">
               {done.map((w) => (
                 <WishRow key={w.id} wish={w} onToggle={() => api.updateWish(w.id, { done: false }).then(bump)} onOpen={() => setEditing(w)} />
@@ -54,9 +56,9 @@ export function Notebook() {
 
       <section className="notebook__section" aria-labelledby="notes-title">
         <div className="notebook__head">
-          <h2 id="notes-title">Souvenirs</h2>
+          <h2 id="notes-title">{t("notebook.memories")}</h2>
         </div>
-        {notes && notes.length === 0 && <p className="notebook__empty">Les souvenirs s'écrivent dans chaque voyage, sous la carte ou à la fin d'une étape. Ils se retrouvent tous ici.</p>}
+        {notes && notes.length === 0 && <p className="notebook__empty">{t("notebook.memories.empty")}</p>}
         <ul className="memories">
           {notes?.map((n) => (
             <li key={`${n.trip.slug}-${n.chapterId}`}>
@@ -64,8 +66,8 @@ export function Notebook() {
                 {n.trip.cover && <img src={n.trip.cover} alt="" loading="lazy" />}
                 <div>
                   <p className="memory__where">
-                    {n.trip.title}
-                    {n.chapterTitle && <span>, {n.chapterTitle}</span>}
+                    {placeTitle(n.trip.title)}
+                    {n.chapterTitle && <span>, {placeTitle(n.chapterTitle)}</span>}
                   </p>
                   <p className="memory__body">{n.body}</p>
                   <p className="memory__who">{authorName(n.author)}</p>
@@ -80,14 +82,14 @@ export function Notebook() {
       {editing && <WishSheet wish={editing} onClose={() => setEditing(null)} onSaved={bump} />}
       {completing && (
         <ActionSheet
-          title={`${completing.title} : c'est fait !`}
+          title={t("notebook.completed", { title: completing.title })}
           actions={[
-            ...(trips ?? []).slice(0, 5).map((t) => ({
-              label: t.title,
-              hint: "Relier à ce voyage",
-              onSelect: () => api.updateWish(completing.id, { doneTripSlug: t.slug }).then(bump),
+            ...(trips ?? []).slice(0, 5).map((trip) => ({
+              label: autoName(trip),
+              hint: t("notebook.linkTrip"),
+              onSelect: () => api.updateWish(completing.id, { doneTripSlug: trip.slug }).then(bump),
             })),
-            { label: "Sans voyage relié", onSelect: () => api.updateWish(completing.id, { done: true }).then(bump) },
+            { label: t("notebook.noTrip"), onSelect: () => api.updateWish(completing.id, { done: true }).then(bump) },
           ]}
           onClose={() => setCompleting(null)}
         />
@@ -99,7 +101,7 @@ export function Notebook() {
 function WishRow({ wish, onToggle, onOpen }: { wish: Wish; onToggle: () => void; onOpen: () => void }) {
   return (
     <li className={`wish${wish.done ? " is-done" : ""}`}>
-      <button className="wish__check" onClick={onToggle} aria-label={wish.done ? `Marquer ${wish.title} comme à faire` : `Marquer ${wish.title} comme réalisée`} aria-pressed={wish.done}>
+      <button className="wish__check" onClick={onToggle} aria-label={wish.done ? t("notebook.markTodo", { title: wish.title }) : t("notebook.markDone", { title: wish.title })} aria-pressed={wish.done}>
         {wish.done && <IconCheck />}
       </button>
       <button className="wish__main" onClick={onOpen}>
@@ -108,7 +110,7 @@ function WishRow({ wish, onToggle, onOpen }: { wish: Wish; onToggle: () => void;
           {wish.title}
         </span>
         <span className="wish__meta">
-          {[wish.month && wishMonth(wish.month), wish.doneTrip?.title, wish.note].filter(Boolean).join(". ")}
+          {[wish.month && wishMonth(wish.month), wish.doneTrip && placeTitle(wish.doneTrip.title), wish.note].filter(Boolean).join(". ")}
         </span>
       </button>
     </li>
@@ -125,14 +127,14 @@ function WishSheet({ wish, onClose, onSaved }: { wish?: Wish; onClose: () => voi
 
   useEffect(() => {
     if (place || query.trim().length < 2 || query === wish?.title) return setHits([]);
-    const t = setTimeout(() => api.places(query).then(setHits, () => setHits([])), 150);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => api.places(query).then(setHits, () => setHits([])), 150);
+    return () => clearTimeout(timer);
   }, [query, place, wish?.title]);
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
-    const title = (place?.name ?? query).trim();
-    if (!title) return setError("Donne un nom à cette envie.");
+    const title = (place ? hitName(place) : query).trim();
+    if (!title) return setError(t("api.wish_title_required"));
     const body = {
       title,
       month: month || null,
@@ -150,19 +152,19 @@ function WishSheet({ wish, onClose, onSaved }: { wish?: Wish; onClose: () => voi
   }
 
   return (
-    <Sheet title={wish ? wish.title : "Nouvelle envie"} onClose={onClose}>
+    <Sheet title={wish ? wish.title : t("notebook.newWish")} onClose={onClose}>
       <form className="wish-form" onSubmit={save}>
         <label className="wish-form__label">
-          Destination
+          {t("notebook.destination")}
           <input
             className="field"
             autoFocus={!wish}
-            value={place ? `${place.flag} ${place.name}` : query}
+            value={place ? `${place.flag} ${hitName(place)}` : query}
             onChange={(e) => {
               setPlace(null);
               setQuery(e.target.value);
             }}
-            placeholder="Lisbonne, Japon, Islande…"
+            placeholder={t("notebook.destination.placeholder")}
             autoComplete="off"
           />
         </label>
@@ -174,8 +176,8 @@ function WishSheet({ wish, onClose, onSaved }: { wish?: Wish; onClose: () => voi
                   <IconPin />
                   <span>
                     <span className="wish__flag" aria-hidden="true">{h.flag}</span>
-                    {h.name}
-                    {h.kind !== "country" && <small>{h.country}</small>}
+                    {hitName(h)}
+                    {h.kind !== "country" && <small>{countryName(h.countryCode, h.country)}</small>}
                   </span>
                 </button>
               </li>
@@ -183,12 +185,12 @@ function WishSheet({ wish, onClose, onSaved }: { wish?: Wish; onClose: () => voi
           </ul>
         )}
         <label className="wish-form__label">
-          Quand ? <small>facultatif</small>
+          {t("notebook.when")} <small>{t("notebook.optional")}</small>
           <input className="field" type="month" value={month} onChange={(e) => setMonth(e.target.value)} />
         </label>
         <label className="wish-form__label">
-          Une note <small>facultatif</small>
-          <textarea className="field" rows={3} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Ce qu'on veut y faire, une adresse, une idée…" />
+          {t("notebook.note")} <small>{t("notebook.optional")}</small>
+          <textarea className="field" rows={3} value={note} onChange={(e) => setNote(e.target.value)} placeholder={t("notebook.note.placeholder")} />
         </label>
         {error && <p role="alert" className="prompt__error">{error}</p>}
         <div className="prompt__actions">
@@ -203,10 +205,10 @@ function WishSheet({ wish, onClose, onSaved }: { wish?: Wish; onClose: () => voi
                 dialog?.close();
               }}
             >
-              Supprimer
+              {t("notebook.delete")}
             </button>
           )}
-          <button className="button">{wish ? "Enregistrer" : "Ajouter"}</button>
+          <button className="button">{wish ? t("common.save") : t("notebook.add")}</button>
         </div>
       </form>
     </Sheet>
