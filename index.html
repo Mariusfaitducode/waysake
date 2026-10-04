@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Waysake: your trips, kept</title>
+<meta name="description" content="Waysake is a self-hosted, open-source travel drive for a couple or a family. Your photos sort themselves into trips and stops on a globe, and everything stays on your own machine.">
+<link rel="canonical" href="https://waysake.com/">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#F6F6F4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0C0C0E" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Waysake">
+<meta property="og:url" content="https://waysake.com/">
+<meta property="og:title" content="Waysake: your trips, kept">
+<meta property="og:description" content="A self-hosted travel drive for a couple or a family. Your photos sort themselves into trips on a globe, at home, not in the cloud.">
+<meta property="og:image" content="https://waysake.com/assets/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Waysake logo, the line “Your trips, kept.” and the Waysake globe with five trips drawn in their colours.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Waysake: your trips, kept">
+<meta name="twitter:description" content="A self-hosted travel drive for a couple or a family. Your photos sort themselves into trips on a globe, at home, not in the cloud.">
+<meta name="twitter:image" content="https://waysake.com/assets/og-image.jpg">
+<link rel="preload" href="assets/fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/video/poster-1600.webp" as="image" type="image/webp" fetchpriority="high">
+<style>
+@font-face{font-family:"Geist";src:url("assets/fonts/geist.woff2") format("woff2");font-weight:100 900;font-style:normal;font-display:swap}
+@font-face{font-family:"Geist Mono";src:url("assets/fonts/geist-mono.woff2") format("woff2");font-weight:100 900;font-style:normal;font-display:swap}
+
+:root{
+  --bg:#F6F6F4;--surface:#FFFFFF;--surface-sunken:#EFEFEC;
+  --glass:rgba(246,246,244,.72);--scrim:rgba(0,0,0,.32);
+  --text:#141416;--text-muted:#606369;
+  --line:rgba(27,27,30,.09);--line-strong:rgba(27,27,30,.15);
+  --accent:#1B1B1E;--accent-hover:#2C2C31;--on-accent:#FFFFFF;
+  --brand-pin:#E87162;--focus:#141416;--success:#1F7A4A;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.06);
+  --shadow-lg:0 24px 60px -24px rgba(0,0,0,.28),0 2px 8px rgba(0,0,0,.06);
+  --c-coral:#CD443D;--c-amber:#C97B00;--c-moss:#4F7205;--c-pine:#2D8D64;--c-lagoon:#1E999C;
+  --c-azure:#2F8ADC;--c-indigo:#3E309F;--c-lilac:#A04AA3;--c-raspberry:#A11056;--c-slate:#5B646F;
+  --font-sans:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --ease:cubic-bezier(.2,.8,.2,1);
+  --r-sm:10px;--r-md:14px;--r-lg:18px;--r-xl:22px;
+  --max:1120px;--gutter:16px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0C0C0E;--surface:#17171A;--surface-sunken:#111113;
+  --glass:rgba(12,12,14,.72);--scrim:rgba(0,0,0,.42);
+  --text:#EDEDEB;--text-muted:#9C9EA3;
+  --line:rgba(255,255,255,.09);--line-strong:rgba(255,255,255,.16);
+  --accent:#EDEDEA;--accent-hover:#FFFFFF;--on-accent:#141416;
+  --focus:#EDEDEB;--success:#6FD39B;
+  --shadow-lg:0 24px 60px -24px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.06);
+  --c-coral:#E87162;--c-amber:#E49E38;--c-moss:#B6E27B;--c-pine:#66C58F;--c-lagoon:#68E3DE;
+  --c-azure:#7DCBFE;--c-indigo:#796CD1;--c-lilac:#C781CB;--c-raspberry:#D85584;--c-slate:#9BA6B1;
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0C0C0E;--surface:#17171A;--surface-sunken:#111113;
+  --glass:rgba(12,12,14,.72);--scrim:rgba(0,0,0,.42);
+  --text:#EDEDEB;--text-muted:#9C9EA3;
+  --line:rgba(255,255,255,.09);--line-strong:rgba(255,255,255,.16);
+  --accent:#EDEDEA;--accent-hover:#FFFFFF;--on-accent:#141416;
+  --focus:#EDEDEB;--success:#6FD39B;
+  --shadow-lg:0 24px 60px -24px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.06);
+  --c-coral:#E87162;--c-amber:#E49E38;--c-moss:#B6E27B;--c-pine:#66C58F;--c-lagoon:#68E3DE;
+  --c-azure:#7DCBFE;--c-indigo:#796CD1;--c-lilac:#C781CB;--c-raspberry:#D85584;--c-slate:#9BA6B1;
+  color-scheme:dark;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-sans);font-size:17px;line-height:1.5;
+  font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;-webkit-tap-highlight-color:transparent}
+img,video,svg{display:block;max-width:100%}
+img,video{height:auto}
+a{color:inherit;text-underline-offset:.18em;text-decoration-thickness:1px}
+a:hover{text-decoration-thickness:2px}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:6px}
+p{margin:0}
+h1,h2,h3{margin:0;font-weight:650;text-wrap:balance}
+.wrap{width:100%;max-width:calc(var(--max) + 2*var(--gutter));margin-inline:auto;padding-inline:max(var(--gutter),env(safe-area-inset-left))}
+.skip{position:absolute;left:12px;top:-60px;z-index:100;background:var(--accent);color:var(--on-accent);padding:10px 16px;border-radius:999px;text-decoration:none;font-weight:600}
+.skip:focus{top:12px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+/* Header */
+.top{position:sticky;top:0;z-index:20;background:var(--glass);-webkit-backdrop-filter:saturate(1.6) blur(18px);backdrop-filter:saturate(1.6) blur(18px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;height:60px;gap:16px}
+.wordmark{display:inline-flex;align-items:center;gap:.32em;font-weight:600;letter-spacing:-.045em;text-decoration:none;font-size:20px;line-height:1}
+.wordmark svg{width:28px;height:28px;flex:none}
+.top nav{display:flex;align-items:center;gap:4px}
+.top nav a{font-size:15px;text-decoration:none;color:var(--text-muted);padding:10px 12px;border-radius:999px}
+.top nav a:hover{color:var(--text)}
+.top nav .gh{color:var(--text);display:inline-flex;align-items:center;gap:8px;font-weight:500}
+.gh svg{width:18px;height:18px}
+@media (max-width:640px){.top nav .opt{display:none}}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 22px;border-radius:999px;font:inherit;font-size:16px;font-weight:600;text-decoration:none;border:0;cursor:pointer;transition:background-color .2s var(--ease),transform .12s var(--ease)}
+.btn:active{transform:scale(.98)}
+.btn--ink{background:var(--accent);color:var(--on-accent)}
+.btn--ink:hover{background:var(--accent-hover)}
+.btn--quiet{background:transparent;color:var(--text);box-shadow:inset 0 0 0 1px var(--line-strong)}
+.btn--quiet:hover{background:var(--surface)}
+.btn svg{width:18px;height:18px}
+
+/* Hero */
+.hero{padding:clamp(56px,10vw,112px) 0 clamp(40px,6vw,72px);text-align:center}
+.hero h1{font-size:clamp(46px,9vw,96px);line-height:.98;letter-spacing:-.05em}
+.hero .lead{max-width:34em;margin:24px auto 0;font-size:clamp(18px,2.2vw,21px);line-height:1.45;color:var(--text-muted)}
+.hero .lead strong{color:var(--text);font-weight:500}
+.cta{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:32px}
+.hero .fine{margin-top:20px;font-size:14px;color:var(--text-muted)}
+
+.film{position:relative;margin-top:clamp(40px,6vw,64px);border-radius:var(--r-xl);overflow:hidden;background:#F6F6F4;box-shadow:var(--shadow-lg);aspect-ratio:16/9}
+.film video{width:100%;height:100%;object-fit:cover}
+.film-controls{position:absolute;right:12px;bottom:12px;display:flex;gap:8px}
+.round{width:44px;height:44px;display:grid;place-items:center;border-radius:999px;border:0;cursor:pointer;color:#fff;background:rgba(20,20,22,.55);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);transition:background-color .2s var(--ease)}
+.round:hover{background:rgba(20,20,22,.75)}
+.round svg{width:20px;height:20px}
+.round:focus-visible{outline:2px solid #fff;outline-offset:2px;box-shadow:0 0 0 4px rgba(20,20,22,.55)}
+.round[hidden]{display:none}
+.round .i-play,.round[aria-pressed="false"] .i-pause{display:none}
+.round[aria-pressed="false"] .i-play{display:block}
+.round .i-sound,.round[aria-pressed="true"] .i-muted{display:none}
+.round[aria-pressed="true"] .i-sound{display:block}
+
+/* Sections */
+section{padding:clamp(72px,11vw,136px) 0}
+.kicker{font-size:15px;font-weight:500;color:var(--text-muted);margin-bottom:14px}
+.h2{font-size:clamp(34px,5.4vw,56px);line-height:1.02;letter-spacing:-.045em}
+.h3{font-size:clamp(26px,3.4vw,36px);line-height:1.08;letter-spacing:-.035em}
+.body{font-size:clamp(17px,1.8vw,19px);line-height:1.55;color:var(--text-muted);max-width:36em}
+.body strong{color:var(--text);font-weight:500}
+.body + .body{margin-top:16px}
+
+/* Why */
+.why{border-top:1px solid var(--line)}
+.why .grid{display:grid;gap:28px}
+@media (min-width:880px){.why .grid{grid-template-columns:1fr 1fr;gap:64px;align-items:start}}
+.why .h2{max-width:11em}
+.facts{list-style:none;margin:40px 0 0;padding:0;display:grid;gap:0;border-top:1px solid var(--line)}
+.facts li{padding:18px 0;border-bottom:1px solid var(--line);display:grid;gap:4px}
+.facts b{font-weight:600;font-size:17px}
+.facts span{color:var(--text-muted);font-size:16px}
+@media (min-width:880px){.facts{grid-template-columns:repeat(3,1fr);gap:0 32px;margin-top:72px}}
+
+/* Moments */
+.moments{padding-top:0}
+.moment{display:grid;gap:28px;padding-top:clamp(72px,10vw,120px)}
+.moment:first-of-type{padding-top:0}
+.moment .text{display:grid;gap:16px;max-width:40em}
+@media (min-width:880px){.moment .text{grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:64px;max-width:none;align-items:end}}
+.shot{margin:0;border-radius:var(--r-lg);overflow:hidden;background:var(--surface);box-shadow:var(--shadow-lg)}
+.shot img{width:100%}
+@media (max-width:640px){.shot{border-radius:var(--r-md)}}
+.shot-pair{display:grid;gap:16px}
+@media (min-width:880px){.shot-pair{grid-template-columns:1fr 1fr;gap:24px;align-items:start}}
+.caption{font-size:14px;color:var(--text-muted);margin-top:12px}
+
+.legend{list-style:none;padding:0;margin:4px 0 0;display:flex;flex-wrap:wrap;gap:8px}
+.legend li{display:inline-flex;align-items:center;gap:8px;padding:7px 12px 7px 10px;border-radius:999px;background:var(--surface);box-shadow:inset 0 0 0 1px var(--line);font-size:14px;font-weight:500}
+.legend li span{color:var(--text-muted);font-weight:400}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--trip);flex:none}
+
+.palette{margin-top:56px;display:grid;gap:16px}
+.palette ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+@media (min-width:880px){.palette{grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:64px;align-items:center}.palette ol{grid-template-columns:repeat(10,minmax(0,1fr))}}
+.palette li{display:grid;gap:8px;font-size:13px;color:var(--text-muted);min-width:0}
+@media (min-width:880px){.palette li{font-size:12px}}
+.palette li i{display:block;aspect-ratio:1;border-radius:12px;background:var(--trip)}
+.palette p{font-size:16px;color:var(--text-muted);max-width:30em}
+
+/* Details */
+.details{border-top:1px solid var(--line)}
+.dl{display:grid;gap:0;margin:40px 0 0;border-top:1px solid var(--line)}
+.dl div{padding:20px 0;border-bottom:1px solid var(--line)}
+.dl dt{font-weight:600;font-size:17px}
+.dl dd{margin:4px 0 0;color:var(--text-muted);font-size:16px}
+@media (min-width:700px){.dl{grid-template-columns:1fr 1fr;column-gap:40px}}
+@media (min-width:1000px){.dl{grid-template-columns:repeat(3,1fr)}}
+
+/* Home */
+.home{background:var(--surface-sunken);border-block:1px solid var(--line)}
+.home .grid{display:grid;gap:40px}
+@media (min-width:880px){.home .grid{grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:64px}}
+.home .dl{margin-top:0}
+@media (min-width:700px){.home .dl{grid-template-columns:1fr 1fr}}
+.immich{margin-top:56px;padding:24px;border-radius:var(--r-lg);background:var(--surface);box-shadow:inset 0 0 0 1px var(--line);display:grid;gap:6px}
+.immich .soon{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--text-muted)}
+.immich .soon::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--brand-pin)}
+.immich q{quotes:none;font-size:clamp(20px,2.6vw,26px);font-weight:600;letter-spacing:-.03em;line-height:1.2}
+
+/* Install */
+.steps{list-style:none;margin:48px 0 0;padding:0;display:grid;gap:40px;counter-reset:s}
+.steps > li{display:grid;grid-template-columns:32px minmax(0,1fr);gap:16px;counter-increment:s}
+.steps > li::before{content:counter(s);width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--on-accent);font-size:14px;font-weight:600;margin-top:2px}
+.steps h3{font-size:20px;letter-spacing:-.02em;line-height:1.3}
+.steps p{color:var(--text-muted);margin-top:6px;max-width:40em}
+.code{position:relative;margin-top:16px;border-radius:var(--r-md);background:#17171A;color:#EDEDEB;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+.code pre{margin:0;padding:18px 20px;padding-right:20px;overflow-x:auto;font:400 14px/1.7 var(--font-mono);tab-size:2;-webkit-overflow-scrolling:touch}
+.code pre code{font:inherit}
+.code .c{color:#9C9EA3}
+.code-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 8px 0 20px;font-size:13px;color:#9C9EA3}
+.copy{min-height:36px;padding:0 14px;border-radius:999px;border:0;font:inherit;font-size:14px;font-weight:600;cursor:pointer;background:rgba(255,255,255,.1);color:#fff;display:inline-flex;align-items:center;gap:6px}
+.copy:hover{background:rgba(255,255,255,.18)}
+.copy:focus-visible{outline-color:#fff}
+.copy svg{width:16px;height:16px}
+.copy-status{font-size:14px;color:var(--text-muted);margin-top:8px;min-height:1.5em}
+.prompt pre{white-space:pre-wrap;font-family:var(--font-sans);font-size:15px;line-height:1.6;max-height:none}
+.ai{margin-top:72px;padding-top:56px;border-top:1px solid var(--line)}
+.ai > *{max-width:820px}
+.ai .h3{margin-bottom:12px}
+.inline-code{font-family:var(--font-mono);font-size:.88em;padding:.1em .4em;border-radius:6px;background:var(--surface-sunken);box-shadow:inset 0 0 0 1px var(--line);-webkit-box-decoration-break:clone;box-decoration-break:clone;overflow-wrap:anywhere}
+
+/* Built */
+.built{border-top:1px solid var(--line)}
+.built .grid{display:grid;gap:28px}
+@media (min-width:880px){.built .grid{grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:64px}}
+
+/* Footer */
+footer{border-top:1px solid var(--line);padding:48px 0 calc(48px + env(safe-area-inset-bottom));font-size:15px;color:var(--text-muted)}
+footer .row{display:flex;flex-wrap:wrap;justify-content:space-between;gap:24px 48px}
+footer .wordmark{color:var(--text)}
+footer .tag{margin-top:10px}
+footer ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px 24px}
+footer ul a{color:var(--text);text-decoration:none}
+footer ul a:hover{text-decoration:underline}
+footer .small{margin-top:32px;font-size:14px;max-width:60em}
+footer .small + .small{margin-top:8px}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{transition-duration:0s!important;animation-duration:0s!important}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="top">
+  <div class="wrap">
+    <a class="wordmark" href="./" aria-label="Waysake, home">
+      <svg viewBox="0 0 100 100" aria-hidden="true" focusable="false"><mask id="pin-a" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100"><rect width="100" height="100" fill="#fff"/><circle cx="78" cy="29" r="4.6" fill="#000"/></mask><g transform="translate(0 4)" mask="url(#pin-a)"><path d="M22 33 C 26 52, 30 70, 37 70 C 44 70, 45 51, 50 51 C 55 51, 56 70, 63 70 C 70 70, 74 52, 78 33" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round"/><circle cx="22" cy="31" r="7.2" fill="currentColor"/><circle cx="78" cy="29" r="11.6" fill="#E87162"/></g></svg>
+      <span>Waysake</span>
+    </a>
+    <nav aria-label="Main">
+      <a class="opt" href="#tour">Tour</a>
+      <a class="opt" href="#home">Privacy</a>
+      <a class="opt" href="#install">Install</a>
+      <a class="gh" href="https://github.com/Mariusfaitducode/waysake">
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        GitHub
+      </a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <div class="hero">
+    <div class="wrap">
+      <h1>Your trips, kept.</h1>
+      <p class="lead">A travel drive for a couple or a family. <strong>Your photos sort themselves into trips and stops on a globe</strong>, and everything stays at home, on your own machine.</p>
+      <div class="cta">
+        <a class="btn btn--ink" href="#install">Install Waysake</a>
+        <a class="btn btn--quiet" href="https://github.com/Mariusfaitducode/waysake">View the code on GitHub</a>
+      </div>
+      <p class="fine">Free and open source under AGPL-3.0. No account, no cloud.</p>
+
+      <div class="film">
+        <video id="film" muted loop playsinline preload="none" poster="assets/video/poster-1600.webp" width="1600" height="900" aria-label="Waysake in 50 seconds: a camera roll becomes trips on a globe, a trip page, the “Where was it?” game and Watch together." aria-describedby="film-desc">
+          <source src="assets/video/waysake-demo-960.mp4" type="video/mp4" media="(max-width: 700px)">
+          <source src="assets/video/waysake-demo-1600.mp4" type="video/mp4">
+        </video>
+        <p id="film-desc" class="sr-only">A silent 50-second tour. Years of trips sit in one messy camera roll; Waysake reads where and when each photo was taken and sorts them into five trips on a globe. Then a page for one trip, the guessing game, and two people watching the same trip together from two screens.</p>
+        <div class="film-controls">
+          <button class="round" id="film-sound" type="button" aria-pressed="false" hidden>
+            <span class="sr-only">Sound</span>
+            <svg class="i-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="m22 9-6 6M16 9l6 6"/></svg>
+            <svg class="i-sound" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>
+          </button>
+          <button class="round" id="film-play" type="button" aria-pressed="false">
+            <span class="sr-only">Play the video</span>
+            <svg class="i-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.6-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z"/></svg>
+            <svg class="i-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+          </button>
+          <button class="round" id="film-full" type="button">
+            <span class="sr-only">Full screen</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="why" aria-labelledby="why-title">
+    <div class="wrap">
+      <div class="grid">
+        <h2 class="h2" id="why-title">Years of trips, lost in a camera roll.</h2>
+        <div>
+          <p class="body">Thousands of photos in one endless scroll. The mountains you hiked sit between a screenshot and a parking ticket, and nobody remembers anymore which summer was Sicily.</p>
+          <p class="body">Every photo already knows when and where it was taken. <strong>Waysake reads that, groups your photos into trips and stops, and puts them back on the map.</strong> You only confirm.</p>
+        </div>
+      </div>
+      <ul class="facts">
+        <li><b>Trips found for you</b><span>Grouped by dates and places, with offline geocoding.</span></li>
+        <li><b>Originals untouched</b><span>Your files are never modified. One folder holds everything.</span></li>
+        <li><b>Made for two, or a few</b><span>One profile each, a shared library, no accounts.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="moments" id="tour" aria-label="A tour of Waysake">
+    <div class="wrap">
+
+      <article class="moment" aria-labelledby="m1">
+        <div class="text">
+          <h2 class="h2" id="m1">Every trip, on one globe.</h2>
+          <div>
+            <p class="body">Each trip draws its route on a quiet grey globe, stop by stop, in its own colour. The colour comes from the trip’s cover photo, rounded to a palette of ten, like album covers.</p>
+          </div>
+        </div>
+        <figure class="shot">
+          <picture>
+            <source media="(max-width: 640px)" type="image/avif" srcset="assets/img/globe-m-800.avif" width="800" height="776">
+            <source media="(max-width: 640px)" type="image/webp" srcset="assets/img/globe-m-800.webp" width="800" height="776">
+            <source media="(max-width: 640px)" srcset="assets/img/globe-m-800.jpg" width="800" height="776">
+            <source type="image/avif" srcset="assets/img/globe-960.avif 960w, assets/img/globe-1600.avif 1600w" sizes="(min-width: 1160px) 1120px, calc(100vw - 32px)">
+            <source type="image/webp" srcset="assets/img/globe-960.webp 960w, assets/img/globe-1600.webp 1600w" sizes="(min-width: 1160px) 1120px, calc(100vw - 32px)">
+            <img src="assets/img/globe-960.jpg" srcset="assets/img/globe-960.jpg 960w, assets/img/globe-1600.jpg 1600w" sizes="(min-width: 1160px) 1120px, calc(100vw - 32px)" width="1600" height="1000" loading="lazy" decoding="async" alt="The Waysake globe on a computer: five trips across Europe, each route in its own colour, with a legend and a row of trip covers below.">
+          </picture>
+        </figure>
+        <ul class="legend" aria-label="Trips on this globe and their colours">
+          <li><i class="dot" style="--trip:var(--c-amber)"></i>Italy, Slovenia &amp; Croatia <span>Amber</span></li>
+          <li><i class="dot" style="--trip:var(--c-lagoon)"></i>Sicily <span>Lagoon</span></li>
+          <li><i class="dot" style="--trip:var(--c-coral)"></i>Canary Islands <span>Coral</span></li>
+          <li><i class="dot" style="--trip:var(--c-raspberry)"></i>Berlin <span>Raspberry</span></li>
+          <li><i class="dot" style="--trip:var(--c-azure)"></i>Amsterdam <span>Azure</span></li>
+        </ul>
+        <div class="palette">
+          <p>Ten colours, each always shown with a name, so two trips never depend on colour alone to tell apart. Pick one by hand whenever you like.</p>
+          <ol aria-label="The ten trip colours">
+            <li style="--trip:var(--c-coral)"><i></i>Coral</li>
+            <li style="--trip:var(--c-amber)"><i></i>Amber</li>
+            <li style="--trip:var(--c-moss)"><i></i>Moss</li>
+            <li style="--trip:var(--c-pine)"><i></i>Pine</li>
+            <li style="--trip:var(--c-lagoon)"><i></i>Lagoon</li>
+            <li style="--trip:var(--c-azure)"><i></i>Azure</li>
+            <li style="--trip:var(--c-indigo)"><i></i>Indigo</li>
+            <li style="--trip:var(--c-lilac)"><i></i>Lilac</li>
+            <li style="--trip:var(--c-raspberry)"><i></i>Raspberry</li>
+            <li style="--trip:var(--c-slate)"><i></i>Slate</li>
+          </ol>
+        </div>
+      </article>
+
+      <article class="moment" aria-labelledby="m2">
+        <div class="text">
+          <h2 class="h2" id="m2">A page for each trip.</h2>
+          <div>
+            <p class="body">The cover melts into the page. Dates, countries and the road between your stops; the days, photos and kilometres. Below, every stop with its photos and its map.</p>
+            <p class="body">Open any photo full screen, react to it, write the story of the trip before you forget it, play a slideshow or make a postcard to share.</p>
+          </div>
+        </div>
+        <figure class="shot">
+          <picture>
+            <source media="(max-width: 640px)" type="image/avif" srcset="assets/img/trip-m-800.avif" width="800" height="860">
+            <source media="(max-width: 640px)" type="image/webp" srcset="assets/img/trip-m-800.webp" width="800" height="860">
+            <source media="(max-width: 640px)" srcset="assets/img/trip-m-800.jpg" width="800" height="860">
+            <source type="image/avif" srcset="assets/img/trip-960.avif 960w, assets/img/trip-1600.avif 1600w" sizes="(min-width: 1160px) 1120px, calc(100vw - 32px)">
+            <source type="image/webp" srcset="assets/img/trip-960.webp 960w, assets/img/trip-1600.webp 1600w" sizes="(min-width: 1160px) 1120px, calc(100vw - 32px)">
+            <img src="assets/img/trip-960.jpg" srcset="assets/img/trip-960.jpg 960w, assets/img/trip-1600.jpg 1600w" sizes="(min-width: 1160px) 1120px, calc(100vw - 32px)" width="1600" height="1000" loading="lazy" decoding="async" alt="The page of the trip “Italy, Slovenia &amp; Croatia”: a mountain lake cover that fades into the page, the route Italy, Dolomites, Slovenia, Croatia, and the figures 21 days, 70 photos, 4 stops, 1,058 km travelled.">
+          </picture>
+        </figure>
+      </article>
+
+      <article class="moment" aria-labelledby="m3">
+        <div class="text">
+          <h2 class="h2" id="m3">Play with your memories. Then watch them together.</h2>
+          <div>
+            <p class="body"><strong>Where was it?</strong> shows a photo from your trips: drop your pin on the map, and the closer you are, the more points. In Investigation mode, one of you suggests a place for a photo that has none, the other confirms: agree within 25 km and the place is saved for good.</p>
+            <p class="body"><strong>Watch together</strong> sends the other person an invitation. One leads, the other follows the same photos on their own screen, live, and reactions fly across both.</p>
+          </div>
+        </div>
+        <div class="shot-pair">
+          <figure class="shot" style="margin:0">
+            <picture>
+              <source type="image/avif" srcset="assets/img/game-960.avif 960w, assets/img/game-1600.avif 1600w" sizes="(min-width: 1160px) 548px, (min-width: 880px) calc(50vw - 28px), calc(100vw - 32px)">
+              <source type="image/webp" srcset="assets/img/game-960.webp 960w, assets/img/game-1600.webp 1600w" sizes="(min-width: 1160px) 548px, (min-width: 880px) calc(50vw - 28px), calc(100vw - 32px)">
+              <img src="assets/img/game-960.jpg" srcset="assets/img/game-960.jpg 960w, assets/img/game-1600.jpg 1600w" sizes="(min-width: 1160px) 548px, (min-width: 880px) calc(50vw - 28px), calc(100vw - 32px)" width="1600" height="900" loading="lazy" decoding="async" alt="A round of “Where was it?”: a harbour photo next to a map of Istria, with the player’s pin 43 km from the real place.">
+            </picture>
+          </figure>
+          <figure class="shot" style="margin:0">
+            <picture>
+              <source type="image/avif" srcset="assets/img/together-960.avif 960w, assets/img/together-1600.avif 1600w" sizes="(min-width: 1160px) 548px, (min-width: 880px) calc(50vw - 28px), calc(100vw - 32px)">
+              <source type="image/webp" srcset="assets/img/together-960.webp 960w, assets/img/together-1600.webp 1600w" sizes="(min-width: 1160px) 548px, (min-width: 880px) calc(50vw - 28px), calc(100vw - 32px)">
+              <img src="assets/img/together-960.jpg" srcset="assets/img/together-960.jpg 960w, assets/img/together-1600.jpg 1600w" sizes="(min-width: 1160px) 548px, (min-width: 880px) calc(50vw - 28px), calc(100vw - 32px)" width="1600" height="982" loading="lazy" decoding="async" alt="Watching together: three glasses raised in a toast, shown full screen, with a heart reaction from the other person.">
+            </picture>
+          </figure>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="details" aria-labelledby="details-title">
+    <div class="wrap">
+      <h2 class="h3" id="details-title">And the small things that make it yours.</h2>
+      <dl class="dl">
+        <div><dt>An Android app that keeps the GPS</dt><dd>Send a whole period from your phone, “since the last import” or chosen dates, with the places intact. On iPhone, add Waysake to your Home Screen from Safari.</dd></div>
+        <div><dt>Photos without a place</dt><dd>A screen to set a place on a whole day or a moment at once, so nothing stays lost.</dd></div>
+        <div><dt>A notebook</dt><dd>The trips you dream of and the memories you want to write down.</dd></div>
+        <div><dt>Countries, in order</dt><dd>Every country you’ve discovered together, in the order you first went.</dd></div>
+        <div><dt>English and French</dt><dd>The whole app, in both languages.</dd></div>
+        <div><dt>Profiles, not accounts</dt><dd>Everyone picks their name; photos remember who took them.</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="home" id="home" aria-labelledby="home-title">
+    <div class="wrap">
+      <div class="grid">
+        <div>
+          <h2 class="h2" id="home-title">At home, not in the cloud.</h2>
+          <p class="body" style="margin-top:20px">Waysake runs on a computer you own. Your photos never leave it, there is no account to create, and this project collects nothing about you.</p>
+        </div>
+        <dl class="dl">
+          <div><dt>Any machine at home</dt><dd>A PC, a Mac, a Raspberry Pi or a NAS. One Docker image, for amd64 and arm64.</dd></div>
+          <div><dt>A household password</dt><dd>Asked once per device. Then everyone just picks their profile.</dd></div>
+          <div><dt>Private on your phones</dt><dd>On your Wi-Fi, or anywhere over HTTPS through <a href="https://tailscale.com">Tailscale</a>. Don’t expose it bare on the internet.</dd></div>
+          <div><dt>One folder to back up</dt><dd>Originals, thumbnails and the database live together. Waysake also keeps a daily snapshot of its database.</dd></div>
+          <div><dt>Open source, AGPL-3.0</dt><dd>Use it, change it, share it. If you host a modified version for others, you publish its code.</dd></div>
+          <div><dt>No tracking</dt><dd>No analytics in the app, and none on this site: no cookies, no trackers.</dd></div>
+        </dl>
+      </div>
+      <div class="immich">
+        <span class="soon">Coming soon: Immich integration</span>
+        <q>Immich organizes your photos. Waysake keeps the journey.</q>
+      </div>
+    </div>
+  </section>
+
+  <section class="install" id="install" aria-labelledby="install-title">
+    <div class="wrap">
+      <h2 class="h2" id="install-title">Install it in a few minutes.</h2>
+      <p class="body" style="margin-top:20px">Nothing to compile: the image is ready for PC, Mac, Raspberry Pi and NAS.</p>
+      <ol class="steps">
+        <li>
+          <div>
+            <h3>Install Docker</h3>
+            <p><a href="https://docs.docker.com/get-started/get-docker/">Docker Desktop</a> on a PC or a Mac, Docker Engine on Linux, a Raspberry Pi or a NAS.</p>
+          </div>
+        </li>
+        <li>
+          <div>
+            <h3>Start Waysake</h3>
+            <p>In a terminal, with your own names and a password of your choice:</p>
+            <div class="code">
+              <div class="code-bar"><span>Terminal</span><button class="copy" type="button" data-copy="cmd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><span>Copy</span></button></div>
+<pre id="cmd" tabindex="0" aria-label="Install commands"><code>mkdir waysake &amp;&amp; cd waysake
+curl -fsSLO https://raw.githubusercontent.com/Mariusfaitducode/waysake/main/docker-compose.yml
+WAYSAKE_PROFILES="Alex, Sam" WAYSAKE_PASSWORD="choose a password" docker compose up -d</code></pre>
+            </div>
+            <p class="copy-status" role="status" data-status="cmd"></p>
+            <p>Photos and the database go to <span class="inline-code">./atlas-data</span> next to the file, or wherever <span class="inline-code">WAYSAKE_DATA</span> points. Waysake restarts with the machine.</p>
+          </div>
+        </li>
+        <li>
+          <div>
+            <h3>Open it</h3>
+            <p>Go to <span class="inline-code">http://localhost:8420</span>, or the machine’s address on your network. For your phones, anywhere and in HTTPS: <span class="inline-code">tailscale serve --bg 8420</span>. To update later: <span class="inline-code">docker compose pull &amp;&amp; docker compose up -d</span>.</p>
+          </div>
+        </li>
+      </ol>
+
+      <div class="ai" aria-labelledby="ai-title">
+        <h3 class="h3" id="ai-title">Set it up with an AI assistant.</h3>
+        <p class="body">Not at ease with a terminal? Paste this into Claude Code or any assistant that can run commands on your machine. It explains each step before running it.</p>
+        <div class="code prompt">
+          <div class="code-bar"><span>Prompt</span><button class="copy" type="button" data-copy="prompt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><span>Copy</span></button></div>
+<pre id="prompt" tabindex="0" aria-label="Prompt for an AI assistant">Help me install Waysake, a self-hosted travel photo drive, on this computer. Read its README first: https://github.com/Mariusfaitducode/waysake
+
+Explain each command in one sentence before you run it, and wait for my OK before installing anything.
+
+1. Check whether Docker is installed and running. If it isn't, tell me how to install it for my system.
+2. Ask me for: the names of the people in our household, a household password, and the folder where our photos should live.
+3. Create a "waysake" folder, download docker-compose.yml from the repository, and write a .env file with WAYSAKE_PROFILES, WAYSAKE_PASSWORD and WAYSAKE_DATA.
+4. Start it with "docker compose up -d", then check that http://localhost:8420/api/health answers.
+5. If I want to use it from our phones, help me set up Tailscale and run "tailscale serve --bg 8420". Never expose Waysake directly to the internet.
+6. Finish by telling me the address to open and how to update later.</pre>
+        </div>
+        <p class="copy-status" role="status" data-status="prompt"></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="built" aria-labelledby="built-title">
+    <div class="wrap">
+      <div class="grid">
+        <h2 class="h2" id="built-title">Built by a couple, with Claude Code.</h2>
+        <div>
+          <p class="body">Waysake is developed with <a href="https://claude.com/claude-code">Claude Code</a>, Anthropic’s coding assistant, and most commits are co-signed by Claude.</p>
+          <p class="body">It isn’t code generated and left behind. My partner and I use it for our own trips, and I read and test every change on our own photo library. The server is covered by more than 200 automated tests, and sensitive changes (sign-in, import, files) go through a dedicated security review. Issues and criticism are welcome on GitHub.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="row">
+      <div>
+        <a class="wordmark" href="./" aria-label="Waysake, home">
+          <svg viewBox="0 0 100 100" aria-hidden="true" focusable="false"><mask id="pin-b" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100"><rect width="100" height="100" fill="#fff"/><circle cx="78" cy="29" r="4.6" fill="#000"/></mask><g transform="translate(0 4)" mask="url(#pin-b)"><path d="M22 33 C 26 52, 30 70, 37 70 C 44 70, 45 51, 50 51 C 55 51, 56 70, 63 70 C 70 70, 74 52, 78 33" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round"/><circle cx="22" cy="31" r="7.2" fill="currentColor"/><circle cx="78" cy="29" r="11.6" fill="#E87162"/></g></svg>
+          <span>Waysake</span>
+        </a>
+        <p class="tag">Your trips, kept.</p>
+      </div>
+      <ul aria-label="Links">
+        <li><a href="https://github.com/Mariusfaitducode/waysake">GitHub</a></li>
+        <li><a href="https://github.com/Mariusfaitducode/waysake/blob/main/LICENSE">License: AGPL-3.0-or-later</a></li>
+        <li><a href="https://github.com/Mariusfaitducode/waysake/blob/main/docs/demo-photos.md">Photo credits</a></li>
+        <li><a href="https://github.com/Mariusfaitducode/waysake/issues">Report an issue</a></li>
+      </ul>
+    </div>
+    <p class="small">The photos in the video and screenshots come from the demo library: free-licensed photos by their authors on Wikimedia Commons and Flickr (CC BY, CC BY-SA, CC0), resized and cropped, with demo dates and places. Each one is credited with its author and licence in the photo credits.</p>
+    <p class="small">This site sets no cookies and loads no trackers. Map data © OpenStreetMap contributors, tiles by OpenFreeMap and OpenMapTiles.</p>
+  </div>
+</footer>
+
+<script src="assets/site.js" defer></script>
+</body>
+</html>
