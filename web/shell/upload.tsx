@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { api } from "../api.js";
+import { api, demo } from "../api.js";
 import { useDataVersion } from "../data.js";
 import { createUploadQueue, type UploadQueue } from "../upload-queue.js";
 import { UploadSheet } from "../components/UploadSheet.js";
@@ -57,7 +57,7 @@ export function UploadProvider({ children }: { children: ReactNode }) {
   }, [send]);
 
   return (
-    <UploadCtx.Provider value={{ open: () => (inApp() ? tellApp({ type: "import" }) : setVisible(true)), queue }}>
+    <UploadCtx.Provider value={{ open: () => (demo ? demo.blocked() : inApp() ? tellApp({ type: "import" }) : setVisible(true)), queue }}>
       {children}
       {visible && (
         <UploadSheet

@@ -1,11 +1,12 @@
 import { useState } from "react";
+import { resourceUrl } from "../api.js";
 import { locale, t } from "../i18n/index.js";
 import { Sheet } from "./Sheet.js";
 import "./PostcardSheet.css";
 
 /** Carte postale d'un voyage, dessinée par la tour : aperçu, téléchargement, partage (feuille du téléphone). */
 export function PostcardSheet({ slug, title, onClose }: { slug: string; title: string; onClose: () => void }) {
-  const url = `/api/trips/${encodeURIComponent(slug)}/postcard.jpg?lang=${locale()}&title=${encodeURIComponent(title)}`;
+  const url = resourceUrl(`/api/trips/${encodeURIComponent(slug)}/postcard.jpg?lang=${locale()}&title=${encodeURIComponent(title)}`);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const canShareFiles = typeof navigator.canShare === "function";

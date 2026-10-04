@@ -1,0 +1,863 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Waysake: your trips, kept</title>
+<meta name="description" content="Waysake is a self-hosted, open-source travel drive for a couple or a family. Your photos sort themselves into trips and stops on a globe, and everything stays on your own machine.">
+<link rel="canonical" href="https://waysake.com/">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#F6F6F4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0C0C0E" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Waysake">
+<meta property="og:url" content="https://waysake.com/">
+<meta property="og:title" content="Waysake: your trips, kept">
+<meta property="og:description" content="A self-hosted travel drive for a couple or a family. Your photos sort themselves into trips on a globe, at home, not in the cloud.">
+<meta property="og:image" content="https://waysake.com/assets/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Waysake logo, the line “Your trips, kept.” and the Waysake globe with five trips drawn in their colours.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Waysake: your trips, kept">
+<meta name="twitter:description" content="A self-hosted travel drive for a couple or a family. Your photos sort themselves into trips on a globe, at home, not in the cloud.">
+<meta name="twitter:image" content="https://waysake.com/assets/og-image.jpg">
+<link rel="preload" href="assets/fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/video/poster-1600.webp" as="image" type="image/webp" fetchpriority="high">
+<script>document.documentElement.classList.add("js")</script>
+<style>
+@font-face{font-family:"Geist";src:url("assets/fonts/geist.woff2") format("woff2");font-weight:100 900;font-style:normal;font-display:swap}
+@font-face{font-family:"Geist Mono";src:url("assets/fonts/geist-mono.woff2") format("woff2");font-weight:100 900;font-style:normal;font-display:swap}
+
+:root{
+  --bg:#F6F6F4;--surface:#FFFFFF;--surface-sunken:#EFEFEC;
+  --glass:rgba(246,246,244,.72);--scrim:rgba(0,0,0,.32);
+  --text:#141416;--text-muted:#606369;
+  --line:rgba(27,27,30,.09);--line-strong:rgba(27,27,30,.15);
+  --accent:#1B1B1E;--accent-hover:#2C2C31;--on-accent:#FFFFFF;
+  --brand-pin:#E87162;--focus:#141416;--success:#1F7A4A;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.06);
+  --shadow-lg:0 24px 60px -24px rgba(0,0,0,.28),0 2px 8px rgba(0,0,0,.06);
+  --c-coral:#CD443D;--c-amber:#C97B00;--c-moss:#4F7205;--c-pine:#2D8D64;--c-lagoon:#1E999C;
+  --c-azure:#2F8ADC;--c-indigo:#3E309F;--c-lilac:#A04AA3;--c-raspberry:#A11056;--c-slate:#5B646F;
+  --font-sans:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --ease:cubic-bezier(.2,.8,.2,1);
+  --r-sm:10px;--r-md:14px;--r-lg:18px;--r-xl:22px;
+  --max:1120px;--gutter:16px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0C0C0E;--surface:#17171A;--surface-sunken:#111113;
+  --glass:rgba(12,12,14,.72);--scrim:rgba(0,0,0,.42);
+  --text:#EDEDEB;--text-muted:#9C9EA3;
+  --line:rgba(255,255,255,.09);--line-strong:rgba(255,255,255,.16);
+  --accent:#EDEDEA;--accent-hover:#FFFFFF;--on-accent:#141416;
+  --focus:#EDEDEB;--success:#6FD39B;
+  --shadow-lg:0 24px 60px -24px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.06);
+  --c-coral:#E87162;--c-amber:#E49E38;--c-moss:#B6E27B;--c-pine:#66C58F;--c-lagoon:#68E3DE;
+  --c-azure:#7DCBFE;--c-indigo:#796CD1;--c-lilac:#C781CB;--c-raspberry:#D85584;--c-slate:#9BA6B1;
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0C0C0E;--surface:#17171A;--surface-sunken:#111113;
+  --glass:rgba(12,12,14,.72);--scrim:rgba(0,0,0,.42);
+  --text:#EDEDEB;--text-muted:#9C9EA3;
+  --line:rgba(255,255,255,.09);--line-strong:rgba(255,255,255,.16);
+  --accent:#EDEDEA;--accent-hover:#FFFFFF;--on-accent:#141416;
+  --focus:#EDEDEB;--success:#6FD39B;
+  --shadow-lg:0 24px 60px -24px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.06);
+  --c-coral:#E87162;--c-amber:#E49E38;--c-moss:#B6E27B;--c-pine:#66C58F;--c-lagoon:#68E3DE;
+  --c-azure:#7DCBFE;--c-indigo:#796CD1;--c-lilac:#C781CB;--c-raspberry:#D85584;--c-slate:#9BA6B1;
+  color-scheme:dark;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-sans);font-size:17px;line-height:1.5;
+  font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;-webkit-tap-highlight-color:transparent}
+img,video,svg{display:block;max-width:100%}
+img,video{height:auto}
+a{color:inherit;text-underline-offset:.18em;text-decoration-thickness:1px}
+a:hover{text-decoration-thickness:2px}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:6px}
+p{margin:0}
+h1,h2,h3{margin:0;font-weight:650;text-wrap:balance}
+.wrap{width:100%;max-width:calc(var(--max) + 2*var(--gutter));margin-inline:auto;padding-inline:max(var(--gutter),env(safe-area-inset-left))}
+.skip{position:absolute;left:12px;top:-60px;z-index:100;background:var(--accent);color:var(--on-accent);padding:10px 16px;border-radius:999px;text-decoration:none;font-weight:600}
+.skip:focus{top:12px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+/* Header */
+.top{position:sticky;top:0;z-index:20;background:var(--glass);-webkit-backdrop-filter:saturate(1.6) blur(18px);backdrop-filter:saturate(1.6) blur(18px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;height:60px;gap:16px}
+.wordmark{display:inline-flex;align-items:center;gap:.32em;font-weight:600;letter-spacing:-.045em;text-decoration:none;font-size:20px;line-height:1}
+.wordmark svg{width:28px;height:28px;flex:none}
+.top nav{display:flex;align-items:center;gap:4px}
+.top nav a{font-size:15px;text-decoration:none;color:var(--text-muted);padding:10px 12px;border-radius:999px}
+.top nav a:hover{color:var(--text)}
+.top nav .gh{color:var(--text);display:inline-flex;align-items:center;gap:8px;font-weight:500}
+.gh svg{width:18px;height:18px}
+@media (max-width:640px){.top nav .opt{display:none}}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 22px;border-radius:999px;font:inherit;font-size:16px;font-weight:600;text-decoration:none;border:0;cursor:pointer;transition:background-color .2s var(--ease),transform .12s var(--ease)}
+.btn:active{transform:scale(.98)}
+.btn--ink{background:var(--accent);color:var(--on-accent)}
+.btn--ink:hover{background:var(--accent-hover)}
+.btn--quiet{background:transparent;color:var(--text);box-shadow:inset 0 0 0 1px var(--line-strong)}
+.btn--quiet:hover{background:var(--surface)}
+.btn svg{width:18px;height:18px}
+
+/* Hero */
+.hero{padding:clamp(56px,10vw,112px) 0 clamp(40px,6vw,72px);text-align:center}
+.hero h1{font-size:clamp(46px,9vw,96px);line-height:.98;letter-spacing:-.05em}
+.hero .lead{max-width:34em;margin:24px auto 0;font-size:clamp(18px,2.2vw,21px);line-height:1.45;color:var(--text-muted)}
+.hero .lead strong{color:var(--text);font-weight:500}
+.cta{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:32px}
+.hero .fine{margin-top:20px;font-size:14px;color:var(--text-muted)}
+
+.film{position:relative;margin-top:clamp(40px,6vw,64px);border-radius:var(--r-xl);overflow:hidden;background:#F6F6F4;box-shadow:var(--shadow-lg);aspect-ratio:16/9}
+.film video{width:100%;height:100%;object-fit:cover}
+.film-controls{position:absolute;right:12px;bottom:12px;display:flex;gap:8px}
+.round{width:44px;height:44px;display:grid;place-items:center;border-radius:999px;border:0;cursor:pointer;color:#fff;background:rgba(20,20,22,.55);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);transition:background-color .2s var(--ease)}
+.round:hover{background:rgba(20,20,22,.75)}
+.round svg{width:20px;height:20px}
+.round:focus-visible{outline:2px solid #fff;outline-offset:2px;box-shadow:0 0 0 4px rgba(20,20,22,.55)}
+.round[hidden]{display:none}
+.round .i-play,.round[aria-pressed="false"] .i-pause{display:none}
+.round[aria-pressed="false"] .i-play{display:block}
+.round .i-sound,.round[aria-pressed="true"] .i-muted{display:none}
+.round[aria-pressed="true"] .i-sound{display:block}
+
+/* Sections */
+section{padding:clamp(72px,11vw,136px) 0}
+.kicker{font-size:15px;font-weight:500;color:var(--text-muted);margin-bottom:14px}
+.h2{font-size:clamp(34px,5.4vw,56px);line-height:1.02;letter-spacing:-.045em}
+.h3{font-size:clamp(26px,3.4vw,36px);line-height:1.08;letter-spacing:-.035em}
+.body{font-size:clamp(17px,1.8vw,19px);line-height:1.55;color:var(--text-muted);max-width:36em}
+.body strong{color:var(--text);font-weight:500}
+.body + .body{margin-top:16px}
+
+/* Why */
+.why{border-top:1px solid var(--line)}
+.why .grid{display:grid;gap:28px}
+@media (min-width:880px){.why .grid{grid-template-columns:1fr 1fr;gap:64px;align-items:start}}
+.why .h2{max-width:11em}
+.facts{list-style:none;margin:40px 0 0;padding:0;display:grid;gap:0;border-top:1px solid var(--line)}
+.facts li{padding:18px 0;border-bottom:1px solid var(--line);display:grid;gap:4px}
+.facts b{font-weight:600;font-size:17px}
+.facts span{color:var(--text-muted);font-size:16px}
+@media (min-width:880px){.facts{grid-template-columns:repeat(3,1fr);gap:0 32px;margin-top:72px}}
+
+/* Moments */
+.moments{padding-top:0}
+.moment{display:grid;gap:28px;padding-top:clamp(72px,10vw,120px)}
+.moment:first-of-type{padding-top:0}
+.moment .text{display:grid;gap:16px;max-width:40em}
+@media (min-width:880px){.moment .text{grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:64px;max-width:none;align-items:end}}
+.shot{margin:0;border-radius:var(--r-lg);overflow:hidden;background:var(--surface);box-shadow:var(--shadow-lg)}
+.shot img{width:100%}
+@media (max-width:640px){.shot{border-radius:var(--r-md)}}
+.shot-pair{display:grid;gap:16px}
+@media (min-width:880px){.shot-pair{grid-template-columns:1fr 1fr;gap:24px;align-items:start}}
+.caption{font-size:14px;color:var(--text-muted);margin-top:12px}
+
+.legend{list-style:none;padding:0;margin:4px 0 0;display:flex;flex-wrap:wrap;gap:8px}
+.legend li{display:inline-flex;align-items:center;gap:8px;padding:7px 12px 7px 10px;border-radius:999px;background:var(--surface);box-shadow:inset 0 0 0 1px var(--line);font-size:14px;font-weight:500}
+.legend li span{color:var(--text-muted);font-weight:400}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--trip);flex:none}
+
+.palette{margin-top:56px;display:grid;gap:16px}
+.palette ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+@media (min-width:880px){.palette{grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:64px;align-items:center}.palette ol{grid-template-columns:repeat(10,minmax(0,1fr))}}
+.palette li{display:grid;gap:8px;font-size:13px;color:var(--text-muted);min-width:0}
+@media (min-width:880px){.palette li{font-size:12px}}
+.palette li i{display:block;aspect-ratio:1;border-radius:12px;background:var(--trip)}
+.palette p{font-size:16px;color:var(--text-muted);max-width:30em}
+
+/* Details */
+.details{border-top:1px solid var(--line)}
+.dl{display:grid;gap:0;margin:40px 0 0;border-top:1px solid var(--line)}
+.dl div{padding:20px 0;border-bottom:1px solid var(--line)}
+.dl dt{font-weight:600;font-size:17px}
+.dl dd{margin:4px 0 0;color:var(--text-muted);font-size:16px}
+@media (min-width:700px){.dl{grid-template-columns:1fr 1fr;column-gap:40px}}
+@media (min-width:1000px){.dl{grid-template-columns:repeat(3,1fr)}}
+
+/* Home */
+.home{background:var(--surface-sunken);border-block:1px solid var(--line)}
+.home .grid{display:grid;gap:40px}
+@media (min-width:880px){.home .grid{grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:64px}}
+.home .dl{margin-top:0}
+@media (min-width:700px){.home .dl{grid-template-columns:1fr 1fr}}
+.immich{margin-top:56px;padding:24px;border-radius:var(--r-lg);background:var(--surface);box-shadow:inset 0 0 0 1px var(--line);display:grid;gap:6px}
+.immich .soon{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--text-muted)}
+.immich .soon::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--brand-pin)}
+.immich q{quotes:none;font-size:clamp(20px,2.6vw,26px);font-weight:600;letter-spacing:-.03em;line-height:1.2}
+
+/* Install */
+.steps{list-style:none;margin:48px 0 0;padding:0;display:grid;gap:40px;counter-reset:s}
+.steps > li{display:grid;grid-template-columns:32px minmax(0,1fr);gap:16px;counter-increment:s}
+.steps > li::before{content:counter(s);width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--on-accent);font-size:14px;font-weight:600;margin-top:2px}
+.steps h3{font-size:20px;letter-spacing:-.02em;line-height:1.3}
+.steps p{color:var(--text-muted);margin-top:6px;max-width:40em}
+.code{position:relative;margin-top:16px;border-radius:var(--r-md);background:#17171A;color:#EDEDEB;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+.code pre{margin:0;padding:18px 20px;padding-right:20px;overflow-x:auto;font:400 14px/1.7 var(--font-mono);tab-size:2;-webkit-overflow-scrolling:touch}
+.code pre code{font:inherit}
+.code .c{color:#9C9EA3}
+.code-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 8px 0 20px;font-size:13px;color:#9C9EA3}
+.copy{min-height:36px;padding:0 14px;border-radius:999px;border:0;font:inherit;font-size:14px;font-weight:600;cursor:pointer;background:rgba(255,255,255,.1);color:#fff;display:inline-flex;align-items:center;gap:6px}
+.copy:hover{background:rgba(255,255,255,.18)}
+.copy:focus-visible{outline-color:#fff}
+.copy svg{width:16px;height:16px}
+.copy-status{font-size:14px;color:var(--text-muted);margin-top:8px;min-height:1.5em}
+.prompt pre{white-space:pre-wrap;font-family:var(--font-sans);font-size:15px;line-height:1.6;max-height:none}
+.ai{margin-top:72px;padding-top:56px;border-top:1px solid var(--line)}
+.ai > *{max-width:820px}
+.ai .h3{margin-bottom:12px}
+.inline-code{font-family:var(--font-mono);font-size:.88em;padding:.1em .4em;border-radius:6px;background:var(--surface-sunken);box-shadow:inset 0 0 0 1px var(--line);-webkit-box-decoration-break:clone;box-decoration-break:clone;overflow-wrap:anywhere}
+
+/* Built */
+.built{border-top:1px solid var(--line)}
+.built .grid{display:grid;gap:28px}
+@media (min-width:880px){.built .grid{grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:64px}}
+
+/* Footer */
+footer{border-top:1px solid var(--line);padding:48px 0 calc(48px + env(safe-area-inset-bottom));font-size:15px;color:var(--text-muted)}
+footer .row{display:flex;flex-wrap:wrap;justify-content:space-between;gap:24px 48px}
+footer .wordmark{color:var(--text)}
+footer .tag{margin-top:10px}
+footer ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px 24px}
+footer ul a{color:var(--text);text-decoration:none}
+footer ul a:hover{text-decoration:underline}
+footer .small{margin-top:32px;font-size:14px;max-width:60em}
+footer .small + .small{margin-top:8px}
+
+
+/* ---- v2: eyebrow link ---- */
+.eyebrow{display:inline-flex;align-items:center;gap:10px;min-height:40px;margin-bottom:28px;padding:0 14px 0 12px;border-radius:999px;background:var(--surface);box-shadow:inset 0 0 0 1px var(--line-strong),var(--shadow-sm);font-size:15px;font-weight:500;text-decoration:none;transition:box-shadow .2s var(--ease)}
+.eyebrow:hover{box-shadow:inset 0 0 0 1px var(--text-muted),var(--shadow-sm)}
+.eyebrow .pulse{width:8px;height:8px;border-radius:50%;background:var(--brand-pin);box-shadow:0 0 0 0 rgba(232,113,98,.5);animation:pulse 2.4s var(--ease) infinite}
+.eyebrow svg{width:16px;height:16px;color:var(--text-muted)}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(232,113,98,.45)}70%,100%{box-shadow:0 0 0 8px rgba(232,113,98,0)}}
+
+/* ---- v2: scroll reveals (only with JS, never on the hero) ---- */
+@media (prefers-reduced-motion:no-preference){
+  .js [data-reveal]{opacity:0;transform:translateY(24px);transition:opacity .8s var(--ease),transform .8s var(--ease);transition-delay:var(--d,0s)}
+  .js [data-reveal].in{opacity:1;transform:none}
+}
+
+/* ---- v2: the photo wall that sorts itself ---- */
+.wall{margin-top:clamp(48px,7vw,80px);display:grid;gap:22px}
+@media (min-width:880px){.wall{grid-template-columns:repeat(5,minmax(0,1fr));gap:16px}}
+.wall-group{margin:0;display:grid;gap:10px;align-content:start}
+.wall-label{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;letter-spacing:-.01em;transition:opacity .6s var(--ease) .5s,transform .6s var(--ease) .5s;min-width:0}
+.wall-label span{color:var(--text-muted);font-weight:400;white-space:nowrap}
+.wall-tiles{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+@media (min-width:880px){.wall-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.wall-tiles li{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--surface-sunken);box-shadow:0 0 0 0 transparent;
+  transition:transform 1.1s var(--ease),box-shadow .6s var(--ease) .6s;transition-delay:var(--wd,0s),.6s;will-change:transform}
+.wall-tiles li::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 2px var(--trip);opacity:0;transition:opacity .6s var(--ease) .7s}
+.wall-tiles img{width:100%;height:100%;object-fit:cover}
+.wall .wall-group:hover .wall-tiles li::after{opacity:1;transition-delay:0s}
+.wall.messy .wall-label{opacity:0;transform:translateY(6px);transition-delay:0s}
+.wall.messy .wall-tiles li{box-shadow:0 6px 18px -8px rgba(0,0,0,.35)}
+
+/* ---- v2: the globe on an ink stage ---- */
+.stage{position:relative;margin:0;border-radius:var(--r-xl);overflow:hidden;background:#0D0D10;color:#EDEDEB;aspect-ratio:16/10;isolation:isolate;
+  box-shadow:var(--shadow-lg),inset 0 0 0 1px rgba(255,255,255,.06);touch-action:pan-y;cursor:grab}
+.stage:active{cursor:grabbing}
+.stage::before{content:"";position:absolute;inset:0;z-index:-1;background:
+  radial-gradient(60% 70% at 50% 58%,rgba(125,203,254,.10),transparent 70%),
+  radial-gradient(40% 40% at 20% 10%,rgba(232,113,98,.10),transparent 70%)}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.stage .ghost{position:absolute;left:50%;top:58%;width:86%;aspect-ratio:1;transform:translate(-50%,-30%);border-radius:50%;
+  background:radial-gradient(circle at 50% 30%,rgba(255,255,255,.07),rgba(255,255,255,.02) 60%,transparent 70%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);transition:opacity .8s var(--ease)}
+.stage.ready .ghost{opacity:0}
+@media (max-width:640px){.stage{aspect-ratio:8/11;border-radius:var(--r-lg)}.legend--stage{left:0;right:0;bottom:12px;padding:0 12px;gap:6px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}.legend--stage::-webkit-scrollbar{display:none}.legend--stage li{flex:none}.legend--stage button span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}.stage-hint{top:12px;right:14px}}
+.stage-hint{position:absolute;top:16px;right:18px;font-size:13px;color:rgba(237,237,235,.6);display:none}
+.stage.ready .stage-hint{display:block}
+.legend--stage{position:absolute;left:16px;right:16px;bottom:16px;margin:0}
+.legend--stage li{background:none;box-shadow:none;padding:0}
+.legend--stage button{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:0 12px 0 10px;border-radius:999px;border:0;font:inherit;font-size:14px;font-weight:500;color:#EDEDEB;cursor:pointer;
+  background:rgba(23,23,26,.72);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);transition:background-color .2s var(--ease),box-shadow .2s var(--ease)}
+.legend--stage button span{color:#9C9EA3;font-weight:400}
+.legend--stage button:hover,.legend--stage button[aria-pressed="true"]{background:rgba(40,40,46,.9);box-shadow:inset 0 0 0 1px var(--trip)}
+.legend--stage button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.legend--stage .dot{background:var(--trip);box-shadow:0 0 10px var(--trip)}
+.stage{--c-coral:#E87162;--c-amber:#E49E38;--c-lagoon:#68E3DE;--c-azure:#7DCBFE;--c-raspberry:#D85584}
+.stage-caption{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px}
+
+/* ---- v2: try the demo, in a device ---- */
+.try{border-top:1px solid var(--line);overflow:hidden}
+.try-head{display:grid;gap:16px;max-width:40em}
+@media (min-width:880px){.try-head{grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:64px;max-width:none;align-items:end}}
+.device{position:relative;margin:clamp(40px,6vw,64px) auto 0}
+.device-screen{position:relative;overflow:hidden;background:#0D0D10}
+.device-screen iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:var(--bg)}
+.demo-poster{position:absolute;inset:0}
+.demo-poster img{width:100%;height:100%;object-fit:cover;object-position:top left}
+.demo-poster::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(12,12,14,.45))}
+.demo-play{position:absolute;left:50%;bottom:clamp(20px,5%,40px);transform:translateX(-50%);z-index:2;box-shadow:0 12px 30px -10px rgba(0,0,0,.5);background:#FFFFFF;color:#141416;white-space:nowrap}
+.demo-play:hover{background:#F2F2F0}
+.demo-play:active{transform:translateX(-50%) scale(.98)}
+.demo-play:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.device.live .demo-poster,.device.live .demo-play{display:none}
+.demo-foot{margin-top:20px;display:flex;flex-wrap:wrap;justify-content:center;gap:8px 20px;font-size:15px;color:var(--text-muted);text-align:center}
+.demo-foot a{color:var(--text);font-weight:500}
+.demo-off [data-demo-link]{display:none}
+.poster-phone{display:none}
+/* Laptop on wide screens */
+@media (min-width:700px){
+  .device{max-width:1000px}
+  .device-screen{aspect-ratio:16/10;border-radius:16px 16px 0 0;border:10px solid #1B1B1E;border-bottom-width:24px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)}
+  .device-base{height:16px;margin:0 -7%;border-radius:0 0 18px 18px;background:linear-gradient(#D9D9D6,#B9B9B6);box-shadow:var(--shadow-lg)}
+  .device-base::before{content:"";display:block;width:16%;height:6px;margin:0 auto;border-radius:0 0 8px 8px;background:#A6A6A2}
+  :root[data-theme="dark"] .device-base{background:linear-gradient(#3A3A3F,#26262A)}
+}
+@media (min-width:700px) and (prefers-color-scheme:dark){:root:not([data-theme="light"]) .device-base{background:linear-gradient(#3A3A3F,#26262A)}:root:not([data-theme="light"]) .device-base::before{background:#1B1B1E}}
+/* Phone on small screens */
+@media (max-width:699px){
+  .device{max-width:340px}
+  .device-screen{aspect-ratio:9/19;border-radius:44px;border:10px solid #1B1B1E;box-shadow:var(--shadow-lg)}
+  .device-screen::before{content:"";position:absolute;top:10px;left:50%;width:84px;height:24px;margin-left:-42px;border-radius:999px;background:#000;z-index:3}
+  .device.live .device-screen{background:var(--bg)}
+  .device.live .device-screen::before{width:64px;height:18px;margin-left:-32px;top:8px}
+  .device-screen iframe{top:32px;height:calc(100% - 46px)}
+  .poster-wide{display:none}
+  .poster-phone{display:block;position:absolute;inset:0;background:var(--bg);color:var(--text);overflow:hidden}
+  .device-base{display:none}
+}
+.poster-phone .pp-cover{position:relative;height:56%}
+.poster-phone .pp-cover img{width:100%;height:100%;object-fit:cover}
+.poster-phone .pp-cover::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,var(--bg))}
+.poster-phone .pp-body{position:relative;margin-top:-64px;padding:0 16px;display:grid;gap:8px}
+.pp-title{font-size:25px;line-height:1.02;font-weight:650;letter-spacing:-.04em}
+.pp-sub{font-size:11px;color:var(--text-muted)}
+.pp-stats{display:flex;gap:16px;margin-top:4px}
+.pp-stats b{display:block;font-size:19px;font-weight:600;letter-spacing:-.03em;line-height:1}
+.pp-stats span{font-size:10px;color:var(--text-muted)}
+
+/* ---- v2: interface close-ups ---- */
+.bento{display:grid;gap:16px;margin-top:40px}
+@media (min-width:880px){.bento{grid-template-columns:repeat(12,minmax(0,1fr))}.bento > :nth-child(1){grid-column:span 7}.bento > :nth-child(2){grid-column:span 5}.bento > :nth-child(3){grid-column:span 5}.bento > :nth-child(4){grid-column:span 7}}
+.card{margin:0;padding:clamp(20px,3vw,32px);border-radius:var(--r-lg);background:var(--surface);box-shadow:inset 0 0 0 1px var(--line);display:flex;flex-direction:column;justify-content:space-between;gap:28px;overflow:hidden;min-width:0}
+.card figcaption{font-size:15px;color:var(--text-muted);max-width:30em}
+.card figcaption b{color:var(--text);font-weight:600}
+.ui-title{font-size:clamp(22px,2.6vw,30px);font-weight:650;letter-spacing:-.04em;line-height:1.05}
+.ui-sub{font-size:14px;color:var(--text-muted);margin-top:6px}
+.route{list-style:none;margin:20px 0 0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.route li{position:relative;padding-top:20px;font-size:13px;font-weight:500;min-width:0;overflow-wrap:anywhere}
+.route li::before{content:"";position:absolute;top:2px;left:0;width:10px;height:10px;border-radius:50%;box-shadow:inset 0 0 0 2px var(--trip);background:var(--surface);z-index:1}
+.route li:last-child::before{background:var(--trip)}
+.route li:not(:last-child)::after{content:"";position:absolute;top:6px;left:12px;right:2px;height:2px;border-radius:2px;background:var(--trip);transform-origin:left;transition:transform .7s var(--ease);transition-delay:calc(var(--i,0) * .18s + .3s)}
+.js .card-route:not(.in) .route li::after{transform:scaleX(0)}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:28px 0 0}
+.stats div{display:flex;flex-direction:column-reverse;gap:4px;min-width:0}
+.stats dd{margin:0;font-size:clamp(30px,4.6vw,52px);font-weight:600;letter-spacing:-.05em;line-height:.95}
+.stats dt{font-size:13px;color:var(--text-muted)}
+@media (max-width:420px){.stats{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:20px}}
+
+.stamps{list-style:none;margin:0;padding:8px 0 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px 12px}
+.stamp{position:relative;display:grid;place-items:center;align-content:center;gap:2px;aspect-ratio:1;padding:8px;border-radius:50%;text-align:center;
+  box-shadow:inset 0 0 0 2px var(--trip),inset 0 0 0 5px var(--surface),inset 0 0 0 6px var(--trip);transform:rotate(var(--r,0deg));min-width:0}
+.stamp b{font-size:clamp(9.5px,2.6vw,13px);font-weight:700;letter-spacing:.04em;text-transform:uppercase;line-height:1.1}
+.stamp span{font:500 11px/1.2 var(--font-mono);color:var(--text-muted)}
+.stamp i{position:absolute;top:12%;font-style:normal;font:600 9px/1 var(--font-mono);letter-spacing:.1em;color:var(--trip)}
+@media (prefers-reduced-motion:no-preference){
+  .js .card-pass .stamp{opacity:0;transform:rotate(var(--r,0deg)) scale(1.35);transition:opacity .25s ease,transform .45s cubic-bezier(.3,1.5,.5,1);transition-delay:calc(var(--i,0) * .16s + .2s)}
+  .js .card-pass.in .stamp{opacity:1;transform:rotate(var(--r,0deg)) scale(1)}
+}
+
+.ui-colour{display:grid;gap:16px}
+.ui-cover{position:relative;border-radius:var(--r-md);overflow:hidden;aspect-ratio:16/10}
+.ui-cover img{width:100%;height:100%;object-fit:cover}
+.ui-cover .pill{position:absolute;left:12px;bottom:12px;display:inline-flex;align-items:center;gap:8px;padding:6px 12px 6px 10px;border-radius:999px;background:rgba(20,20,22,.6);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:#fff;font-size:14px;font-weight:600}
+.swatches{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:6px}
+.swatches li{aspect-ratio:1;border-radius:50%;background:var(--trip);position:relative}
+.swatches li.on{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--trip)}
+.swatches li.on::after{content:"";position:absolute;left:50%;top:46%;width:30%;height:16%;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:translate(-50%,-50%) rotate(-45deg)}
+
+.ui-photo{position:relative;border-radius:var(--r-md);overflow:hidden;background:#0D0D10;aspect-ratio:3/2}
+.ui-photo img{width:100%;height:100%;object-fit:cover}
+.ui-photo .meta{position:absolute;left:14px;top:12px;color:#fff;font-size:13px;font-weight:600;text-shadow:0 1px 6px rgba(0,0,0,.5)}
+.ui-photo .meta span{display:block;font-weight:400;opacity:.85;font-size:12px}
+.reacts{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);display:flex;gap:4px;padding:5px;border-radius:999px;background:rgba(20,20,22,.6);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.reacts span{width:34px;height:34px;display:grid;place-items:center;border-radius:50%;font-size:18px;line-height:1}
+.reacts span:first-child{background:rgba(255,255,255,.18)}
+.float{position:absolute;right:16%;bottom:62px;font-size:26px;line-height:1}
+@media (prefers-reduced-motion:no-preference){
+  .js .card-react.in .float{animation:float 3.2s var(--ease) .4s infinite}
+}
+@keyframes float{0%{opacity:0;transform:translateY(16px) scale(.6)}15%{opacity:1;transform:translateY(0) scale(1)}70%{opacity:1;transform:translateY(-40px) scale(1)}100%{opacity:0;transform:translateY(-70px) scale(.9)}}
+
+/* palette swatches pop in, one after another */
+@media (prefers-reduced-motion:no-preference){
+  .js .palette ol li i{transform:scale(.6);opacity:0;transition:transform .5s cubic-bezier(.3,1.4,.5,1),opacity .3s ease;transition-delay:calc(var(--i,0) * .05s)}
+  .js .palette.in ol li i{transform:none;opacity:1}
+}
+
+/* footer credits */
+.credits{margin-top:24px;font-size:14px}
+.credits summary{cursor:pointer;color:var(--text);font-weight:500;min-height:44px;display:inline-flex;align-items:center}
+.credits ul{display:grid;gap:6px;margin-top:8px;font-size:13px}
+@media (min-width:880px){.credits ul{grid-template-columns:1fr 1fr;column-gap:32px}}
+.credits ul a{color:var(--text-muted);text-decoration:underline}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{transition-duration:0s!important;animation-duration:0s!important}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="top">
+  <div class="wrap">
+    <a class="wordmark" href="./" aria-label="Waysake, home">
+      <svg viewBox="0 0 100 100" aria-hidden="true" focusable="false"><mask id="pin-a" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100"><rect width="100" height="100" fill="#fff"/><circle cx="78" cy="29" r="4.6" fill="#000"/></mask><g transform="translate(0 4)" mask="url(#pin-a)"><path d="M22 33 C 26 52, 30 70, 37 70 C 44 70, 45 51, 50 51 C 55 51, 56 70, 63 70 C 70 70, 74 52, 78 33" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round"/><circle cx="22" cy="31" r="7.2" fill="currentColor"/><circle cx="78" cy="29" r="11.6" fill="#E87162"/></g></svg>
+      <span>Waysake</span>
+    </a>
+    <nav aria-label="Main">
+      <a class="opt" href="#tour">Tour</a>
+      <a class="opt" href="#home">Privacy</a>
+      <a class="opt" href="#install">Install</a>
+      <a class="gh" href="https://github.com/Mariusfaitducode/waysake">
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        GitHub
+      </a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <div class="hero">
+    <div class="wrap">
+      <a class="eyebrow" href="app/" data-app-link><span class="pulse" aria-hidden="true"></span>Try the live demo<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      <h1>Your trips, kept.</h1>
+      <p class="lead">A travel drive for a couple or a family. <strong>Your photos sort themselves into trips and stops on a globe</strong>, and everything stays at home, on your own machine.</p>
+      <div class="cta">
+        <a class="btn btn--ink" href="#install">Install Waysake</a>
+        <a class="btn btn--quiet" href="https://github.com/Mariusfaitducode/waysake">View the code on GitHub</a>
+      </div>
+      <p class="fine">Free and open source under AGPL-3.0. No account, no cloud.</p>
+
+      <div class="film">
+        <video id="film" muted loop playsinline preload="none" poster="assets/video/poster-1600.webp" width="1600" height="900" aria-label="Waysake in 50 seconds: a camera roll becomes trips on a globe, a trip page, the “Where was it?” game and Watch together." aria-describedby="film-desc">
+          <source src="assets/video/waysake-demo-960.mp4" type="video/mp4" media="(max-width: 700px)">
+          <source src="assets/video/waysake-demo-1600.mp4" type="video/mp4">
+        </video>
+        <p id="film-desc" class="sr-only">A silent 50-second tour. Years of trips sit in one messy camera roll; Waysake reads where and when each photo was taken and sorts them into five trips on a globe. Then a page for one trip, the guessing game, and two people watching the same trip together from two screens.</p>
+        <div class="film-controls">
+          <button class="round" id="film-sound" type="button" aria-pressed="false" hidden>
+            <span class="sr-only">Sound</span>
+            <svg class="i-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="m22 9-6 6M16 9l6 6"/></svg>
+            <svg class="i-sound" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>
+          </button>
+          <button class="round" id="film-play" type="button" aria-pressed="false">
+            <span class="sr-only">Play the video</span>
+            <svg class="i-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.6-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z"/></svg>
+            <svg class="i-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+          </button>
+          <button class="round" id="film-full" type="button">
+            <span class="sr-only">Full screen</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="why" aria-labelledby="why-title">
+    <div class="wrap">
+      <div class="grid">
+        <h2 class="h2" id="why-title">Years of trips, lost in a camera roll.</h2>
+        <div>
+          <p class="body">Thousands of photos in one endless scroll. The mountains you hiked sit between a screenshot and a parking ticket, and nobody remembers anymore which summer was Sicily.</p>
+          <p class="body">Every photo already knows when and where it was taken. <strong>Waysake reads that, groups your photos into trips and stops, and puts them back on the map.</strong> You only confirm.</p>
+        </div>
+      </div>
+      <div class="wall" data-wall role="group" aria-label="Twenty photos from the demo library, sorted into five trips">
+          <figure class="wall-group" style="--trip:var(--c-amber)">
+            <figcaption class="wall-label"><i class="dot"></i>Italy, Slovenia &amp; Croatia <span>Aug 2026</span></figcaption>
+            <ul class="wall-tiles">
+              <li><picture><source type="image/avif" srcset="assets/img/wall/italy-1.avif"><source type="image/webp" srcset="assets/img/wall/italy-1.webp"><img src="assets/img/wall/italy-1.jpg" width="320" height="320" loading="lazy" decoding="async" alt="Lago di Braies, a green mountain lake"></picture></li>
+              <li><picture><source type="image/avif" srcset="assets/img/wall/italy-2.avif"><source type="image/webp" srcset="assets/img/wall/italy-2.webp"><img src="assets/img/wall/italy-2.jpg" width="320" height="320" loading="lazy" decoding="async" alt="A gondola in a narrow canal in Venice"></picture></li>
+              <li><picture><source type="image/avif" srcset="assets/img/wall/italy-3.avif"><source type="image/webp" srcset="assets/img/wall/italy-3.webp"><img src="assets/img/wall/italy-3.jpg" width="320" height="320" loading="lazy" decoding="async" alt="The Tre Cime di Lavaredo behind yellow flowers"></picture></li>
+              <li><picture><source type="image/avif" srcset="assets/img/wall/italy-4.avif"><source type="image/webp" srcset="assets/img/wall/italy-4.webp"><img src="assets/img/wall/italy-4.jpg" width="320" height="320" loading="lazy" decoding="async" alt="Boats in the harbour of Dubrovnik"></picture></li>
+            </ul>
+          </figure>
+          <figure class="wall-group" style="--trip:var(--c-lagoon)">
+            <figcaption class="wall-label"><i class="dot"></i>Sicily <span>May 2025</span></figcaption>
+            <ul class="wall-tiles">
+              <li><picture><source type="image/avif" srcset="assets/img/wall/sicily-1.avif"><source type="image/webp" srcset="assets/img/wall/sicily-1.webp"><img src="assets/img/wall/sicily-1.jpg" width="320" height="320" loading="lazy" decoding="async" alt="Cefalù beach in the evening"></picture></li>
+              <li><picture><source type="image/avif" srcset="assets/img/wall/sicily-2.avif"><source type="image/webp" srcset="assets/img/wall/sicily-2.webp"><img src="assets/img/wall/sicily-2.jpg" width="320" height="320" loading="lazy" decoding="async" alt="Flowers above the sea in Taormina"></picture></li>
+              <li><picture><source type="image/avif" srcset="assets/img/wall/sicily-3.avif"><source type="image/webp" srcset="assets/img/wall/sicily-3.webp"><img src="assets/img/wall/sicily-3.jpg" width="320" height="320" loading="lazy" decoding="async" alt="The slopes of Mount Etna"></picture></li>
+              <li><picture><source type="image/avif" srcset="assets/img/wall/sicily-4.avif"><source type="image/webp" srcset="assets/img/wall/sicily-4.webp"><img src="assets/img/wall/sicily-4.jpg" width="320" height="320" loading="lazy" decoding="async" alt="Olives and dried tomatoes at the Ortigia market"></picture></li>
+            </ul>
+          </figure>
+          <figure class="wall-group" style="--trip:var(--c-coral)">
+            <figcaption class="wall-label"><i class="dot"></i>Canary Islands <span>Feb 2025</span></figcaption>
+            <ul class="wall-tiles">
+              <li><picture><source type="image/avif" srcset="assets/img/wall/canary-1.avif"><source type="image/webp" srcset="assets/img/wall/canary-1.webp"><img src="assets/img/wall/canary-1.jpg" width="320" height="320" loading="lazy" decoding="async" alt="Mount Teide above a pine forest"></picture></li>
+              <li><picture><source type="image/avif" srcset="assets/img/wall/canary-2.avif"><source type="image/webp" srcset="assets/img/wall/canary-2.webp"><img src="assets/img/wall/canary-2.jpg" width="320" height="320" loading="lazy" decoding="async" alt="Playa de Las Teresitas"></picture></li>
+              <li><picture><source type="image/avif" srcset="assets/img/wall/canary-3.avif"><source type="image/webp" srcset="assets/img/wall/canary-3.webp"><img src="assets/img/wall/canary-3.jpg" width="320" height="320" loading="lazy" decoding="async" alt="A pink house in Puerto de la Cruz"></picture></li>
+              <li><picture><source type="image/avif" srcset="assets/img/wall/canary-4.avif"><source type="image/webp" srcset="assets/img/wall/canary-4.webp"><img src="assets/img/wall/canary-4.jpg" width="320" height="320" loading="lazy" decoding="async" alt="A palm-lined promenade in Los Cristianos"></picture></li>
+            </ul>
+          </figure>
+          <figure class="wall-group" style="--trip:var(--c-raspberry)">
+            <figcaption class="wall-label"><i class="dot"></i>Berlin <span>Nov 2024</span></figcaption>
+            <ul class="wall-tiles">
+              <li><picture><source type="image/avif" srcset="assets/img/wall/berlin-1.avif"><source type="image/webp" srcset="assets/img/wall/berlin-1.webp"><img src="assets/img/wall/berlin-1.jpg" width="320" height="320" loading="lazy" decoding="async" alt="A colourful U-Bahn station"></picture></li>
+              <li><picture><source type="image/avif" srcset="assets/img/wall/berlin-2.avif"><source type="image/webp" srcset="assets/img/wall/berlin-2.webp"><img src="assets/img/wall/berlin-2.jpg" width="320" height="320" loading="lazy" decoding="async" alt="The Spree at dusk"></picture></li>
+              <li><picture><source type="image/avif" srcset="assets/img/wall/berlin-3.avif"><source type="image/webp" srcset="assets/img/wall/berlin-3.webp"><img src="assets/img/wall/berlin-3.jpg" width="320" height="320" loading="lazy" decoding="async" alt="A currywurst with fries"></picture></li>
+              <li><picture><source type="image/avif" srcset="assets/img/wall/berlin-4.avif"><source type="image/webp" srcset="assets/img/wall/berlin-4.webp"><img src="assets/img/wall/berlin-4.jpg" width="320" height="320" loading="lazy" decoding="async" alt="Yellow ginkgo leaves"></picture></li>
+            </ul>
+          </figure>
+          <figure class="wall-group" style="--trip:var(--c-azure)">
+            <figcaption class="wall-label"><i class="dot"></i>Amsterdam <span>Apr 2024</span></figcaption>
+            <ul class="wall-tiles">
+              <li><picture><source type="image/avif" srcset="assets/img/wall/amsterdam-1.avif"><source type="image/webp" srcset="assets/img/wall/amsterdam-1.webp"><img src="assets/img/wall/amsterdam-1.jpg" width="320" height="320" loading="lazy" decoding="async" alt="A canal in June"></picture></li>
+              <li><picture><source type="image/avif" srcset="assets/img/wall/amsterdam-2.avif"><source type="image/webp" srcset="assets/img/wall/amsterdam-2.webp"><img src="assets/img/wall/amsterdam-2.jpg" width="320" height="320" loading="lazy" decoding="async" alt="Tulips at the flower market"></picture></li>
+              <li><picture><source type="image/avif" srcset="assets/img/wall/amsterdam-3.avif"><source type="image/webp" srcset="assets/img/wall/amsterdam-3.webp"><img src="assets/img/wall/amsterdam-3.jpg" width="320" height="320" loading="lazy" decoding="async" alt="A bicycle by a canal"></picture></li>
+              <li><picture><source type="image/avif" srcset="assets/img/wall/amsterdam-4.avif"><source type="image/webp" srcset="assets/img/wall/amsterdam-4.webp"><img src="assets/img/wall/amsterdam-4.jpg" width="320" height="320" loading="lazy" decoding="async" alt="A canal at night"></picture></li>
+            </ul>
+          </figure>
+
+      </div>
+      <ul class="facts" data-reveal>
+        <li><b>Trips found for you</b><span>Grouped by dates and places, with offline geocoding.</span></li>
+        <li><b>Originals untouched</b><span>Your files are never modified. One folder holds everything.</span></li>
+        <li><b>Made for two, or a few</b><span>One profile each, a shared library, no accounts.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="moments" id="tour" aria-label="A tour of Waysake">
+    <div class="wrap">
+
+      <article class="moment" aria-labelledby="m1">
+        <div class="text">
+          <h2 class="h2" id="m1">Every trip, on one globe.</h2>
+          <div>
+            <p class="body">Each trip draws its route on a quiet grey globe, stop by stop, in its own colour. The colour comes from the trip’s cover photo, rounded to a palette of ten, like album covers.</p>
+          </div>
+        </div>
+        <div class="stage" data-globe data-reveal>
+          <div class="ghost" aria-hidden="true"></div>
+          <canvas role="img" aria-label="A dotted globe turning slowly over Europe, with the routes of the five demo trips drawn in their colours, and flights from Paris in dotted lines."></canvas>
+          <p class="stage-hint" aria-hidden="true">Drag to turn the globe</p>
+          <ul class="legend legend--stage" aria-label="Trips on this globe and their colours">
+            <li><button type="button" data-trip="italy" style="--trip:var(--c-amber)"><i class="dot"></i>Italy, Slovenia &amp; Croatia <span>Amber</span></button></li>
+            <li><button type="button" data-trip="sicily" style="--trip:var(--c-lagoon)"><i class="dot"></i>Sicily <span>Lagoon</span></button></li>
+            <li><button type="button" data-trip="canary" style="--trip:var(--c-coral)"><i class="dot"></i>Canary Islands <span>Coral</span></button></li>
+            <li><button type="button" data-trip="berlin" style="--trip:var(--c-raspberry)"><i class="dot"></i>Berlin <span>Raspberry</span></button></li>
+            <li><button type="button" data-trip="amsterdam" style="--trip:var(--c-azure)"><i class="dot"></i>Amsterdam <span>Azure</span></button></li>
+          </ul>
+        </div>
+        <figure class="shot" data-reveal>
+          <picture>
+            <source media="(max-width: 640px)" type="image/avif" srcset="assets/img/globe-m-800.avif" width="800" height="776">
+            <source media="(max-width: 640px)" type="image/webp" srcset="assets/img/globe-m-800.webp" width="800" height="776">
+            <source media="(max-width: 640px)" srcset="assets/img/globe-m-800.jpg" width="800" height="776">
+            <source type="image/avif" srcset="assets/img/globe-960.avif 960w, assets/img/globe-1600.avif 1600w" sizes="(min-width: 1160px) 1120px, calc(100vw - 32px)">
+            <source type="image/webp" srcset="assets/img/globe-960.webp 960w, assets/img/globe-1600.webp 1600w" sizes="(min-width: 1160px) 1120px, calc(100vw - 32px)">
+            <img src="assets/img/globe-960.jpg" srcset="assets/img/globe-960.jpg 960w, assets/img/globe-1600.jpg 1600w" sizes="(min-width: 1160px) 1120px, calc(100vw - 32px)" width="1600" height="1000" loading="lazy" decoding="async" alt="The Waysake globe on a computer: five trips across Europe, each route in its own colour, with a legend and a row of trip covers below.">
+          </picture>
+        </figure>
+        <div class="palette" data-reveal>
+          <p>Ten colours, each always shown with a name, so two trips never depend on colour alone to tell apart. Pick one by hand whenever you like.</p>
+          <ol aria-label="The ten trip colours">
+            <li style="--trip:var(--c-coral);--i:0"><i></i>Coral</li>
+            <li style="--trip:var(--c-amber);--i:1"><i></i>Amber</li>
+            <li style="--trip:var(--c-moss);--i:2"><i></i>Moss</li>
+            <li style="--trip:var(--c-pine);--i:3"><i></i>Pine</li>
+            <li style="--trip:var(--c-lagoon);--i:4"><i></i>Lagoon</li>
+            <li style="--trip:var(--c-azure);--i:5"><i></i>Azure</li>
+            <li style="--trip:var(--c-indigo);--i:6"><i></i>Indigo</li>
+            <li style="--trip:var(--c-lilac);--i:7"><i></i>Lilac</li>
+            <li style="--trip:var(--c-raspberry);--i:8"><i></i>Raspberry</li>
+            <li style="--trip:var(--c-slate);--i:9"><i></i>Slate</li>
+          </ol>
+        </div>
+      </article>
+
+      <article class="moment" aria-labelledby="m2">
+        <div class="text">
+          <h2 class="h2" id="m2">A page for each trip.</h2>
+          <div>
+            <p class="body">The cover melts into the page. Dates, countries and the road between your stops; the days, photos and kilometres. Below, every stop with its photos and its map.</p>
+            <p class="body">Open any photo full screen, react to it, write the story of the trip before you forget it, play a slideshow or make a postcard to share.</p>
+          </div>
+        </div>
+        <figure class="shot" data-reveal>
+          <picture>
+            <source media="(max-width: 640px)" type="image/avif" srcset="assets/img/trip-m-800.avif" width="800" height="860">
+            <source media="(max-width: 640px)" type="image/webp" srcset="assets/img/trip-m-800.webp" width="800" height="860">
+            <source media="(max-width: 640px)" srcset="assets/img/trip-m-800.jpg" width="800" height="860">
+            <source type="image/avif" srcset="assets/img/trip-960.avif 960w, assets/img/trip-1600.avif 1600w" sizes="(min-width: 1160px) 1120px, calc(100vw - 32px)">
+            <source type="image/webp" srcset="assets/img/trip-960.webp 960w, assets/img/trip-1600.webp 1600w" sizes="(min-width: 1160px) 1120px, calc(100vw - 32px)">
+            <img src="assets/img/trip-960.jpg" srcset="assets/img/trip-960.jpg 960w, assets/img/trip-1600.jpg 1600w" sizes="(min-width: 1160px) 1120px, calc(100vw - 32px)" width="1600" height="1000" loading="lazy" decoding="async" alt="The page of the trip “Italy, Slovenia &amp; Croatia”: a mountain lake cover that fades into the page, the route Italy, Dolomites, Slovenia, Croatia, and the figures 21 days, 70 photos, 4 stops, 1,058 km travelled.">
+          </picture>
+        </figure>
+      </article>
+
+      <article class="moment" aria-labelledby="m3">
+        <div class="text">
+          <h2 class="h2" id="m3">Play with your memories. Then watch them together.</h2>
+          <div>
+            <p class="body"><strong>Where was it?</strong> shows a photo from your trips: drop your pin on the map, and the closer you are, the more points. In Investigation mode, one of you suggests a place for a photo that has none, the other confirms: agree within 25 km and the place is saved for good.</p>
+            <p class="body"><strong>Watch together</strong> sends the other person an invitation. One leads, the other follows the same photos on their own screen, live, and reactions fly across both.</p>
+          </div>
+        </div>
+        <div class="shot-pair" data-reveal>
+          <figure class="shot" style="margin:0">
+            <picture>
+              <source type="image/avif" srcset="assets/img/game-960.avif 960w, assets/img/game-1600.avif 1600w" sizes="(min-width: 1160px) 548px, (min-width: 880px) calc(50vw - 28px), calc(100vw - 32px)">
+              <source type="image/webp" srcset="assets/img/game-960.webp 960w, assets/img/game-1600.webp 1600w" sizes="(min-width: 1160px) 548px, (min-width: 880px) calc(50vw - 28px), calc(100vw - 32px)">
+              <img src="assets/img/game-960.jpg" srcset="assets/img/game-960.jpg 960w, assets/img/game-1600.jpg 1600w" sizes="(min-width: 1160px) 548px, (min-width: 880px) calc(50vw - 28px), calc(100vw - 32px)" width="1600" height="900" loading="lazy" decoding="async" alt="A round of “Where was it?”: a harbour photo next to a map of Istria, with the player’s pin 43 km from the real place.">
+            </picture>
+          </figure>
+          <figure class="shot" style="margin:0">
+            <picture>
+              <source type="image/avif" srcset="assets/img/together-960.avif 960w, assets/img/together-1600.avif 1600w" sizes="(min-width: 1160px) 548px, (min-width: 880px) calc(50vw - 28px), calc(100vw - 32px)">
+              <source type="image/webp" srcset="assets/img/together-960.webp 960w, assets/img/together-1600.webp 1600w" sizes="(min-width: 1160px) 548px, (min-width: 880px) calc(50vw - 28px), calc(100vw - 32px)">
+              <img src="assets/img/together-960.jpg" srcset="assets/img/together-960.jpg 960w, assets/img/together-1600.jpg 1600w" sizes="(min-width: 1160px) 548px, (min-width: 880px) calc(50vw - 28px), calc(100vw - 32px)" width="1600" height="982" loading="lazy" decoding="async" alt="Watching together: three glasses raised in a toast, shown full screen, with a heart reaction from the other person.">
+            </picture>
+          </figure>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="try" id="demo" aria-labelledby="try-title">
+    <div class="wrap">
+      <div class="try-head" data-reveal>
+        <div>
+          <p class="kicker">Try it</p>
+          <h2 class="h2" id="try-title">Look around the demo.</h2>
+        </div>
+        <p class="body">The real app, with the five trips of this page and their photos. Open a trip, browse its photos full screen, turn the globe.</p>
+      </div>
+      <div class="device" data-demo data-reveal>
+        <div class="device-screen">
+          <div class="demo-poster">
+            <picture class="poster-wide">
+              <source type="image/avif" srcset="assets/img/demo-960.avif 960w, assets/img/demo-1600.avif 1600w" sizes="(min-width: 1000px) 980px, calc(100vw - 52px)">
+              <source type="image/webp" srcset="assets/img/demo-960.webp 960w, assets/img/demo-1600.webp 1600w" sizes="(min-width: 1000px) 980px, calc(100vw - 52px)">
+              <img src="assets/img/demo-960.jpg" srcset="assets/img/demo-960.jpg 960w, assets/img/demo-1600.jpg 1600w" sizes="(min-width: 1000px) 980px, calc(100vw - 52px)" width="1600" height="1000" loading="lazy" decoding="async" alt="Preview of the demo: the page of the trip “Italy, Slovenia &amp; Croatia”, with its mountain lake cover.">
+            </picture>
+            <div class="poster-phone">
+              <div class="pp-cover"><picture><source type="image/avif" srcset="assets/img/phone-cover.avif"><source type="image/webp" srcset="assets/img/phone-cover.webp"><img src="assets/img/phone-cover.jpg" width="480" height="600" loading="lazy" decoding="async" alt="Preview of the demo on a phone: the trip “Italy, Slovenia &amp; Croatia”, with its mountain lake cover."></picture></div>
+              <div class="pp-body" aria-hidden="true">
+                <p class="pp-title">Italy, Slovenia &amp; Croatia</p>
+                <p class="pp-sub">August 25 – September 14, 2026</p>
+                <div class="pp-stats"><p><b>21</b><span>days</span></p><p><b>70</b><span>photos</span></p><p><b>4</b><span>stops</span></p></div>
+              </div>
+            </div>
+          </div>
+          <button class="btn demo-play" type="button" data-demo-play><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.6-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z"/></svg>Try the live demo</button>
+        </div>
+        <div class="device-base" aria-hidden="true"></div>
+      </div>
+      <p class="demo-foot"><a href="app/" data-demo-link data-app-link>Open the demo full screen</a><span class="demo-note" role="status" data-demo-note></span></p>
+    </div>
+  </section>
+
+  <section class="details" aria-labelledby="details-title">
+    <div class="wrap">
+      <h2 class="h3" id="details-title">And the small things that make it yours.</h2>
+      <div class="bento">
+        <figure class="card card-route" style="--trip:var(--c-amber)" data-reveal>
+          <div aria-hidden="true">
+            <p class="ui-title">Italy, Slovenia &amp; Croatia</p>
+            <p class="ui-sub">August 25 – September 14, 2026</p>
+            <ol class="route"><li style="--i:0">Italy</li><li style="--i:1">Dolomites</li><li style="--i:2">Slovenia</li><li>Croatia</li></ol>
+            <dl class="stats"><div><dt>days</dt><dd>21</dd></div><div><dt>photos</dt><dd>70</dd></div><div><dt>stops</dt><dd>4</dd></div><div><dt>km travelled</dt><dd>1,058</dd></div></dl>
+          </div>
+          <figcaption><b>The road between your stops.</b> Dates, countries, days, photos and kilometres, counted for you.</figcaption>
+        </figure>
+        <figure class="card card-pass" data-reveal style="--d:.1s">
+          <ol class="stamps" aria-label="Countries in the demo library, in the order they were first visited">
+            <li class="stamp" style="--trip:var(--c-azure);--r:-6deg;--i:0"><i>01</i><b>Netherlands</b><span>Apr 2024</span></li>
+            <li class="stamp" style="--trip:var(--c-raspberry);--r:4deg;--i:1"><i>02</i><b>Germany</b><span>Nov 2024</span></li>
+            <li class="stamp" style="--trip:var(--c-coral);--r:-3deg;--i:2"><i>03</i><b>Spain</b><span>Feb 2025</span></li>
+            <li class="stamp" style="--trip:var(--c-lagoon);--r:5deg;--i:3"><i>04</i><b>Italy</b><span>May 2025</span></li>
+            <li class="stamp" style="--trip:var(--c-amber);--r:-5deg;--i:4"><i>05</i><b>Slovenia</b><span>Sep 2026</span></li>
+            <li class="stamp" style="--trip:var(--c-amber);--r:3deg;--i:5"><i>06</i><b>Croatia</b><span>Sep 2026</span></li>
+          </ol>
+          <figcaption><b>Countries, in order.</b> Every country you’ve discovered together, in the order you first went.</figcaption>
+        </figure>
+        <figure class="card card-colour" data-reveal>
+          <div class="ui-colour" aria-hidden="true">
+            <div class="ui-cover" style="--trip:var(--c-amber)"><picture><source type="image/avif" srcset="assets/img/phone-cover.avif"><source type="image/webp" srcset="assets/img/phone-cover.webp"><img src="assets/img/phone-cover.jpg" width="480" height="600" loading="lazy" decoding="async" alt=""></picture><span class="pill"><i class="dot"></i>Amber</span></div>
+            <ol class="swatches"><li style="--trip:var(--c-coral)"></li><li style="--trip:var(--c-amber)" class="on"></li><li style="--trip:var(--c-moss)"></li><li style="--trip:var(--c-pine)"></li><li style="--trip:var(--c-lagoon)"></li><li style="--trip:var(--c-azure)"></li><li style="--trip:var(--c-indigo)"></li><li style="--trip:var(--c-lilac)"></li><li style="--trip:var(--c-raspberry)"></li><li style="--trip:var(--c-slate)"></li></ol>
+          </div>
+          <figcaption><b>A colour for each trip.</b> Taken from the cover photo, rounded to the palette of ten. Pick one by hand whenever you like.</figcaption>
+        </figure>
+        <figure class="card card-react" data-reveal style="--d:.1s">
+          <div class="ui-photo" aria-hidden="true">
+            <picture><source type="image/avif" srcset="assets/img/react.avif"><source type="image/webp" srcset="assets/img/react.webp"><img src="assets/img/react.jpg" width="720" height="480" loading="lazy" decoding="async" alt=""></picture>
+            <p class="meta">Cefalù<span>By Sam · May 5, 2025</span></p>
+            <span class="float">❤️</span>
+            <p class="reacts"><span>❤️</span><span>😂</span><span>😮</span><span>🥹</span></p>
+          </div>
+          <figcaption><b>React to any photo.</b> Full screen, on your own or while you watch together.</figcaption>
+        </figure>
+      </div>
+      <dl class="dl">
+        <div><dt>An Android app that keeps the GPS</dt><dd>Send a whole period from your phone, “since the last import” or chosen dates, with the places intact. On iPhone, add Waysake to your Home Screen from Safari.</dd></div>
+        <div><dt>Photos without a place</dt><dd>A screen to set a place on a whole day or a moment at once, so nothing stays lost.</dd></div>
+        <div><dt>A notebook</dt><dd>The trips you dream of and the memories you want to write down.</dd></div>
+        <div><dt>Countries, in order</dt><dd>Every country you’ve discovered together, in the order you first went.</dd></div>
+        <div><dt>English and French</dt><dd>The whole app, in both languages.</dd></div>
+        <div><dt>Profiles, not accounts</dt><dd>Everyone picks their name; photos remember who took them.</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="home" id="home" aria-labelledby="home-title">
+    <div class="wrap">
+      <div class="grid">
+        <div>
+          <h2 class="h2" id="home-title">At home, not in the cloud.</h2>
+          <p class="body" style="margin-top:20px">Waysake runs on a computer you own. Your photos never leave it, there is no account to create, and this project collects nothing about you.</p>
+        </div>
+        <dl class="dl">
+          <div><dt>Any machine at home</dt><dd>A PC, a Mac, a Raspberry Pi or a NAS. One Docker image, for amd64 and arm64.</dd></div>
+          <div><dt>A household password</dt><dd>Asked once per device. Then everyone just picks their profile.</dd></div>
+          <div><dt>Private on your phones</dt><dd>On your Wi-Fi, or anywhere over HTTPS through <a href="https://tailscale.com">Tailscale</a>. Don’t expose it bare on the internet.</dd></div>
+          <div><dt>One folder to back up</dt><dd>Originals, thumbnails and the database live together. Waysake also keeps a daily snapshot of its database.</dd></div>
+          <div><dt>Open source, AGPL-3.0</dt><dd>Use it, change it, share it. If you host a modified version for others, you publish its code.</dd></div>
+          <div><dt>No tracking</dt><dd>No analytics in the app, and none on this site: no cookies, no trackers.</dd></div>
+        </dl>
+      </div>
+      <div class="immich">
+        <span class="soon">Coming soon: Immich integration</span>
+        <q>Immich organizes your photos. Waysake keeps the journey.</q>
+      </div>
+    </div>
+  </section>
+
+  <section class="install" id="install" aria-labelledby="install-title">
+    <div class="wrap">
+      <h2 class="h2" id="install-title">Install it in a few minutes.</h2>
+      <p class="body" style="margin-top:20px">Nothing to compile: the image is ready for PC, Mac, Raspberry Pi and NAS.</p>
+      <ol class="steps">
+        <li>
+          <div>
+            <h3>Install Docker</h3>
+            <p><a href="https://docs.docker.com/get-started/get-docker/">Docker Desktop</a> on a PC or a Mac, Docker Engine on Linux, a Raspberry Pi or a NAS.</p>
+          </div>
+        </li>
+        <li>
+          <div>
+            <h3>Start Waysake</h3>
+            <p>In a terminal, with your own names and a password of your choice:</p>
+            <div class="code">
+              <div class="code-bar"><span>Terminal</span><button class="copy" type="button" data-copy="cmd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><span>Copy</span></button></div>
+<pre id="cmd" tabindex="0" aria-label="Install commands"><code>mkdir waysake &amp;&amp; cd waysake
+curl -fsSLO https://raw.githubusercontent.com/Mariusfaitducode/waysake/main/docker-compose.yml
+WAYSAKE_PROFILES="Alex, Sam" WAYSAKE_PASSWORD="choose a password" docker compose up -d</code></pre>
+            </div>
+            <p class="copy-status" role="status" data-status="cmd"></p>
+            <p>Photos and the database go to <span class="inline-code">./atlas-data</span> next to the file, or wherever <span class="inline-code">WAYSAKE_DATA</span> points. Waysake restarts with the machine.</p>
+          </div>
+        </li>
+        <li>
+          <div>
+            <h3>Open it</h3>
+            <p>Go to <span class="inline-code">http://localhost:8420</span>, or the machine’s address on your network. For your phones, anywhere and in HTTPS: <span class="inline-code">tailscale serve --bg 8420</span>. To update later: <span class="inline-code">docker compose pull &amp;&amp; docker compose up -d</span>.</p>
+          </div>
+        </li>
+      </ol>
+
+      <div class="ai" aria-labelledby="ai-title">
+        <h3 class="h3" id="ai-title">Set it up with an AI assistant.</h3>
+        <p class="body">Not at ease with a terminal? Paste this into Claude Code or any assistant that can run commands on your machine. It explains each step before running it.</p>
+        <div class="code prompt">
+          <div class="code-bar"><span>Prompt</span><button class="copy" type="button" data-copy="prompt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><span>Copy</span></button></div>
+<pre id="prompt" tabindex="0" aria-label="Prompt for an AI assistant">Help me install Waysake, a self-hosted travel photo drive, on this computer. Read its README first: https://github.com/Mariusfaitducode/waysake
+
+Explain each command in one sentence before you run it, and wait for my OK before installing anything.
+
+1. Check whether Docker is installed and running. If it isn't, tell me how to install it for my system.
+2. Ask me for: the names of the people in our household, a household password, and the folder where our photos should live.
+3. Create a "waysake" folder, download docker-compose.yml from the repository, and write a .env file with WAYSAKE_PROFILES, WAYSAKE_PASSWORD and WAYSAKE_DATA.
+4. Start it with "docker compose up -d", then check that http://localhost:8420/api/health answers.
+5. If I want to use it from our phones, help me set up Tailscale and run "tailscale serve --bg 8420". Never expose Waysake directly to the internet.
+6. Finish by telling me the address to open and how to update later.</pre>
+        </div>
+        <p class="copy-status" role="status" data-status="prompt"></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="built" aria-labelledby="built-title">
+    <div class="wrap">
+      <div class="grid">
+        <h2 class="h2" id="built-title">Built by a couple, with Claude Code.</h2>
+        <div>
+          <p class="body">Waysake is developed with <a href="https://claude.com/claude-code">Claude Code</a>, Anthropic’s coding assistant, and most commits are co-signed by Claude.</p>
+          <p class="body">It isn’t code generated and left behind. My partner and I use it for our own trips, and I read and test every change on our own photo library. The server is covered by more than 200 automated tests, and sensitive changes (sign-in, import, files) go through a dedicated security review. Issues and criticism are welcome on GitHub.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="row">
+      <div>
+        <a class="wordmark" href="./" aria-label="Waysake, home">
+          <svg viewBox="0 0 100 100" aria-hidden="true" focusable="false"><mask id="pin-b" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100"><rect width="100" height="100" fill="#fff"/><circle cx="78" cy="29" r="4.6" fill="#000"/></mask><g transform="translate(0 4)" mask="url(#pin-b)"><path d="M22 33 C 26 52, 30 70, 37 70 C 44 70, 45 51, 50 51 C 55 51, 56 70, 63 70 C 70 70, 74 52, 78 33" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round"/><circle cx="22" cy="31" r="7.2" fill="currentColor"/><circle cx="78" cy="29" r="11.6" fill="#E87162"/></g></svg>
+          <span>Waysake</span>
+        </a>
+        <p class="tag">Your trips, kept.</p>
+      </div>
+      <ul aria-label="Links">
+        <li><a href="https://github.com/Mariusfaitducode/waysake">GitHub</a></li>
+        <li><a href="https://github.com/Mariusfaitducode/waysake/blob/main/LICENSE">License: AGPL-3.0-or-later</a></li>
+        <li><a href="https://github.com/Mariusfaitducode/waysake/blob/main/docs/demo-photos.md">Photo credits</a></li>
+        <li><a href="https://github.com/Mariusfaitducode/waysake/issues">Report an issue</a></li>
+      </ul>
+    </div>
+    <p class="small">The photos in the video, the screenshots and the photo wall come from the demo library: free-licensed photos by their authors on Wikimedia Commons and Flickr (CC BY, CC BY-SA, CC0), resized and cropped, with demo dates and places. Each one is credited with its author and licence in the photo credits.</p>
+    <details class="credits">
+      <summary>Credits for the photos on this page</summary>
+      <ul>
+          <li><a href="https://commons.wikimedia.org/wiki/File:Lago_di_Braies_a_maggio.jpg">Lago di Braies a maggio</a>, Alessandro.Spinello, <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></li>
+          <li><a href="https://commons.wikimedia.org/wiki/File:Venice_Gondola_in_narrow_canal.jpg">Venice Gondola in narrow canal</a>, Yourusernamewillbepublic2, <a href="http://creativecommons.org/publicdomain/zero/1.0/deed.en">CC0</a></li>
+          <li><a href="https://commons.wikimedia.org/wiki/File:Tre_Cime_di_Lavaredo_con_fiori.jpg">Tre Cime di Lavaredo con fiori</a>, Rikmez, <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></li>
+          <li><a href="https://commons.wikimedia.org/wiki/File:Dubrovnik,_Croatia_boats_October_2025.jpg">Dubrovnik, Croatia boats October 2025</a>, Sharon Hahn Darlin, <a href="https://creativecommons.org/licenses/by/4.0">CC BY 4.0</a></li>
+          <li><a href="https://commons.wikimedia.org/wiki/File:Cefalu_beach_evening.jpg">Cefalu beach evening</a>, Wittylama, <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></li>
+          <li><a href="https://commons.wikimedia.org/wiki/File:Taormina,_Sicilia,_Italia_April_2024_-_6.jpg">Taormina, Sicilia, Italia April 2024 - 6</a>, Sharon Hahn Darlin, <a href="https://creativecommons.org/licenses/by/2.0">CC BY 2.0</a></li>
+          <li><a href="https://commons.wikimedia.org/wiki/File:Mongibello_(Mount_Etna">Mongibello (Mount Etna), Sicilia, Italia April 2024 - 1</a>, Sharon Hahn Darlin, <a href="https://creativecommons.org/licenses/by/2.0">CC BY 2.0</a></li>
+          <li><a href="https://commons.wikimedia.org/wiki/File:Olive_condite_e_pomodori_secchi_(market_of_Ortigia,_Syracuse">Olive condite e pomodori secchi (market of Ortigia, Syracuse)</a>, kaempfe.ch, <a href="https://creativecommons.org/licenses/by-sa/2.0">CC BY-SA 2.0</a></li>
+          <li><a href="https://commons.wikimedia.org/wiki/File:Teide_(Tenerife">Teide (Tenerife) - February 2026</a>, Squibgob, <a href="https://creativecommons.org/licenses/by/4.0">CC BY 4.0</a></li>
+          <li><a href="https://commons.wikimedia.org/wiki/File:At_Playa_de_Las_Teresitas,_Tenerife_2021_042.jpg">At Playa de Las Teresitas, Tenerife 2021 042</a>, Mike Peel, <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></li>
+          <li><a href="https://commons.wikimedia.org/wiki/File:Puerto_de_la_Cruz._Tenerife._Espa%C3%B1a_eue67.jpg">Puerto de la Cruz. Tenerife. España eue67 (Puerto de la Cruz (nord de Tenerife))</a>, Lmbuga (Luis Miguel Bugallo Sánchez), <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></li>
+          <li><a href="https://commons.wikimedia.org/wiki/File:ESP_Tenerife,_Arona,_Los_Cristianos,_Avenida_Juan_Alfonso_Batista_0001.jpg">ESP Tenerife, Arona, Los Cristianos, Avenida Juan Alfonso Batista 0001</a>, -wuppertaler, <a href="https://creativecommons.org/licenses/by/4.0">CC BY 4.0</a></li>
+          <li><a href="https://commons.wikimedia.org/wiki/File:Berlin-Spandau-Haselhorst-U-Bahnhof-Paulsternstrasse-II.jpg">Berlin-Spandau-Haselhorst-U-Bahnhof-Paulsternstrasse-II</a>, Bildarbeiter, <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></li>
+          <li><a href="https://commons.wikimedia.org/wiki/File:Spree_in_Berlin-Kreuzberg_in_der_Abendd%C3%A4mmerung-.jpg">Spree in Berlin-Kreuzberg in der Abenddämmerung-</a>, Raimond Spekking, <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></li>
+          <li><a href="https://commons.wikimedia.org/wiki/File:Currywurst_von_Curry_36.jpg">Currywurst von Curry 36</a>, Anton Porsche, <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></li>
+          <li><a href="https://commons.wikimedia.org/wiki/File:Berlin_Ginkgo_lub_2021-10-20_img01.jpg">Berlin Ginkgo lub 2021-10-20 img01</a>, Lukas Beck, <a href="https://creativecommons.org/licenses/by/4.0">CC BY 4.0</a></li>
+          <li><a href="https://commons.wikimedia.org/wiki/File:Amsterdam_Canal_June_2019.jpg">Amsterdam Canal June 2019</a>, Azzalini Fabio, <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></li>
+          <li><a href="https://commons.wikimedia.org/wiki/File:Flower_Market_Amsterdam.jpg">Flower Market Amsterdam</a>, Angie Balzan, <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></li>
+          <li><a href="https://commons.wikimedia.org/wiki/File:BicycleAmsterdam.jpg">BicycleAmsterdam</a>, App.211, <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></li>
+          <li><a href="https://commons.wikimedia.org/wiki/File:Canal_Nieuwe_Herengracht_-_Amsterdam_(NL32">Canal Nieuwe Herengracht - Amsterdam (NL32) - 2024-11-26 - 1</a>, Chabe01, <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></li>
+      </ul>
+    </details>
+    <p class="small">This site sets no cookies and loads no trackers. Map data © OpenStreetMap contributors, tiles by OpenFreeMap and OpenMapTiles.</p>
+  </div>
+</footer>
+
+<script src="assets/site.js" defer></script>
+</body>
+</html>

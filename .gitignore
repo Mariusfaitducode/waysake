@@ -1,6 +1,7 @@
 node_modules/
 /data/
 dist/
+dist-demo/
 *.log
 .superpowers/
 .playwright-mcp/
@@ -9,3 +10,7 @@ web/public/atlas.apk
 atlas-data/
 web/public/waysake.shortcut
 server/version.json
+
+# Site waysake.com : la démo est construite au déploiement
+site/app/
+site/.vercel/

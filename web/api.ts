@@ -1,6 +1,10 @@
 import type { TripColorId } from "./trip-colors.js";
 import { t } from "./i18n/index.js";
 import { fr } from "./i18n/fr.js";
+// Mode démo statique (pnpm build:demo) ; `null` dans le build normal, où vite.config.ts substitue web/demo/off.ts.
+import { demo } from "./demo/runtime.js";
+
+export { demo };
 
 export type User = { id: string; name: string; color: string };
 export type Media = {
@@ -230,13 +234,18 @@ const call = (url: string, init?: RequestInit) =>
   fetch(url, init).catch(() => {
     throw new Error(t("api.unreachable"));
   });
-const get = <T,>(url: string) => call(url).then((r) => json<T>(r));
-const send = <T,>(method: string, url: string, body?: unknown) =>
-  call(url, {
-    method,
-    headers: body === undefined ? undefined : { "content-type": "application/json" },
-    body: body === undefined ? undefined : JSON.stringify(body),
-  }).then((r) => json<T>(r));
+const get = <T,>(url: string): Promise<T> => (demo ? (demo.get(url) as Promise<T>) : call(url).then((r) => json<T>(r)));
+const send = <T,>(method: string, url: string, body?: unknown): Promise<T> =>
+  demo
+    ? (demo.send(method, url, body) as Promise<T>)
+    : call(url, {
+        method,
+        headers: body === undefined ? undefined : { "content-type": "application/json" },
+        body: body === undefined ? undefined : JSON.stringify(body),
+      }).then((r) => json<T>(r));
+
+/** Adresse d'une ressource que la tour sert hors JSON (contour des pays, carte postale) ; fichier statique en démo. */
+export const resourceUrl = (path: string) => (demo ? demo.url(path) : path);
 
 export const api = {
   health: () => get<{ ok: boolean; auth?: boolean }>("/api/health"),
@@ -256,6 +265,7 @@ export const api = {
     return all;
   },
   upload(file: File, importId?: number): Promise<{ id: number; duplicate: boolean }> {
+    if (demo) return demo.send("POST", "/api/media") as Promise<never>;
     const body = new FormData();
     body.append("file", file, file.name);
     return call(importId ? `/api/media?import=${importId}` : "/api/media", { method: "POST", body }).then((r) => json(r));

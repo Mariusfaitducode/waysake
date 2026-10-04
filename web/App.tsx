@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { BrowserRouter, Route, Routes } from "react-router";
-import { api, AUTH_EVENT, AuthRequiredError, type User } from "./api.js";
+import { BrowserRouter, HashRouter, Route, Routes } from "react-router";
+import { api, AUTH_EVENT, AuthRequiredError, demo, type User } from "./api.js";
 import { DataProvider } from "./data.js";
 import { ProfileCtx } from "./profile.js";
 import { LiveProvider } from "./live.js";
@@ -24,6 +24,9 @@ import { GetApp } from "./screens/GetApp.js";
 import { Locate } from "./screens/Locate.js";
 import { Stats } from "./screens/Stats.js";
 import { useLocale } from "./i18n/index.js";
+
+// La démo statique (sous-chemin, iframe, hébergement sans réécriture d'adresses) navigue par l'ancre.
+const Router = demo ? HashRouter : BrowserRouter;
 
 export function App() {
   const locale = useLocale();
@@ -66,7 +69,7 @@ export function App() {
     window.addEventListener(AUTH_EVENT, onAuth);
     return () => window.removeEventListener(AUTH_EVENT, onAuth);
   }, [start]);
-  const switchProfile = () => (inApp() ? tellApp({ type: "settings" }) : setMe(null));
+  const switchProfile = () => (demo ? demo.blocked() : inApp() ? tellApp({ type: "settings" }) : setMe(null));
 
   if (locked)
     return (
@@ -84,7 +87,7 @@ export function App() {
     <ProfileCtx.Provider value={{ me, switchProfile }}>
       {/* Changer de langue remonte les écrans : chaque texte, date et nom de pays est relu dans la nouvelle langue. */}
       <DataProvider key={locale}>
-        <BrowserRouter>
+        <Router>
           <UploadProvider>
             <LiveProvider>
             <Routes>
@@ -107,7 +110,8 @@ export function App() {
             </Routes>
             </LiveProvider>
           </UploadProvider>
-        </BrowserRouter>
+        </Router>
+        {demo && <demo.Chrome />}
       </DataProvider>
     </ProfileCtx.Provider>
   );

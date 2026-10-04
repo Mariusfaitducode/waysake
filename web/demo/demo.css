@@ -1,0 +1,102 @@
+/*
+ * Mode démo : bandeau discret « Demo · Install Waysake » et message des actions bloquées.
+ * Le bandeau ne doit masquer aucun bouton : languette verticale au bord droit sur téléphone,
+ * dans la barre latérale (sous les onglets) sur ordinateur.
+ */
+.demo-badge {
+  position: fixed;
+  z-index: 31; /* au-dessus des onglets, sous les feuilles et la visionneuse */
+  right: 0;
+  top: 34%;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 4px 4px;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  background: var(--glass);
+  backdrop-filter: saturate(1.8) blur(18px);
+  -webkit-backdrop-filter: saturate(1.8) blur(18px);
+  box-shadow: inset 0 0 0 0.5px var(--line-strong), var(--shadow-sm);
+  color: var(--text);
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.demo-badge__tag {
+  padding: 7px 4px;
+  border-radius: var(--r-full);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.demo-badge:hover .demo-badge__cta { text-decoration: underline; }
+.demo-badge:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+.demo-toast-region {
+  position: fixed;
+  z-index: 70;
+  left: 50%;
+  bottom: calc(62px + env(safe-area-inset-bottom, 0px) + 12px);
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  pointer-events: none;
+}
+.demo-toast {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px 10px;
+  margin: 0;
+  padding: 10px 16px;
+  border-radius: var(--r-lg);
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: var(--shadow-lg);
+  font-size: var(--fs-sm);
+  text-align: center;
+  pointer-events: auto;
+  animation: demo-toast-in 0.18s ease-out;
+}
+.demo-toast a { color: inherit; font-weight: 600; }
+@keyframes demo-toast-in {
+  from { opacity: 0; transform: translateY(6px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .demo-toast { animation: none; }
+}
+@media (min-width: 900px) {
+  .demo-toast-region { bottom: 24px; left: calc(50% + var(--shell-left, 0px) / 2); }
+  .demo-badge {
+    top: auto;
+    right: auto;
+    left: 8px;
+    bottom: 132px;
+    width: calc(var(--shell-left, 92px) - 16px);
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px 4px 9px;
+    writing-mode: horizontal-tb;
+    transform: none;
+    border-radius: var(--r-md);
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: inset 0 0 0 0.5px var(--line-strong);
+    color: var(--text-muted);
+    font-size: var(--fs-2xs);
+    line-height: 1.25;
+    text-align: center;
+    white-space: normal;
+  }
+  .demo-badge__tag { padding: 4px 7px; }
+  .demo-badge:hover { color: var(--text); background: color-mix(in srgb, var(--text) 5%, transparent); }
+}

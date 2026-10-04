@@ -516,4 +516,8 @@ export const fr = {
   "household.duration.days": "{days} j {hours} h",
   "household.duration.hours": "{hours} h {minutes} min",
   "household.duration.minutes": "{minutes} min",
+  "demo.badge": "Démo",
+  "demo.install": "Installer Waysake",
+  "demo.blocked": "Ceci est une démo : installez Waysake pour le faire.",
+  "demo.dismiss": "Fermer",
 } as const;

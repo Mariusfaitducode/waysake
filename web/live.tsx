@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { api, type Reaction } from "./api.js";
+import { api, demo, type Reaction } from "./api.js";
 
 /** « Regarder ensemble » côté interface : un flux SSE vers la tour, l'état du salon, les invitations, les réactions. */
 export type RoomState = { room: string; leader: string; mediaId: number | null; members: string[] };
@@ -34,7 +34,7 @@ export function LiveProvider({ children }: { children: ReactNode }) {
   // Un seul flux à la fois : sans salon, il ne sert qu'aux invitations. EventSource se reconnecte seul après une
   // coupure réseau, mais abandonne pour de bon sur une erreur HTTP (tour qui redémarre, 502 du proxy) : on relance.
   useEffect(() => {
-    if (typeof EventSource === "undefined") return;
+    if (demo || typeof EventSource === "undefined") return;
     const es = new EventSource(`/api/live/events${room ? `?room=${encodeURIComponent(room)}` : ""}`);
     let retry: ReturnType<typeof setTimeout> | undefined;
     es.addEventListener("error", () => {
@@ -55,6 +55,7 @@ export function LiveProvider({ children }: { children: ReactNode }) {
   }, [room, attempt]);
 
   const join = useCallback((slug: string) => {
+    if (demo) return demo.blocked(); // la démo n'a pas de tour pour relier deux écrans
     setState(null);
     setRoom(slug);
     setInvite((i) => (i?.trip.slug === slug ? null : i));

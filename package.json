@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "concurrently -k -n api,web \"tsx watch server/main.ts\" \"vite\"",
     "build": "vite build",
+    "build:demo": "vite build --mode demo && tsx scripts/build-demo-data.ts dist-demo && node -e \"for (const f of ['waysake.apk','atlas.apk']) require('fs').rmSync('dist-demo/'+f,{force:true})\"",
     "start": "tsx server/main.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",

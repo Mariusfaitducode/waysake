@@ -518,4 +518,8 @@ export const en: Translation<typeof fr> = {
   "household.duration.days": "{days} d {hours} h",
   "household.duration.hours": "{hours} h {minutes} min",
   "household.duration.minutes": "{minutes} min",
+  "demo.badge": "Demo",
+  "demo.install": "Install Waysake",
+  "demo.blocked": "This is a demo — install Waysake to do this.",
+  "demo.dismiss": "Dismiss",
 };

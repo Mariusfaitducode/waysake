@@ -19,7 +19,10 @@ name: CI
 
 on:
   push:
+    # Le site waysake.com (site/) se déploie à part, sur Vercel : il ne reconstruit pas l'image.
+    paths-ignore: ["site/**"]
   pull_request:
+    paths-ignore: ["site/**"]
   workflow_dispatch:
 
 permissions:

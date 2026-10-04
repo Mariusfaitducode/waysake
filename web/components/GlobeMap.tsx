@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import * as maplibregl from "maplibre-gl";
 import type { GeoJSONSource, Map as MlMap, Marker, PaddingOptions, StyleSpecification } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import type { Wish } from "../api.js";
+import { resourceUrl, type Wish } from "../api.js";
 import { tripColorHex, type TripColorId } from "../trip-colors.js";
 import "./GlobeMap.css";
 
@@ -63,7 +63,7 @@ function buildStyle(trips: GlobeTrip[], visited: string[], focus: string | null)
     projection: { type: "globe" },
     sky: { "sky-color": p.sky, "horizon-color": p.horizon, "fog-color": p.sky, "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 0, 1, 5, 0.6, 7, 0] },
     sources: {
-      countries: { type: "geojson", data: `${location.origin}/api/geo/countries.geojson` },
+      countries: { type: "geojson", data: new URL(resourceUrl("/api/geo/countries.geojson"), location.href).href },
       trips: { type: "geojson", data: tripFeatures(trips) },
     },
     layers: [
