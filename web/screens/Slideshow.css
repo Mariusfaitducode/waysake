@@ -164,9 +164,11 @@
 }
 .slideshow__trip { flex: 1; min-width: 0; font-family: var(--font-display); font-weight: var(--fw-semibold); font-size: clamp(17px, 1.6vw, 26px); letter-spacing: var(--tracking-tight); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .slideshow__toggle {
+  flex: none;
+  min-height: 44px;
   border: 0;
   border-radius: var(--r-full);
-  padding: 9px 16px;
+  padding: 0 16px;
   background: rgba(255, 255, 255, 0.14);
   color: #fff;
   font: inherit;
@@ -205,7 +207,18 @@
   .slideshow__sign { animation: none; }
 }
 
-/* Téléphone : la mini-carte chevaucherait les commandes ; la route du haut montre déjà où on en est. */
+/* Téléphone : la mini-carte chevaucherait les commandes ; la route du haut montre déjà où on en est. Le nom du
+   voyage laisse la place aux deux boutons (il est déjà sur les panneaux d'étape). La légende, plus petite,
+   remonte au-dessus des commandes tant qu'elles sont visibles. */
 @media (max-width: 600px) {
   .slideshow__map { display: none; }
+  .slideshow__bar { gap: 8px; padding: 14px var(--gutter); }
+  .slideshow__trip { visibility: hidden; }
+  .slideshow__toggle { padding: 0 14px; font-size: var(--fs-sm); }
+  .slideshow__button { width: 48px; height: 48px; }
+  .slideshow__caption { left: var(--gutter); right: var(--gutter); max-width: none; bottom: calc(max(28px, 4vh) + var(--safe-bottom)); transition: bottom 400ms var(--ease); }
+  .slideshow:not(.is-idle) .slideshow__caption { bottom: calc(max(28px, 4vh) + 60px + 20px + var(--safe-bottom)); }
+  .slideshow__caption strong { font-size: 24px; }
+  .slideshow__caption span { font-size: 14px; }
+  .slideshow__caption .slideshow__note { font-size: 16px; }
 }

@@ -32,7 +32,7 @@
 .globe__play {
   display: inline-flex;
   align-items: center;
-  height: 36px;
+  height: 44px;
   padding: 0 var(--sp-4);
   border-radius: var(--r-full);
   background: var(--accent);
@@ -44,7 +44,10 @@
 }
 .globe__play:hover { background: var(--accent-hover); }
 .globe__play:active { transform: scale(0.97); }
+/* Les trois commandes du haut ont la même hauteur (44 px, zone de toucher pleine). */
 .globe__add {
+  width: 44px;
+  height: 44px;
   background: var(--glass);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -53,6 +56,9 @@
 }
 .globe__me {
   display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
   padding: 0;
   border: 0;
   border-radius: var(--r-full);
@@ -69,7 +75,7 @@
   flex-direction: column;
   align-items: flex-start;
   gap: var(--sp-3);
-  max-height: calc(100% - 64px - 230px);
+  max-height: calc(100% - 64px - 260px);
   pointer-events: none;
 }
 .globe__side > * { pointer-events: auto; }
@@ -134,7 +140,7 @@
   position: relative;
   flex: none;
   scroll-snap-align: start;
-  border-radius: 20px;
+  border-radius: var(--r-lg);
   box-shadow: var(--shadow-float);
   transition: transform var(--dur-slow) var(--ease), box-shadow var(--dur-slow) var(--ease);
 }
@@ -160,7 +166,7 @@
 @media (min-width: 900px) {
   .globe__top { padding: var(--sp-8) var(--sp-10) 0; }
   .globe__me { display: none; }
-  .globe__side { top: 88px; left: var(--sp-10); max-height: calc(100% - 88px - 260px); }
+  .globe__side { top: 88px; left: var(--sp-10); max-height: calc(100% - 88px - 290px); }
   .globe__legend { display: block; }
   .globe__strip { padding-inline: var(--sp-10); scroll-padding-inline: var(--sp-10); bottom: var(--sp-6); }
 }

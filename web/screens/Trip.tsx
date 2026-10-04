@@ -16,7 +16,7 @@ import { ActionSheet, PromptSheet, Sheet, type Action } from "../components/Shee
 import { TripColorPicker, tripColorName } from "../components/TripColor.js";
 import { EmptyState } from "../components/EmptyState.js";
 import { TripStatsPanel } from "../components/TripStatsPanel.js";
-import { IconBack, IconMore, IconPlay, IconTogether } from "../shell/icons.js";
+import { IconBack, IconMore, IconPlay, IconPostcard, IconTogether } from "../shell/icons.js";
 import { PostcardSheet } from "../components/PostcardSheet.js";
 import { tripColorProps } from "../trip-colors.js";
 import "./Trip.css";
@@ -130,29 +130,40 @@ export function TripScreen() {
   return (
     <article className="trip" {...tripColorProps(trip.color)}>
       <header className="trip-cover">
-        {trip.coverLarge && <img className="trip-cover__img" src={trip.coverLarge} alt="" />}
-        {/* Flou progressif : la photo se fond dans la page, sans voile noir. */}
-        <div className="trip-cover__veil" aria-hidden="true" />
-        <div className="trip-cover__bar">
-          <button className="icon-button icon-button--glass" onClick={back} aria-label={t("common.back")}>
-            <IconBack />
-          </button>
-          <span className="trip-cover__spacer" />
-          <button className="icon-button icon-button--glass" onClick={() => setOverlay({ kind: "trip-menu" })} aria-label={t("trip.options")}>
-            <IconMore />
-          </button>
-          <button
-            className="icon-button icon-button--glass trip-cover__swatch"
-            onClick={() => setOverlay({ kind: "color" })}
-            aria-label={t("trip.color", { name: tripColorName(trip.color) })}
-            title={t("trip.color", { name: tripColorName(trip.color) })}
-          >
-            <i aria-hidden="true" />
-          </button>
+        {/* La photo est le sujet : nette sur presque toute sa hauteur, seul son bas se fond dans la page. */}
+        <div className="trip-cover__photo">
+          {trip.coverLarge && <img className="trip-cover__img" src={trip.coverLarge} alt="" />}
+          <div className="trip-cover__veil" aria-hidden="true" />
+          <div className="trip-cover__bar">
+            <button className="icon-button icon-button--glass" onClick={back} aria-label={t("common.back")}>
+              <IconBack />
+            </button>
+            <span className="trip-cover__spacer" />
+            <button className="icon-button icon-button--glass" onClick={() => setOverlay({ kind: "trip-menu" })} aria-label={t("trip.options")}>
+              <IconMore />
+            </button>
+            <button
+              className="icon-button icon-button--glass trip-cover__swatch"
+              onClick={() => setOverlay({ kind: "color" })}
+              aria-label={t("trip.color", { name: tripColorName(trip.color) })}
+              title={t("trip.color", { name: tripColorName(trip.color) })}
+            >
+              <i aria-hidden="true" />
+            </button>
+          </div>
         </div>
         <div className="trip-cover__text">
-          <h1 className="title title--display trip-cover__title">{trip.title}</h1>
+          <h1 className="title trip-cover__title">{trip.title}</h1>
           <p className="trip-cover__meta">{[dateRange(trip.startAt, trip.endAt), countries].filter(Boolean).join(" · ")}</p>
+          {/* Les chiffres, discrets : une ligne de métadonnées, pas un tableau de bord. */}
+          <p className="trip-cover__figures">
+            {figures.map((f, i) => (
+              <span key={f.label(f.value)}>
+                {i > 0 && " · "}
+                <b>{number(f.value)}</b> {f.label(f.value)}
+              </span>
+            ))}
+          </p>
           {many && (
             <ol className={`trip-route${trip.chapters.length > 5 ? " trip-route--many" : ""}`} aria-label={t("trip.stops")}>
               {trip.chapters.map((c, i) => (
@@ -165,6 +176,20 @@ export function TripScreen() {
               ))}
             </ol>
           )}
+          <div className="trip__actions">
+            <button className="button trip__primary" onClick={startTogether}>
+              <IconTogether />
+              {t("live.start")}
+            </button>
+            <button className="button trip__tinted" onClick={() => navigate(`/v/${trip.slug}/diaporama`)} aria-label={t("slideshow.title")} title={t("slideshow.title")}>
+              <IconPlay />
+              <span className="trip__action-label">{t("slideshow.title")}</span>
+            </button>
+            <button className="button trip__tinted" onClick={() => setOverlay({ kind: "postcard" })} aria-label={t("postcard.open")} title={t("postcard.open")}>
+              <IconPostcard />
+              <span className="trip__action-label">{t("postcard.open")}</span>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -173,29 +198,6 @@ export function TripScreen() {
         <div className="trip__backdrop" aria-hidden="true">
           {trip.cover && <img src={trip.cover} alt="" />}
         </div>
-        <section className="trip__intro">
-          <dl className="trip__figures">
-            {figures.map((f) => (
-              <div key={f.label(f.value)}>
-                <dt>{f.label(f.value)}</dt>
-                <dd>{number(f.value)}</dd>
-              </div>
-            ))}
-          </dl>
-          <div className="trip__actions">
-            <button className="button" onClick={startTogether}>
-              <IconTogether />
-              {t("live.start")}
-            </button>
-            <button className="button trip__tinted" onClick={() => navigate(`/v/${trip.slug}/diaporama`)}>
-              <IconPlay />
-              {t("slideshow.title")}
-            </button>
-            <button className="button trip__tinted" onClick={() => setOverlay({ kind: "postcard" })}>
-              {t("postcard.open")}
-            </button>
-          </div>
-        </section>
 
         {(many || trip.route.length > 1) && (
           <section className={`trip__route${many ? "" : " trip__route--map-only"}`} aria-label={t("trip.route")}>

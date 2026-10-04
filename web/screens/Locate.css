@@ -14,6 +14,8 @@
 .lday__title { margin: 0; font-family: var(--font-display); font-weight: var(--fw-bold); font-size: var(--fs-lg); letter-spacing: var(--tracking-tight); line-height: var(--lh-snug); }
 .lday__head p { margin: 2px 0 0; color: var(--text-muted); font-size: var(--fs-sm); }
 .lday__head .button { flex: none; }
+/* Téléphone : la date garde toute la largeur, le bouton passe dessous. */
+@media (max-width: 480px) { .lday__head { flex-wrap: wrap; } }
 .lday__head .button svg { width: 16px; height: 16px; }
 
 .lday__strip { display: flex; gap: 3px; margin-top: var(--sp-3); overflow-x: auto; scrollbar-width: none; align-items: center; }
@@ -21,7 +23,8 @@
 .lday__thumb { position: relative; flex: none; padding: 0; border: 0; background: var(--surface-sunken); border-radius: var(--r-xs); overflow: hidden; cursor: zoom-in; }
 .lday__thumb::after { content: ""; position: absolute; inset: 0; background: #fff; opacity: 0; transition: opacity var(--dur-fast) var(--ease); }
 .lday__thumb:hover::after { opacity: 0.1; }
-.lday__strip img { display: block; width: 76px; height: 76px; object-fit: cover; }
+.lday__strip img { display: block; width: 96px; height: 96px; object-fit: cover; }
+@media (min-width: 900px) { .lday__strip img { width: 112px; height: 112px; } }
 .lday__strip .lday__thumb:first-child { border-radius: var(--r-sm) var(--r-xs) var(--r-xs) var(--r-sm); }
 .lday__strip .lday__thumb:last-child { border-radius: var(--r-xs) var(--r-sm) var(--r-sm) var(--r-xs); }
 .lday__strip .lday__thumb:only-child { border-radius: var(--r-sm); }

@@ -21,6 +21,18 @@ describe("justify", () => {
     expect(rows.flatMap((r) => r.items.map((i) => i.index))).toEqual(ratios.map((_, i) => i));
   });
 
+  it("préfère la coupure la plus proche de la cible : deux photos hautes plutôt que trois écrasées", () => {
+    // 358 px, cible 157 : un paysage et un portrait (≈ 165 px) plutôt que trois photos (≈ 97 px).
+    const rows = justify([1.5, 0.66, 1.5, 1.5], { width: 358, targetHeight: 157, gap: 2 });
+    expect(rows[0].items.length).toBe(2);
+    expect(rows[0].height).toBeGreaterThan(140);
+    expect(rows.flatMap((r) => r.items.map((i) => i.index))).toEqual([0, 1, 2, 3]);
+    for (const r of rows.slice(0, -1)) {
+      const total = r.items.reduce((a, i) => a + i.width, 0) + 2 * (r.items.length - 1);
+      expect(total).toBeCloseTo(358, 0);
+    }
+  });
+
   it("ne produit pas de rangée démesurée pour un panorama", () => {
     const rows = justify([6, 1.5, 1.5], { width: 390, targetHeight: 120, gap: 2 });
     expect(Math.max(...rows.map((r) => r.height))).toBeLessThanOrEqual(120 * 1.5);

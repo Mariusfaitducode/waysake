@@ -24,8 +24,8 @@
 }
 .trips__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
 
-.trips__skeleton { display: grid; grid-template-columns: 58px 1fr; gap: var(--sp-3); align-items: center; padding: var(--sp-2) var(--row-inset); }
-.trips__skeleton .skeleton:first-child { height: 58px; border-radius: var(--r-md); }
+.trips__skeleton { display: grid; grid-template-columns: 72px 1fr; gap: var(--sp-3); align-items: center; padding: var(--sp-2) var(--row-inset); }
+.trips__skeleton .skeleton:first-child { height: 72px; border-radius: var(--r-md); }
 .trips__skeleton .skeleton:last-child { height: 14px; width: 60%; }
 .trips__body > .trips__skeleton:first-child { margin-top: var(--sp-6); }
 

@@ -182,16 +182,25 @@ Clés i18n : `tripColor.*` (titre, auto, noms) et `api.invalid_color`, en franç
 
 ## 6. Recettes Horizon (maquettes validées)
 
-- **Couverture à fondu par flou progressif** : l'image en fond, puis un calque
-  `backdrop-filter: blur(26px) saturate(1.15)` masqué par `mask-image: linear-gradient(to bottom, transparent 36%, #000 72%)`,
-  et par-dessus un dégradé vers la couleur de page (`transparent 34%` → `color-mix(--trip-page 55 %)` 62 % →
-  `--trip-page` 97 %). Le titre (`--fs-display`, 650, -0,05 em) est en `--text`, posé sur la partie floutée.
+- **Couverture : la photo d'abord** (retours de Marius, oct. 2026). La photo est nette sur presque toute sa
+  hauteur ; seul son bas se fond dans la page par un flou progressif (calque `backdrop-filter: blur(18px)` sur
+  le dernier quart, masqué vers le haut, plus un dégradé vers `--trip-page`). Téléphone : couverture de
+  `min(118vw, 72svh)`, titre (30 → 40 px), dates, chiffres et route **sous** la photo. Grand écran : couverture
+  de `min(86vh, 900px)`, texte compact (`--fs-3xl`) posé dans la bande floutée du bas, actions à droite.
+  Les chiffres sont une ligne de métadonnées (`21 jours · 70 photos · …`, nombre en `--text` 600), pas un tableau.
+- **Actions d'une page** : une rangée de 44 px — le bouton Encre avec libellé, les secondaires en boutons ronds
+  teintés (icône seule sur téléphone, libellé dès 520 px de large).
+- **Photos plein écran** (visionneuse, diaporama, jeu) : la photo prend toute la place ; le chrome n'a pas de
+  bandeau ; les détails (légende, réactions, actions) sont repliés derrière un bouton « i » et s'ouvrent au toucher.
+- **Cartes de voyage** (globe) : la couverture entière en 3:2, sans texte dessus ; pastille, titre et dates dessous.
+- **Zone de toucher** : 44 px de haut pour tout bouton (`.button` a `min-height: 44px` ; `.button--small` aussi
+  sur écran tactile), boutons d'un même groupe à la même hauteur.
 - **Route sous le titre** : étapes en petits cercles évidés (bord 1,6 px `--trip`, fond `--trip-page`), la
   dernière pleine, reliées par des traits de 1,6 px ; sur écran étroit, seuls la première et la dernière gardent
   leur nom.
 - **Étapes** : liste verticale, trait de 2 px `--trip` à 55 %, pastilles de 10 px évidées, la dernière pleine.
 - **Boutons ronds sur photo** : `.icon-button--glass` (`--scrim` + flou).
-- **Liste** : lignes de 58 px de vignette (`--r-md`), titre 15,5 px 600, métadonnées 12,5 px `--text-muted`,
+- **Liste** : lignes de 72 px de vignette (`--r-md`), titre 15,5 px 600, métadonnées 12,5 px `--text-muted`,
   regroupées par année (15 px 600 `--text-muted`).
 
 ## 7. Écrans à refaire (phase 2)
@@ -201,7 +210,7 @@ Phase 1 n'a fait que le remplacement minimal (jetons, police, logo, plus de pann
 | Écran | Fichier | Ce qu'il doit devenir |
 | --- | --- | --- |
 | Globe (accueil) | `screens/Globe.tsx`, `components/GlobeMap.tsx` | globe gris neutre ; **itinéraire de chaque voyage en sa couleur** (ligne + liseré, points d'étape, dernier point plus gros) ; légende flottante (pastille, nom, dates, nom de la couleur) ; `Wordmark` + « n voyages · n pays » en haut à gauche ; cartes de voyage du bas avec pastille |
-| Liste des voyages | `screens/Trips.tsx`, `components/TripCard.tsx` | titre « Voyages » (`--fs-2xl`, 650) + sous-titre ; **filtres par couleur** (`TripColorFilter`, « Tous » puis les couleurs présentes) ; lignes groupées par année : vignette 58 px, `TripColorDot` + titre, dates · étapes · photos, mini-route, `TripColorTag` à droite |
+| Liste des voyages | `screens/Trips.tsx`, `components/TripCard.tsx` | titre « Voyages » (`--fs-2xl`, 650) + sous-titre ; **filtres par couleur** (`TripColorFilter`, « Tous » puis les couleurs présentes) ; lignes groupées par année : vignette 72 px, `TripColorDot` + titre, dates · étapes · photos, mini-route, `TripColorTag` à droite |
 | Page d'un voyage | `screens/Trip.tsx` (+ `TripMap`, `TripStatsPanel`, `NoteEditor`) | fond `--trip-page` avec la couverture très floutée ; **couverture à flou progressif** ; titre display, dates · pays, route ; chiffres (jours, photos, étapes, km) ; bouton Encre « Regarder ensemble » + bouton secondaire teinté « Où était-ce ? » ; étapes en petite route ; grille de photos ; **pastille de couleur en haut à droite qui ouvre `TripColorPicker`** (aujourd'hui accessible par le menu « … » du voyage, dans une feuille, déjà branché sur `api.setTripColor`) |
 | Validation d'un import | `screens/ImportReview.tsx` | carte du voyage proposé avec la même couverture Horizon, couleur proposée visible |
 | Diaporama | `screens/Slideshow.tsx` | reste sur fond noir ; titres Geist ; route et progression à la couleur du voyage (`tripColorHex`) |

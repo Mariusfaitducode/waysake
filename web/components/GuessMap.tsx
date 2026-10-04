@@ -30,6 +30,8 @@ export function GuessMap({ pin, pins, onPick, start, round }: { pin: { lat: numb
       return;
     }
     m.addControl(new maplibregl.AttributionControl({ compact: true }), "bottom-right");
+    // Crédits repliés en un petit « i » dès le départ : ouverts, ils couvrent le bas de la carte sur téléphone.
+    m.once("load", () => m.getContainer().querySelector(".maplibregl-ctrl-attrib")?.classList.remove("maplibregl-compact-show"));
     m.once("styledata", () => {
       for (const layer of m.getStyle().layers ?? [])
         if (layer.type === "symbol" && m.getLayoutProperty(layer.id, "text-field") !== undefined)

@@ -41,7 +41,7 @@
   display: flex;
   align-items: center;
   gap: var(--sp-2);
-  min-height: 32px;
+  min-height: 36px;
   padding: 4px var(--sp-2);
   border-radius: var(--r-sm);
   color: var(--text);
@@ -50,6 +50,7 @@
   text-decoration: none;
   transition: background var(--dur-fast) var(--ease);
 }
+@media (pointer: coarse) { .country__trip, .country__more { min-height: 44px; } }
 .country__trip span { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .country__trip:hover { background: color-mix(in oklab, var(--trip) 9%, transparent); }
 .country__more { color: var(--text-muted); font-weight: var(--fw-regular); }

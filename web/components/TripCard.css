@@ -1,40 +1,41 @@
-/* ---------- Carte sur photo (bas du globe) ---------- */
+/* ---------- Carte de voyage (bas du globe) ---------- */
+/* La photo d'abord, sans rien dessus ; le texte vient dessous, sur la surface de la carte. */
 .trip-card {
   position: relative;
-  display: block;
+  display: grid;
   overflow: hidden;
-  border-radius: var(--r-xl);
-  background: var(--surface-sunken);
-  color: var(--text-on-photo);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  color: var(--text);
   text-decoration: none;
   isolation: isolate;
   transition: transform var(--dur) var(--ease);
   -webkit-tap-highlight-color: transparent;
 }
 .trip-card:active { transform: scale(0.98); }
-.trip-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; transition: transform 700ms var(--ease); }
-.trip-card:hover img { transform: scale(1.04); }
-/* Photo : seul endroit où le noir est permis (lisibilité du texte blanc). */
-.trip-card__shade { position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.6)); }
-.trip-card__text { position: absolute; left: 0; right: 0; bottom: 0; display: grid; gap: 2px; padding: var(--sp-5); }
+.trip-card__photo { position: relative; display: block; overflow: hidden; aspect-ratio: 3 / 2; background: var(--surface-sunken); }
+.trip-card__photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 700ms var(--ease); }
+.trip-card:hover .trip-card__photo img { transform: scale(1.04); }
+.trip-card__text { display: grid; gap: 1px; min-width: 0; padding: 9px 12px 11px; }
 .trip-card__title {
   display: block;
-  font-weight: var(--fw-bold);
-  font-size: var(--fs-3xl);
-  letter-spacing: var(--tracking-tighter);
-  line-height: var(--lh-tight);
-  text-wrap: balance;
+  min-width: 0;
+  overflow: hidden;
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-md);
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
-/* Pastille sur photo : liseré blanc pour rester visible sur toutes les couvertures. */
-.trip-card__title .trip-dot { width: 0.3em; height: 0.3em; min-width: 9px; min-height: 9px; margin-right: 0.35em; vertical-align: 0.14em; box-shadow: 0 0 0 2px var(--text-on-photo); }
-.trip-card__meta { overflow: hidden; font-size: var(--fs-sm); font-weight: var(--fw-medium); opacity: 0.88; text-overflow: ellipsis; white-space: nowrap; }
-.trip-card--lg { aspect-ratio: 4 / 5; }
-.trip-card--md { aspect-ratio: 4 / 3; }
-.trip-card--sm { width: 240px; aspect-ratio: 4 / 3; border-radius: var(--r-lg); }
-.trip-card--sm .trip-card__title { font-size: var(--fs-xl); letter-spacing: var(--tracking-tight); }
-.trip-card--sm .trip-card__text { padding: 14px; }
+.trip-card__title .trip-dot { width: 9px; height: 9px; margin-right: 7px; vertical-align: 0.06em; }
+.trip-card__meta { overflow: hidden; color: var(--text-muted); font-size: var(--fs-xs); text-overflow: ellipsis; white-space: nowrap; }
+.trip-card--sm { width: clamp(220px, 64vw, 260px); }
+.trip-card--md .trip-card__photo { aspect-ratio: 4 / 3; }
+.trip-card--lg .trip-card__photo { aspect-ratio: 4 / 5; }
 @media (min-width: 900px) {
-  .trip-card--lg { aspect-ratio: 16 / 10; }
+  .trip-card--sm { width: 248px; }
+  .trip-card--lg .trip-card__photo { aspect-ratio: 16 / 10; }
 }
 
 /* ---------- Ligne de la liste des voyages ---------- */
@@ -53,7 +54,7 @@
 .trip-row:hover { background: color-mix(in srgb, var(--trip) 7%, transparent); }
 .trip-row:active { background: color-mix(in srgb, var(--trip) 11%, transparent); }
 .trip-row:focus-visible { outline-offset: 0; border-radius: var(--r-md); }
-.trip-row__thumb { position: relative; width: 58px; height: 58px; flex: none; overflow: hidden; border-radius: var(--r-md); background: var(--surface-sunken); }
+.trip-row__thumb { position: relative; width: 72px; height: 72px; flex: none; overflow: hidden; border-radius: var(--r-md); background: var(--surface-sunken); }
 .trip-row__thumb img { width: 100%; height: 100%; object-fit: cover; }
 .trip-row__thumb::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 1px var(--line); }
 .trip-row__text { min-width: 0; display: grid; }

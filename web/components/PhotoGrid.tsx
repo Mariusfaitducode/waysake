@@ -39,9 +39,10 @@ export function PhotoGrid<T extends GridItem>({
     return () => ro.disconnect();
   }, []);
 
-  // Grille fine façon Photos : des joints de 2 px sur téléphone, 4 px sur grand écran.
+  // Grille fine façon Photos : des joints de 2 px sur téléphone, 4 px sur grand écran. Des vignettes grandes :
+  // sur téléphone, deux photos par rangée en moyenne (une seule quand elle est très large).
   const gap = width < 600 ? 2 : 4;
-  const targetHeight = width < 600 ? 118 : width < 1100 ? 190 : 230;
+  const targetHeight = width < 600 ? Math.round(Math.max(150, width * 0.44)) : width < 1100 ? 230 : 280;
   const rows = width ? justify(items.map(ratio), { width, targetHeight, gap }) : [];
 
   return (

@@ -16,12 +16,13 @@ const stopsOf = (trip: TripSummary) => {
   return n && n > 0 ? n : null;
 };
 
-/** Carte de voyage sur photo (bas du globe) : la couverture porte tout, pastille de couleur devant le titre. */
+/**
+ * Carte de voyage (bas du globe) : la couverture entière, sans texte dessus ; pastille, titre et dates dessous.
+ */
 export function TripCard({ trip, size = "md" }: { trip: TripSummary; size?: "sm" | "md" | "lg" }) {
   return (
     <Link to={`/v/${trip.slug}`} className={`trip-card trip-card--${size}`} {...tripColorProps(trip.color)}>
-      {trip.coverLarge && <img src={size === "sm" ? trip.cover! : trip.coverLarge} alt="" loading="lazy" decoding="async" />}
-      <span className="trip-card__shade" aria-hidden="true" />
+      <span className="trip-card__photo">{trip.coverLarge && <img src={size === "sm" ? trip.cover! : trip.coverLarge} alt="" loading="lazy" decoding="async" />}</span>
       <span className="trip-card__text">
         <strong className="trip-card__title">
           <TripColorDot color={trip.color} />
@@ -37,7 +38,7 @@ export function TripCard({ trip, size = "md" }: { trip: TripSummary; size?: "sm"
 }
 
 /**
- * Ligne de la liste des voyages (Horizon) : vignette 58 px, pastille + titre, dates · étapes · photos,
+ * Ligne de la liste des voyages (Horizon) : vignette 72 px, pastille + titre, dates · étapes · photos,
  * mini-route à la couleur du voyage, et le nom de la couleur à droite (la couleur n'est jamais seule).
  */
 export function TripRow({ trip }: { trip: TripSummary }) {

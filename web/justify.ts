@@ -17,6 +17,21 @@ export function justify(
     const naturalWidth = sum * targetHeight + gap * (count - 1);
     if (naturalWidth >= width) {
       const height = Math.min((width - gap * (count - 1)) / sum, targetHeight * 1.5);
+      // Couper avant cette photo donne parfois une rangée plus proche de la hauteur cible (moins écrasée) :
+      // on garde la coupure la plus proche, sans dépasser 1,5 fois la cible.
+      const before = count > 1 ? (width - gap * (count - 2)) / (sum - ratios[i]) : Infinity;
+      if (before <= targetHeight * 1.5 && before - targetHeight < targetHeight - height) {
+        rows.push(row(ratios, start, i - 1, before));
+        start = i;
+        sum = ratios[i];
+        // La photo écartée commence la rangée suivante ; elle peut à elle seule la remplir.
+        if (ratios[i] * targetHeight >= width) {
+          rows.push(row(ratios, i, i, Math.min(width / ratios[i], targetHeight * 1.5)));
+          start = i + 1;
+          sum = 0;
+        }
+        continue;
+      }
       rows.push(row(ratios, start, i, height));
       start = i + 1;
       sum = 0;

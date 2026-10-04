@@ -13,7 +13,7 @@
 }
 .header__subtitle { margin: var(--sp-2) 0 0; max-width: 62ch; color: var(--text-muted); font-size: var(--fs-md); line-height: 1.45; }
 .header__actions { display: flex; flex: none; align-items: center; gap: var(--sp-2); }
-.header__me { display: grid; padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer; transition: transform var(--dur-fast) var(--ease); }
+.header__me { display: grid; place-items: center; width: 44px; height: 44px; margin: -5px -5px -5px 0; padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer; transition: transform var(--dur-fast) var(--ease); }
 .header__me:active { transform: scale(0.95); }
 @media (min-width: 900px) {
   .header { padding: var(--sp-10) var(--sp-10) var(--sp-2); }

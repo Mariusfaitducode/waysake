@@ -1,12 +1,15 @@
-/* Une manche : la photo en haut, la carte dessous (côte à côte sur grand écran), la barre d'action en bas. */
+/* Une manche : la photo domine (en haut, la plus grande part de l'écran), la carte dessous (à droite sur grand
+   écran, plus étroite), la barre d'action en bas. */
 .play {
   display: grid;
-  grid-template-rows: auto minmax(0, 38vh) minmax(240px, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1.3fr) minmax(190px, 1fr) auto;
   gap: var(--sp-3);
   height: calc(100dvh - var(--shell-bottom, 62px));
   padding: calc(env(safe-area-inset-top, 0px) + var(--sp-3)) var(--sp-3) var(--sp-3);
 }
 .play__top { display: flex; align-items: center; gap: var(--sp-3); min-width: 0; }
+.play__top .icon-button { width: 44px; height: 44px; flex: none; }
+.play__top .icon-button::after { inset: -3px; }
 .play__round { font-weight: var(--fw-semibold); font-size: var(--fs-md); letter-spacing: -0.01em; white-space: nowrap; font-variant-numeric: tabular-nums; }
 /* Avancement : un point par photo, la photo en cours en trait. */
 .play__progress { display: none; align-items: center; gap: 4px; }
@@ -25,11 +28,14 @@
   white-space: nowrap;
 }
 .play__chip b { font-weight: var(--fw-semibold); font-variant-numeric: tabular-nums; }
-.play__photo { margin: 0; min-height: 0; display: grid; place-items: center; border-radius: var(--r-lg); overflow: hidden; background: var(--surface-sunken); }
-.play__photo img { max-width: 100%; max-height: 100%; object-fit: contain; animation: fade var(--dur-slow) var(--ease) both; }
+/* La photo entière, aussi grande que la place le permet, sans cadre gris autour. */
+.play__photo { margin: 0; min-height: 0; display: grid; place-items: center; overflow: hidden; }
+.play__photo img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: var(--r-md); animation: fade var(--dur-slow) var(--ease) both; }
 .play__map { min-height: 0; }
 .play__bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-3); min-height: 48px; }
-.play__hint, .play__result { flex: 1 1 220px; margin: 0; color: var(--text-muted); font-size: var(--fs-md); }
+.play__bar .button { height: 44px; padding-block: 0; }
+.play__end-actions .button { height: 44px; padding-block: 0; }
+.play__hint, .play__result { flex: 1 1 160px; margin: 0; color: var(--text-muted); font-size: var(--fs-sm); }
 .play__result { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 var(--sp-2); color: var(--text); }
 .play__result b {
   font-family: var(--font-display);
@@ -104,7 +110,7 @@
 }
 @media (min-width: 900px) {
   .play {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 3fr) minmax(320px, 2fr);
     grid-template-rows: auto minmax(0, 1fr) auto;
     height: 100dvh;
     padding: var(--sp-6) var(--sp-10);

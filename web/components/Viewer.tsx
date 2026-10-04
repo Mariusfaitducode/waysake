@@ -21,6 +21,13 @@ type Props = {
   live?: { onLeave: () => void };
 };
 
+const IconInfo = () => (
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="8.5" />
+    <path d="M12 11v5.2M12 7.8v.1" />
+  </svg>
+);
+
 const IconDownload = () => (
   <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19.5h14" />
@@ -39,6 +46,9 @@ export function Viewer({ items, index, onIndex, onClose, action, live }: Props) 
   const [done, setDone] = useState<number | null>(null);
   const [placing, setPlacing] = useState(false);
   const [bare, setBare] = useState(false);
+  // Détails (légende, réactions, auteur, actions) repliés par défaut : la photo d'abord. Ouverts en direct,
+  // où les réactions sont le cœur du moment.
+  const [details, setDetails] = useState(!!live);
   // Lieu posé depuis la visionneuse, affiché tout de suite (la liste se recharge en arrière-plan).
   const [placed, setPlaced] = useState<Record<number, string>>({});
   const authorName = useAuthorName();
@@ -78,7 +88,7 @@ export function Viewer({ items, index, onIndex, onClose, action, live }: Props) 
   return (
     <dialog
       ref={ref}
-      className={`viewer${bare ? " is-bare" : ""}`}
+      className={`viewer${bare ? " is-bare" : ""}${details ? " has-details" : ""}`}
       aria-label={t("viewer.label")}
       // En React, la fermeture d'une feuille ouverte depuis la visionneuse remonte jusqu'ici : on l'ignore.
       onClose={(e) => e.target === e.currentTarget && onClose()}
@@ -135,25 +145,39 @@ export function Viewer({ items, index, onIndex, onClose, action, live }: Props) 
       {live && <LiveOverlay mediaId={m.id} onLeave={live.onLeave} />}
 
       <footer className="viewer__info">
-        <div className="viewer__panel">
-          <PhotoSocial key={m.id} media={m} />
-          <div className="viewer__foot">
-            <span className="viewer__who">{t("viewer.by", { name: who })}</span>
-            <div className="viewer__actions">
-              {canPlace && (
-                <button className="viewer__action" onClick={() => setPlacing(true)}>
-                  <IconPin />
-                  {located ? t("viewer.editPlace") : t("viewer.addPlace")}
-                </button>
-              )}
-              {action && (
-                <button className="viewer__action" onClick={() => action.run(m).then(() => setDone(m.id))} disabled={done === m.id}>
-                  {done === m.id ? t("viewer.done") : action.label}
-                </button>
-              )}
+        {details ? (
+          <div className="viewer__panel" id="viewer-details">
+            <PhotoSocial key={m.id} media={m} />
+            <div className="viewer__foot">
+              <span className="viewer__who">{t("viewer.by", { name: who })}</span>
+              <div className="viewer__actions">
+                {canPlace && (
+                  <button className="viewer__action" onClick={() => setPlacing(true)}>
+                    <IconPin />
+                    {located ? t("viewer.editPlace") : t("viewer.addPlace")}
+                  </button>
+                )}
+                {action && (
+                  <button className="viewer__action" onClick={() => action.run(m).then(() => setDone(m.id))} disabled={done === m.id}>
+                    {done === m.id ? t("viewer.done") : action.label}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        ) : (
+          // Replié : la légende sur une ligne (si elle existe), rien d'autre sur la photo.
+          <p className="viewer__note">{m.note}</p>
+        )}
+        <button
+          className="icon-button icon-button--glass viewer__toggle"
+          onClick={() => setDetails((d) => !d)}
+          aria-expanded={details}
+          aria-label={t("viewer.info")}
+          title={t("viewer.info")}
+        >
+          <IconInfo />
+        </button>
       </footer>
       {placing && (
         <PlacePicker

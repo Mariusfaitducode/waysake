@@ -72,6 +72,13 @@ export const IconPlay = () => (
     <path d="M8 5.5v13l10.5-6.5z" fill="currentColor" />
   </svg>
 );
+export const IconPostcard = () => (
+  <svg {...base} strokeWidth={1.9}>
+    <rect x="3" y="5.5" width="18" height="13" rx="2" />
+    <rect x="14.5" y="8.5" width="3.5" height="4" rx="0.6" />
+    <path d="M6.5 10h5M6.5 13h5M6.5 16h3" />
+  </svg>
+);
 export const IconTogether = () => (
   <svg {...base} strokeWidth={2}>
     <circle cx="9" cy="9" r="3.2" />

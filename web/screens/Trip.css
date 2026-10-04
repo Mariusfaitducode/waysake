@@ -23,37 +23,45 @@
 :root[data-theme="dark"] .trip__backdrop img { opacity: 0.38; }
 
 /* ---------- Couverture ---------- */
-/* La photo remplit toute la couverture ; le texte est dans le flux, en bas : un long titre agrandit la couverture
-   au lieu de remonter sur la partie nette de la photo. */
-.trip-cover { position: relative; isolation: isolate; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; min-height: min(128vw, 88vh); }
-.trip-cover--loading { border-radius: 0; }
+/* La photo est le sujet. Téléphone : elle occupe l'essentiel du premier écran, nette sur presque toute sa
+   hauteur ; titre, chiffres et actions viennent dessous, dans la page. Grand écran : le texte, compact, est
+   posé tout en bas de la photo, sur une bande floutée étroite. */
+.trip-cover { position: relative; isolation: isolate; }
+.trip-cover--loading { height: min(118vw, 72svh); border-radius: 0; }
+.trip-cover__photo { position: relative; isolation: isolate; overflow: hidden; height: min(118vw, 72svh); min-height: 300px; background: var(--surface-sunken); }
 .trip-cover__img { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; object-position: 50% 45%; animation: cover-in var(--dur-slow) var(--ease) both; }
-/* Flou progressif : un calque qui floute la photo, masqué en haut ; par-dessus, un dégradé vers la page. */
+/* Flou progressif, sur le bas seulement : la photo se fond dans la page sans voile noir. */
 .trip-cover__veil {
   position: absolute;
-  inset: 0;
+  inset: auto 0 0;
+  height: 26%;
   z-index: -1;
   pointer-events: none;
-  -webkit-backdrop-filter: blur(26px) saturate(1.15);
-  backdrop-filter: blur(26px) saturate(1.15);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 36%, #000 72%);
-  mask-image: linear-gradient(to bottom, transparent 36%, #000 72%);
+  -webkit-backdrop-filter: blur(18px) saturate(1.1);
+  backdrop-filter: blur(18px) saturate(1.1);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 75%);
+  mask-image: linear-gradient(to bottom, transparent, #000 75%);
 }
 .trip-cover__veil::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, transparent 34%, color-mix(in srgb, var(--trip-page) 55%, transparent) 62%, var(--trip-page) 97%);
+  background: linear-gradient(to bottom, transparent 20%, color-mix(in srgb, var(--trip-page) 60%, transparent) 70%, var(--trip-page));
 }
-.trip-cover__bar { position: absolute; top: 0; left: 0; right: 0; display: flex; gap: var(--sp-2); padding: calc(env(safe-area-inset-top, 0px) + var(--sp-3)) var(--gutter); }
+.trip-cover__bar { position: absolute; top: 0; left: 0; right: 0; display: flex; gap: var(--sp-3); padding: calc(env(safe-area-inset-top, 0px) + var(--sp-3)) var(--gutter); }
+.trip-cover__bar .icon-button { width: 44px; height: 44px; }
+.trip-cover__bar .icon-button::after { inset: -3px; }
 .trip-cover__spacer { flex: 1; }
 /* Pastille de couleur : ouvre le sélecteur. Liseré blanc, comme toute pastille posée sur une photo. */
 .trip-cover__swatch i { width: 15px; height: 15px; border-radius: 50%; background: var(--trip); box-shadow: 0 0 0 2px var(--text-on-photo); transition: transform var(--dur-fast) var(--ease); }
 .trip-cover__swatch:hover i { transform: scale(1.12); }
 
-.trip-cover__text { padding: 46vw var(--gutter) var(--sp-4); container-type: inline-size; }
-.trip-cover__title { max-width: 18ch; color: var(--text); overflow-wrap: anywhere; }
-.trip-cover__meta { margin: var(--sp-2) 0 0; color: var(--text-muted); font-size: var(--fs-md); font-weight: var(--fw-medium); }
+.trip-cover__text { position: relative; margin-top: calc(-1 * var(--sp-6)); padding: 0 var(--gutter); container-type: inline-size; }
+.trip-cover__title { max-width: 20ch; font-size: clamp(30px, 8.6vw, 40px); color: var(--text); overflow-wrap: anywhere; }
+.trip-cover__meta { margin: var(--sp-2) 0 0; color: var(--text-muted); font-size: var(--fs-sm); font-weight: var(--fw-medium); }
+/* Chiffres discrets : une ligne de métadonnées, le nombre à peine appuyé. */
+.trip-cover__figures { margin: 2px 0 0; color: var(--text-muted); font-size: var(--fs-sm); }
+.trip-cover__figures b { color: var(--text); font-weight: var(--fw-semibold); font-variant-numeric: tabular-nums; }
 
 /* Route sous le titre : étapes en petits cercles évidés reliés par un trait, la dernière pleine. */
 .trip-route { list-style: none; margin: var(--sp-3) 0 0; padding: 0; display: flex; align-items: center; overflow: hidden; font-size: var(--fs-sm); }
@@ -88,18 +96,17 @@
 .trip__body { position: relative; isolation: isolate; padding: var(--sp-4) 0 var(--sp-12); display: grid; gap: var(--sp-8); }
 .trip__section { padding: 0 var(--gutter); }
 
-.trip__intro { padding: 0 var(--gutter); display: grid; gap: var(--sp-5); }
-.trip__figures { margin: 0; display: flex; flex-wrap: wrap; gap: var(--sp-3) var(--sp-6); }
-.trip__figures > div { display: flex; flex-direction: column-reverse; }
-.trip__figures dd { margin: 0; font-size: var(--fs-xl); font-weight: var(--fw-semibold); letter-spacing: var(--tracking-tight); line-height: 1; }
-.trip__figures dt { margin-top: 5px; color: var(--text-muted); font-size: var(--fs-xs); }
-.trip__actions { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
-@media (max-width: 520px) {
-  .trip__actions { display: grid; grid-template-columns: 1fr 1fr; }
-  .trip__actions > :first-child:nth-last-child(odd) { grid-column: 1 / -1; }
-  .trip__actions > * { justify-content: center; }
+/* Actions : un bouton Encre, deux boutons ronds teintés (libellé visible dès qu'il y a la place). Même hauteur. */
+.trip__actions { display: flex; align-items: center; gap: var(--sp-2); margin-top: var(--sp-4); }
+.trip__actions .button { height: 44px; padding-block: 0; }
+.trip__actions svg { width: 18px; height: 18px; flex: none; }
+.trip__primary svg { margin-left: -2px; }
+.trip__tinted { width: 44px; padding-inline: 0; }
+.trip__action-label { display: none; }
+@container (min-width: 520px) {
+  .trip__tinted { width: auto; padding-inline: 16px 18px; }
+  .trip__action-label { display: inline; }
 }
-.trip__actions svg { width: 18px; height: 18px; margin-left: -2px; }
 /* Bouton secondaire teinté (16 % de la couleur du voyage) : le seul bouton Encre reste « Regarder ensemble ». */
 .trip__tinted { background: color-mix(in srgb, var(--trip) 16%, transparent); color: var(--text); }
 .trip__tinted:hover { background: color-mix(in srgb, var(--trip) 24%, transparent); }
@@ -152,16 +159,28 @@
 .chapter__note { margin: 14px var(--gutter) 0; }
 
 @media (min-width: 900px) {
-  .trip-cover { min-height: min(80vh, 760px); }
+  .trip-cover__photo { height: min(86vh, 900px); min-height: 520px; }
+  .trip-cover__veil { height: max(40%, 300px); -webkit-mask-image: linear-gradient(to bottom, transparent, #000 45%); mask-image: linear-gradient(to bottom, transparent, #000 45%); }
+  .trip-cover__veil::after { background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--trip-page) 62%, transparent) 38%, color-mix(in srgb, var(--trip-page) 90%, transparent) 64%, var(--trip-page)); }
   .trip-cover__bar { padding: var(--sp-5) var(--sp-8); }
-  .trip-cover__text { padding: 280px var(--sp-10) var(--sp-6); }
-  .trip-cover__meta { font-size: var(--fs-lg); }
+  /* Le texte tient dans la bande floutée du bas : à gauche le titre et ses lignes, à droite les actions. */
+  .trip-cover__text {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 0 var(--sp-10) var(--sp-6);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: var(--sp-8);
+  }
+  .trip-cover__text > :not(.trip__actions) { grid-column: 1; }
+  .trip-cover__text > .trip__actions { grid-column: 2; grid-row: 1 / span 4; align-self: end; margin: 0; }
+  .trip-cover__title { max-width: 24ch; font-size: var(--fs-3xl); }
+  .trip-cover__meta, .trip-cover__figures { font-size: var(--fs-md); }
   .trip-route { font-size: var(--fs-md); }
-  .trip__body { gap: var(--sp-12); padding-top: var(--sp-6); }
-  .trip__intro { padding-inline: var(--sp-10); grid-template-columns: 1fr auto; align-items: end; }
-  .trip__figures { gap: var(--sp-10); }
-  .trip__figures dd { font-size: var(--fs-2xl); }
-  .trip__figures dt { font-size: var(--fs-sm); }
+  .trip__body { gap: var(--sp-12); padding-top: var(--sp-10); }
   .trip__route { padding-inline: var(--sp-10); grid-template-columns: minmax(220px, 300px) minmax(0, 1fr); gap: var(--sp-8); align-items: start; }
   .trip__route--map-only { grid-template-columns: minmax(0, 1fr); }
   .trip__section, .chapter__head { padding-inline: var(--sp-10); }

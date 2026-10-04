@@ -34,6 +34,8 @@
   transition: background-color var(--dur-fast) var(--ease);
 }
 .trip-filter .trip-dot { width: 9px; height: 9px; }
+/* Écran tactile : des puces de 44 px (la bande de filtres les fait défiler, la hauteur ne coûte rien). */
+@media (pointer: coarse) { .trip-filter { min-height: 44px; padding-inline: 14px; } }
 .trip-filter:hover { background: color-mix(in srgb, var(--text) 5%, transparent); }
 .trip-filter[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); box-shadow: none; }
 

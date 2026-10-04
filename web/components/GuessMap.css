@@ -1,4 +1,4 @@
-.guess-map { width: 100%; height: 100%; min-height: 260px; border-radius: var(--r-lg); overflow: hidden; background: var(--surface-sunken); }
+.guess-map { width: 100%; height: 100%; min-height: 180px; border-radius: var(--r-lg); overflow: hidden; background: var(--surface-sunken); }
 .guess-map__canvas { width: 100%; height: 100%; }
 .guess-map.is-picking .maplibregl-canvas { cursor: crosshair; }
 

@@ -29,6 +29,8 @@ export function PinMap({ pin, center, zoom, onPick }: { pin: { lat: number; lon:
       return;
     }
     m.addControl(new maplibregl.AttributionControl({ compact: true }), "bottom-right");
+    // Crédits repliés en un petit « i » dès le départ : ouverts, ils couvrent le bas de la carte sur téléphone.
+    m.once("load", () => m.getContainer().querySelector(".maplibregl-ctrl-attrib")?.classList.remove("maplibregl-compact-show"));
     m.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
     m.once("styledata", () => {
       for (const layer of m.getStyle().layers ?? [])

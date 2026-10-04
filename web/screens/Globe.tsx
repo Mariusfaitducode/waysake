@@ -95,7 +95,7 @@ export function GlobeScreen() {
             <IconPlus />
           </button>
           <button className="globe__me" onClick={switchProfile} aria-label={t("profile.switch", { name: me.name })}>
-            <Avatar name={me.name} color={me.color} size={36} />
+            <Avatar name={me.name} color={me.color} size={40} />
           </button>
         </div>
       </div>
@@ -164,5 +164,5 @@ export function GlobeScreen() {
 
 /** Marges de cadrage du globe selon la largeur (légende à gauche sur grand écran, cartes du bas). */
 function framing() {
-  return wide() ? { top: 120, bottom: 240, left: 340, right: 80 } : { top: 110, bottom: 220, left: 40, right: 40 };
+  return wide() ? { top: 120, bottom: 270, left: 340, right: 80 } : { top: 110, bottom: 250, left: 40, right: 40 };
 }
