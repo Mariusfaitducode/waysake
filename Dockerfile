@@ -29,6 +29,13 @@ COPY --from=build /app/server ./server
 # Géométrie du logo, partagée avec le site : la carte postale (server/postcard.ts) la dessine.
 COPY --from=build /app/web/brand.ts ./web/brand.ts
 COPY --from=build /app/dist ./dist
+# Version annoncée par /api/health (server/version.json). La CI passe le commit et sa date ; sans eux (construction
+# locale), on garde le version.json éventuellement présent dans les sources (scripts/deploy-tower.sh l'y écrit).
+ARG WAYSAKE_COMMIT=""
+ARG WAYSAKE_BUILD_DATE=""
+RUN if [ -n "$WAYSAKE_COMMIT" ]; then \
+      printf '{"commit":"%s","date":"%s"}\n' "$WAYSAKE_COMMIT" "$WAYSAKE_BUILD_DATE" > server/version.json; \
+    fi
 VOLUME /data
 EXPOSE 8420
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s CMD node -e "fetch('http://127.0.0.1:8420/api/health').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"

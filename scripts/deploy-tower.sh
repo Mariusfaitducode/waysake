@@ -17,7 +17,7 @@ COMMIT="$(git rev-parse --short HEAD)"
 step "Version en ligne"
 LIVE="$(remote '(Invoke-WebRequest -UseBasicParsing http://127.0.0.1:8420/api/health -TimeoutSec 5).Content' 2>/dev/null || true)"
 echo "  tour : ${LIVE:-injoignable} ; à déployer : $COMMIT"
-if [ "${FORCE:-0}" != 1 ] && printf '%s' "$LIVE" | grep -q "\"commit\":\"$COMMIT\""; then
+if [ "${FORCE:-0}" != 1 ] && grep -q "\"commit\":\"$COMMIT\"" <<< "$LIVE"; then
   echo "  La tour est déjà à jour. (FORCE=1 pour redéployer quand même.)"
   exit 0
 fi
@@ -44,21 +44,59 @@ fi
 step "Construction et démarrage de Waysake (Docker) — quelques minutes la première fois"
 # En SSH, Windows n'ouvre pas le gestionnaire d'identifiants dont Docker Desktop a besoin : on lance la
 # construction dans la session Windows ouverte, via une tâche planifiée, et on suit son journal.
-remote "schtasks /Create /TN AtlasDeploy /TR 'powershell -NoProfile -ExecutionPolicy Bypass -File C:\\Atlas-app\\scripts\\tower-up.ps1 -Data $DATA' /SC ONCE /ST 00:00 /IT /F | Out-Null; Remove-Item -ErrorAction SilentlyContinue C:\\Atlas-app\\deploy.log; schtasks /Run /TN AtlasDeploy | Out-Null"
-for _ in $(seq 1 120); do
-  sleep 10
-  LOG="$(remote 'if (Test-Path C:\Atlas-app\deploy.log) { Get-Content C:\Atlas-app\deploy.log -Tail 3 }' 2>/dev/null || true)"
-  printf '  %s\n' "$(printf '%s' "$LOG" | tail -1 | cut -c1-110)"
-  if printf '%s' "$LOG" | grep -q '^EXIT'; then break; fi
-done
-printf '%s' "$LOG" | grep -q '^EXIT 0' || { echo "La construction a échoué :"; remote 'Get-Content C:\Atlas-app\deploy.log -Tail 30'; exit 1; }
+# tower-up.ps1 sauvegarde la base, construit, vérifie (santé Docker, aucun redémarrage, commit dans /api/health)
+# et revient tout seul à la version précédente si ça ne va pas ; « EXIT 0 » = nouvelle version en ligne et vérifiée.
+run_on_tower() { # run_on_tower <arguments de tower-up.ps1> ; renvoie 0 seulement si le journal finit par EXIT 0
+  remote "schtasks /Create /TN AtlasDeploy /TR 'powershell -NoProfile -ExecutionPolicy Bypass -File C:\\Atlas-app\\scripts\\tower-up.ps1 -Data $DATA $1' /SC ONCE /ST 00:00 /IT /F | Out-Null; Remove-Item -ErrorAction SilentlyContinue C:\\Atlas-app\\deploy.log; schtasks /Run /TN AtlasDeploy | Out-Null"
+  local log="" state=""
+  for _ in $(seq 1 90); do
+    sleep 10
+    log="$(remote 'if (Test-Path C:\Atlas-app\deploy.log) { Get-Content C:\Atlas-app\deploy.log -Tail 3 }' 2> /dev/null | tr -d '\r' || true)"
+    printf '  %s\n' "$(printf '%s' "$log" | tail -1 | cut -c1-110)"
+    if grep -q '^EXIT' <<< "$log"; then break; fi
+    # La tâche s'est arrêtée sans écrire EXIT (tuée, session fermée…) : inutile d'attendre davantage.
+    state="$(remote '(Get-ScheduledTask -TaskName AtlasDeploy).State' 2> /dev/null | tr -d '\r' || true)"
+    if [ -n "$state" ] && [ "$state" != Running ]; then
+      sleep 3
+      log="$(remote 'Get-Content C:\Atlas-app\deploy.log -Tail 3' 2> /dev/null | tr -d '\r' || true)"
+      grep -q '^EXIT' <<< "$log" || { echo "  La tâche AtlasDeploy s'est arrêtée (état : $state) sans terminer."; break; }
+    fi
+  done
+  grep -q '^EXIT 0' <<< "$log"
+}
+
+# Secours si tower-up.ps1 n'a pas pu revenir en arrière lui-même (tâche interrompue, vérification ci-dessous ratée).
+rollback() {
+  echo "$1"
+  remote 'schtasks /End /TN AtlasDeploy 2>$null | Out-Null' || true
+  step "Retour à la version précédente"
+  if run_on_tower -Rollback; then echo "  Version précédente rétablie : $(remote "(Invoke-WebRequest -UseBasicParsing $HEALTH_URL -TimeoutSec 5).Content" 2> /dev/null || echo '?')"
+  else echo "  Le retour arrière a échoué : la tour est peut-être hors ligne. Journal :"; remote 'Get-Content C:\Atlas-app\deploy.log -Tail 30' || true
+  fi
+  exit 1
+}
+HEALTH_URL=http://127.0.0.1:8420/api/health
+
+if ! run_on_tower "-Commit $COMMIT"; then
+  echo "Le déploiement a échoué :"
+  remote 'Get-Content C:\Atlas-app\deploy.log -Tail 40' || true
+  # tower-up.ps1 a fait le retour arrière s'il est allé jusqu'au bout (EXIT 1) ; sinon, on le fait d'ici.
+  FINISHED="$(remote 'Select-String -Quiet -Pattern "^EXIT" C:\Atlas-app\deploy.log' 2> /dev/null | tr -d '\r' || true)"
+  [ "$FINISHED" = True ] || rollback "Déploiement interrompu avant sa fin."
+  exit 1
+fi
 
 step "Accès privé via Tailscale (HTTPS)"
 remote "tailscale serve --bg 8420 | Out-Null; tailscale serve status"
 
 step "Vérification"
-HEALTH="$(remote 'Start-Sleep 5; (Invoke-WebRequest -UseBasicParsing http://127.0.0.1:8420/api/health).Content')"
-echo "  $HEALTH"
-printf '%s' "$HEALTH" | grep -q "\"commit\":\"$COMMIT\"" || { echo "La tour ne répond pas avec la version $COMMIT."; exit 1; }
+# Contrôle indépendant de celui de la tour : le bon commit en ligne, et un conteneur sain qui ne redémarre pas.
+sleep 10
+HEALTH="$(remote "(Invoke-WebRequest -UseBasicParsing $HEALTH_URL -TimeoutSec 5).Content" 2> /dev/null || true)"
+CONTAINER="$(remote "docker inspect --format '{{.State.Status}} {{if .State.Health}}{{.State.Health.Status}}{{end}} {{.RestartCount}}' atlas" 2> /dev/null | tr -d '\r' || true)"
+echo "  /api/health : ${HEALTH:-injoignable}"
+echo "  conteneur   : ${CONTAINER:-introuvable} (état, santé, redémarrages)"
+grep -q "\"commit\":\"$COMMIT\"" <<< "$HEALTH" || rollback "La tour ne répond pas avec la version $COMMIT."
+[ "$CONTAINER" = "running healthy 0" ] || rollback "Le conteneur n'est pas sain (attendu : running healthy 0)."
 echo
 echo "Waysake est en ligne. Sur le téléphone (Tailscale activé), ouvre l'adresse https://… affichée ci-dessus, puis /app."

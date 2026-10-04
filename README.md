@@ -60,7 +60,36 @@ Pour construire l'image vous-même, depuis un clone du dépôt : `docker compose
 Sur une machine Windows joignable en SSH, `scripts/release.sh utilisateur@machine C:/Waysake` fait tout
 depuis un Mac ou un Linux : vérifications (code commité, `main` inclus), tests, compilation, envoi, construction,
 démarrage et contrôle de la version. Une machine déjà à jour est laissée telle quelle (`FORCE=1` pour forcer).
+La base est sauvegardée avant, et si la nouvelle version ne démarre pas proprement (santé, redémarrages, commit
+annoncé), la précédente est remise en service automatiquement.
 `/api/health` indique la version qui tourne : `{"ok":true,"version":{"commit":"…","date":"…"}}`.
+
+## Mises à jour automatiques
+
+Chaque fusion sur `main` passe par la CI : tests, types, compilation, puis un **test de fumée de l'image**
+(démarrée sur un dossier vide : santé, site et API doivent répondre, sans redémarrage). Seule une image qui a
+tout passé est publiée en `:latest` (et `:sha-<commit>`) ; les pull requests sont testées de la même façon
+mais ne publient jamais.
+
+Pour que votre serveur suive `:latest` tout seul, deux possibilités :
+
+- **[Watchtower](https://containrrr.dev/watchtower/)** (toute machine Linux, NAS…) : simple, mais sans
+  sauvegarde de la base ni retour arrière.
+  ```bash
+  docker run -d --name watchtower --restart unless-stopped -v /var/run/docker.sock:/var/run/docker.sock \
+    containrrr/watchtower --cleanup --interval 300 atlas
+  ```
+- **Tour Windows** (Docker Desktop) : `scripts/install-autoupdate.sh moi@tour C:/Atlas` installe une tâche
+  planifiée qui, toutes les 2 minutes, télécharge l'image ; si elle est nouvelle, elle sauvegarde la base
+  (`backups/avant-maj-<date>.db`, les 10 dernières gardées), remplace le conteneur, vérifie la santé et le commit
+  annoncé, et **revient à la version précédente** en cas de problème. Une ligne par événement dans
+  `<données>\update.log` (rien quand il n'y a pas de nouvelle image). `--status` affiche l'état, `--off` désactive.
+  `scripts/release.sh` reste disponible pour déployer à la main une version pas encore publiée (une branche) :
+  elle reste en service jusqu'à la prochaine image publiée sur `main`.
+
+Pourquoi le serveur va chercher l'image au lieu d'un déploiement poussé par GitHub : sur un dépôt **public**, un
+runner GitHub Actions auto-hébergé exécuterait sur votre machine le code de n'importe quelle pull request
+venue d'un fork. Le serveur n'expose rien et ne télécharge qu'une image déjà validée.
 
 ## Sur le téléphone
 

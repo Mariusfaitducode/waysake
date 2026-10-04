@@ -1,22 +1,45 @@
-# Tests, types et construction du site à chaque push et pull request.
+# Tests, test de fumée de l'image Docker, puis publication sur ghcr.io — dans un seul workflow.
+#
+#   test     tests, types, compilation du site                    (chaque push et pull request)
+#   smoke    image amd64 construite sans être poussée, démarrée    (chaque push et pull request)
+#            sur un dossier vide : santé, site et API doivent répondre (scripts/smoke-image.sh)
+#   publish  image multi-architecture (amd64, arm64) poussée       (main, tags v*, lancement manuel ;
+#            seulement si test ET smoke ont réussi                   dépôt Mariusfaitducode/waysake seul)
+#              main       → :latest et :sha-<commit>
+#              tag v1.2.3 → :1.2.3, :1.2 et :sha-<commit>
+#
+# Un seul workflow avec `needs` plutôt que deux reliés par `workflow_run` : la publication dépend
+# visiblement des deux vérifications du même commit, une pull request (même d'un fork) passe par exactement
+# les mêmes contrôles sans jamais atteindre `publish`, et aucun déclencheur ne s'exécute avec les droits du
+# dépôt sur du code venu d'un fork (le piège classique de `workflow_run`).
+#
+# Les serveurs auto-hébergés (dont la tour) récupèrent :latest eux-mêmes (scripts/tower-autoupdate.ps1) :
+# l'image n'y arrive donc que validée. Les actions sont figées sur des SHA (mises à jour par Dependabot).
 name: CI
 
 on:
   push:
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+env:
+  IMAGE: ghcr.io/mariusfaitducode/waysake
+
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # Sur main et les tags, les exécutions se suivent (une publication n'est jamais coupée en plein envoi).
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
 
       # Version de pnpm lue dans le champ « packageManager » du package.json.
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
@@ -38,3 +61,94 @@ jobs:
       - run: pnpm vitest run
       - run: npx tsc --noEmit -p .
       - run: pnpm build
+
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      # Commit court et date du commit (et non de la construction) : identiques ici et dans `publish`,
+      # donc la couche qui les contient vient du cache et l'image publiée est celle qui a été testée.
+      - name: Version
+        id: version
+        run: |
+          echo "commit=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          echo "date=$(TZ=UTC git log -1 --format=%cd --date=format-local:%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
+
+      - name: Construction de l'image amd64 (chargée localement, pas poussée)
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
+        with:
+          context: .
+          platforms: linux/amd64
+          load: true
+          push: false
+          tags: waysake:smoke
+          build-args: |
+            WAYSAKE_COMMIT=${{ steps.version.outputs.commit }}
+            WAYSAKE_BUILD_DATE=${{ steps.version.outputs.date }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Test de fumée
+        env:
+          EXPECT_COMMIT: ${{ steps.version.outputs.commit }}
+        run: scripts/smoke-image.sh waysake:smoke
+
+  publish:
+    needs: [test, smoke]
+    # Seul le dépôt public publie (une copie ou un fork ne fait que tester), et jamais depuis une pull request.
+    if: >-
+      github.repository == 'Mariusfaitducode/waysake'
+      && github.event_name != 'pull_request'
+      && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - name: Version
+        id: version
+        run: |
+          echo "commit=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          echo "date=$(TZ=UTC git log -1 --format=%cd --date=format-local:%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3.7.0
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
+
+      - uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
+        id: meta
+        with:
+          images: ${{ env.IMAGE }}
+          flavor: latest=false
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+
+      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            WAYSAKE_COMMIT=${{ steps.version.outputs.commit }}
+            WAYSAKE_BUILD_DATE=${{ steps.version.outputs.date }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
