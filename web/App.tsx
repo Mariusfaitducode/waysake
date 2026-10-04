@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { BrowserRouter, Route, Routes } from "react-router";
-import { api, type User } from "./api.js";
+import { api, AUTH_EVENT, AuthRequiredError, type User } from "./api.js";
 import { DataProvider } from "./data.js";
 import { ProfileCtx } from "./profile.js";
 import { Shell } from "./shell/Shell.js";
@@ -13,26 +13,64 @@ import { TripScreen } from "./screens/Trip.js";
 import { Notebook } from "./screens/Notebook.js";
 import { Countries } from "./screens/Countries.js";
 import { NotFound } from "./screens/NotFound.js";
-import { appUser, inApp, tellApp } from "./native.js";
+import { appPassword, appUser, inApp, tellApp } from "./native.js";
+import { Login } from "./screens/Login.js";
 import { ImportReview } from "./screens/ImportReview.js";
 import { GetApp } from "./screens/GetApp.js";
 import { Locate } from "./screens/Locate.js";
 
 export function App() {
   const [me, setMe] = useState<User | null | undefined>(undefined);
-  useEffect(() => {
-    api.me().then(
-      async (r) => {
-        // Dans l'app, le profil a déjà été choisi sur le téléphone.
-        const fromApp = appUser();
-        if (!r.user && fromApp) return setMe((await api.setMe(fromApp)).user);
-        setMe(r.user);
-      },
-      () => setMe(null),
-    );
+  // La tour demande le mot de passe du foyer (ATLAS_PASSWORD) : écran de connexion avant le choix du profil.
+  const [locked, setLocked] = useState(false);
+  const starting = useRef(false);
+
+  const start = useCallback(async () => {
+    starting.current = true;
+    try {
+      let r: { user: User | null };
+      try {
+        r = await api.me();
+      } catch (e) {
+        // Dans l'app, le mot de passe a déjà été saisi sur le téléphone : la WebView ouvre sa session seule.
+        const fromApp = appPassword();
+        if (!(e instanceof AuthRequiredError) || !fromApp) throw e;
+        await api.login(fromApp).catch(() => {
+          throw new AuthRequiredError(); // mot de passe changé depuis : on le redemande ici
+        });
+        r = await api.me();
+      }
+      // Dans l'app, le profil a déjà été choisi sur le téléphone.
+      const fromApp = appUser();
+      if (!r.user && fromApp) return setMe((await api.setMe(fromApp)).user);
+      setMe(r.user);
+    } catch (e) {
+      if (e instanceof AuthRequiredError) setLocked(true);
+      else setMe(null);
+    } finally {
+      starting.current = false;
+    }
   }, []);
+
+  useEffect(() => {
+    start();
+    // Session fermée en cours de route (mot de passe changé, déconnexion ailleurs) : retour à la connexion.
+    const onAuth = () => !starting.current && setLocked(true);
+    window.addEventListener(AUTH_EVENT, onAuth);
+    return () => window.removeEventListener(AUTH_EVENT, onAuth);
+  }, [start]);
   const switchProfile = () => (inApp() ? tellApp({ type: "settings" }) : setMe(null));
 
+  if (locked)
+    return (
+      <Login
+        onDone={() => {
+          setLocked(false);
+          setMe(undefined);
+          start();
+        }}
+      />
+    );
   if (me === undefined) return null;
   if (me === null) return <ProfilePicker onPick={setMe} />;
   return (

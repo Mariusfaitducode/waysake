@@ -107,8 +107,16 @@ export type UnlocatedMedia = { id: number; kind: "photo" | "video"; width: numbe
 export type UnlocatedDay = { day: string; count: number; moments: { start: string; end: string; ids: number[]; count: number }[]; media: UnlocatedMedia[] };
 export type PlaceHit = { kind: "country" | "region" | "place"; name: string; country: string; countryCode: string; lat: number; lon: number; flag: string };
 
+/** La tour demande le mot de passe du foyer (ATLAS_PASSWORD) : session absente, fermée ou mot de passe changé. */
+export class AuthRequiredError extends Error {}
+export const AUTH_EVENT = "atlas:auth-required";
+
 async function json<T>(res: Response): Promise<T> {
   const body = await res.json().catch(() => ({}));
+  if (res.status === 401 && body.code === "AUTH_REQUIRED") {
+    window.dispatchEvent(new Event(AUTH_EVENT));
+    throw new AuthRequiredError(body.error);
+  }
   if (!res.ok) throw new Error(body.error ?? "La tour ne répond pas. Vérifie que Tailscale est connecté.");
   return body as T;
 }
@@ -121,6 +129,9 @@ const send = <T,>(method: string, url: string, body?: unknown) =>
   }).then((r) => json<T>(r));
 
 export const api = {
+  health: () => get<{ ok: boolean; auth?: boolean }>("/api/health"),
+  login: (password: string) => send<{ ok: boolean }>("POST", "/api/login", { password }),
+  logout: () => send<{ ok: boolean }>("POST", "/api/logout"),
   users: () => get<User[]>("/api/users"),
   me: () => get<{ user: User | null }>("/api/me"),
   setMe: (userId: string) => send<{ user: User }>("POST", "/api/me", { userId }),

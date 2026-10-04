@@ -1,0 +1,20 @@
+.login {
+  display: flex;
+  gap: 10px;
+  width: min(380px, calc(100vw - 40px));
+}
+.login__input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  font-size: 18px;
+  color: var(--ink);
+  background: var(--surface);
+  border: 0;
+  border-radius: var(--r-md);
+  padding: 13px 16px;
+  box-shadow: inset 0 0 0 1.5px var(--hairline);
+  transition: box-shadow 160ms var(--ease);
+}
+.login__input:focus { outline: none; box-shadow: inset 0 0 0 2px var(--autostrada); }
+.picker__lock { margin-top: 28px; }

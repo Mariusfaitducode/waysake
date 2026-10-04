@@ -114,6 +114,10 @@ const MIGRATIONS = [
   ALTER TABLE media ADD COLUMN location_source TEXT CHECK (location_source IN ('exif', 'phone', 'manual', 'game'));
   UPDATE media SET location_source = 'exif' WHERE lat IS NOT NULL;
   `,
+  `
+  -- Sessions du mot de passe du foyer (ATLAS_PASSWORD) : seule l'empreinte SHA-256 du jeton est gardée.
+  CREATE TABLE session (token_hash TEXT PRIMARY KEY, created_at INTEGER NOT NULL);
+  `,
 ];
 
 export type Profile = { id: string; name: string; color: string };

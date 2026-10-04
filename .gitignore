@@ -5,3 +5,4 @@ dist/
 .superpowers/
 .playwright-mcp/
 web/public/atlas.apk
+atlas-data/

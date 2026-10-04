@@ -4,13 +4,20 @@
 FROM node:22-slim AS build
 RUN apt-get update && apt-get install -y --no-install-recommends python3 make g++ && rm -rf /var/lib/apt/lists/*
 RUN corepack enable
+# onnxruntime-node : seul le moteur CPU (inclus dans le paquet) sert ; pas de téléchargement CUDA/TensorRT sur amd64.
+ENV ONNXRUNTIME_NODE_INSTALL=skip
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 COPY tsconfig.json vite.config.ts ./
 COPY server ./server
 COPY web ./web
-RUN pnpm build
+RUN pnpm build && CI=true pnpm prune --prod
+# onnxruntime-node embarque Windows, macOS et Linux toutes architectures : on ne garde que linux/<arch>.
+RUN for d in node_modules/.pnpm/onnxruntime-node@*/node_modules/onnxruntime-node/bin/napi-v*; do \
+      find "$d" -mindepth 1 -maxdepth 1 ! -name linux -exec rm -rf {} + ; \
+      find "$d/linux" -mindepth 1 -maxdepth 1 ! -name "$(node -p process.arch)" -exec rm -rf {} + ; \
+    done
 
 # 2. Exécution : seulement ce qui sert.
 FROM node:22-slim

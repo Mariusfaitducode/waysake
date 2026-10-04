@@ -32,9 +32,11 @@ export function AtlasScreen({ settings, onReset }: { settings: Settings; onReset
     return () => sub.remove();
   }, [canGoBack]);
 
-  // Atlas sait qu'il tourne dans l'app, et pour qui — seulement sur les pages de la tour.
+  // Atlas sait qu'il tourne dans l'app, et pour qui — seulement sur les pages de la tour. Le mot de passe du
+  // foyer lui permet d'ouvrir sa session (cookie) sans le redemander : la WebView n'envoie pas d'en-tête
+  // Authorization sur les images ni les appels de la page.
   const origin = new URL(settings.server).origin;
-  const bridge = `if (location.origin === ${JSON.stringify(origin)}) { window.__ATLAS_APP__ = ${JSON.stringify({ user: settings.user, platform: "android" })}; } true;`;
+  const bridge = `if (location.origin === ${JSON.stringify(origin)}) { window.__ATLAS_APP__ = ${JSON.stringify({ user: settings.user, platform: "android", password: settings.password })}; } true;`;
 
   function onMessage(e: WebViewMessageEvent) {
     // Seule la tour peut demander un import ou les réglages.

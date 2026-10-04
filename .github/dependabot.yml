@@ -1,0 +1,7 @@
+# Garde les actions GitHub figées sur des SHA à jour.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

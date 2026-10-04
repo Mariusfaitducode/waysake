@@ -13,10 +13,17 @@ import { tripRoutes } from "./routes/trips.js";
 import { journalRoutes } from "./routes/journal.js";
 import { importRoutes } from "./routes/imports.js";
 import { locateRoutes } from "./routes/locate.js";
+import { setupAuth } from "./auth.js";
 
 export type AtlasApp = FastifyInstance & { atlas: { db: Db; rebuild: () => void; scheduleRebuild: () => void } };
 
-export async function buildApp(opts: { dataDir: string; webDir?: string; rebuildDelayMs?: number }): Promise<AtlasApp> {
+export async function buildApp(opts: {
+  dataDir: string;
+  webDir?: string;
+  rebuildDelayMs?: number;
+  /** Mot de passe du foyer ; absent ou vide : Atlas reste ouvert (ATLAS_PASSWORD par défaut). */
+  password?: string;
+}): Promise<AtlasApp> {
   const app = Fastify({ logger: false, bodyLimit: 1024 * 1024 });
   const db = openDb(opts.dataDir);
   // Envois interrompus par un redémarrage : leurs fichiers temporaires ne serviront plus.
@@ -58,22 +65,22 @@ export async function buildApp(opts: { dataDir: string; webDir?: string; rebuild
   });
 
   await app.register(cookie);
+  // Le mot de passe passe avant tout le reste, y compris le choix du profil.
+  setupAuth(app, db, "password" in opts ? opts.password : process.env.ATLAS_PASSWORD);
 
   // Protection CSRF : toute modification exige une identité. Le cookie (SameSite=Lax) n'accompagne
   // jamais un formulaire posté depuis un autre site, et un autre site ne peut pas poser l'en-tête
-  // X-Atlas-User sans CORS. Seul le choix du profil reste ouvert.
+  // X-Atlas-User sans CORS. Seuls le choix du profil et la connexion (mot de passe du foyer) restent ouverts.
   // On juge la route reconnue par le routeur (déjà décodée), jamais le texte brut de l'adresse :
   // « /%61pi/… » atteint les mêmes routes que « /api/… ».
   app.addHook("preHandler", async (req, reply) => {
     if (req.method === "GET" || req.method === "HEAD") return;
-    if (req.method === "POST" && req.routeOptions.url === "/api/me") return;
+    if (req.method === "POST" && ["/api/me", "/api/login", "/api/logout"].includes(req.routeOptions.url ?? "")) return;
     if (!identify(db, req)) return reply.code(401).send({ error: "Choisis ton profil d'abord." });
   });
   await app.register(multipart, { limits: { fileSize: 2 * 1024 ** 3, files: 1 } });
   // Originaux servis avec prise en charge des plages (Range) : indispensable aux vidéos sur iPhone.
   await app.register(fastifyStatic, { root: resolve(opts.dataDir), serve: false });
-
-  app.get("/api/health", async () => ({ ok: true }));
 
   // L'app Android : déposée dans DATA_DIR/app/atlas.apk sur la tour (elle n'est pas dans git), sinon celle du site compilé.
   app.get("/atlas.apk", async (_req, reply) => {

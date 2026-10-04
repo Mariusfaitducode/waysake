@@ -2,16 +2,19 @@ import { useState } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Sign } from "../components";
-import { tower, type Person } from "../server";
+import { PasswordError, tower, type Person } from "../server";
 import { normalizeServer, saveSettings, type Settings } from "../storage";
 import { font, useTheme } from "../theme";
 
-/** Premier lancement : relier le téléphone à la tour, puis dire qui l'utilise. */
+/** Premier lancement : relier le téléphone à la tour, donner le mot de passe du foyer s'il y en a un, puis dire qui l'utilise. */
 export function SetupScreen({ initial, onDone }: { initial: Settings | null; onDone: (s: Settings) => void }) {
   const t = useTheme();
   const [address, setAddress] = useState(initial?.server.replace(/^https?:\/\//, "") ?? "");
   const [server, setServer] = useState<string | null>(null);
-  const [people, setPeople] = useState<Person[]>([]);
+  // La tour est protégée (ATLAS_PASSWORD) : on demande le mot de passe avant les profils.
+  const [askPassword, setAskPassword] = useState(false);
+  const [password, setPassword] = useState(initial?.password ?? "");
+  const [people, setPeople] = useState<Person[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -20,8 +23,11 @@ export function SetupScreen({ initial, onDone }: { initial: Settings | null; onD
     setBusy(true);
     setError(null);
     try {
+      const { auth } = await tower.health({ server: url, user: "" });
       // Les profils viennent de la tour (réglage ATLAS_PROFILES).
-      setPeople(await tower.users({ server: url, user: "" }));
+      const found = auth ? null : await tower.users({ server: url, user: "" });
+      setAskPassword(!!auth);
+      setPeople(found);
       setServer(url);
     } catch (e) {
       setError(`${(e as Error).message}\nAdresse essayée : ${url}`);
@@ -30,8 +36,20 @@ export function SetupScreen({ initial, onDone }: { initial: Settings | null; onD
     }
   }
 
+  async function unlock() {
+    setBusy(true);
+    setError(null);
+    try {
+      setPeople(await tower.users({ server: server!, user: "", password }));
+    } catch (e) {
+      setError(e instanceof PasswordError ? "Ce n'est pas le bon mot de passe." : (e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function pick(user: Settings["user"]) {
-    const s = { server: server!, user };
+    const s: Settings = { server: server!, user, ...(askPassword ? { password } : {}) };
     await saveSettings(s);
     onDone(s);
   }
@@ -61,6 +79,27 @@ export function SetupScreen({ initial, onDone }: { initial: Settings | null; onD
               />
               {error && <Text style={[styles.error, { color: t.danger }]}>{error}</Text>}
               <Button title="Se connecter" onPress={connect} busy={busy} disabled={!address.trim()} />
+            </>
+          ) : !people ? (
+            <>
+              <Text style={[styles.title, { color: t.ink }]}>Mot de passe</Text>
+              <Text style={[styles.lead, { color: t.muted }]}>Ta tour est protégée. Tape le mot de passe du foyer : Atlas s'en souviendra sur ce téléphone.</Text>
+              <TextInput
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoFocus
+                textContentType="password"
+                autoComplete="current-password"
+                returnKeyType="go"
+                onSubmitEditing={unlock}
+                accessibilityLabel="Mot de passe du foyer"
+                style={[styles.input, { color: t.ink, backgroundColor: t.hairline }]}
+              />
+              {error && <Text style={[styles.error, { color: t.danger }]}>{error}</Text>}
+              <Button title="Continuer" onPress={unlock} busy={busy} disabled={!password} />
             </>
           ) : (
             <>

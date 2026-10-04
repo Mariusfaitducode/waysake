@@ -1,13 +1,27 @@
 import { useEffect, useState } from "react";
 import { api, type User } from "../api.js";
+import { inApp } from "../native.js";
 import "./ProfilePicker.css";
+import "./Login.css";
 
 export function ProfilePicker({ onPick }: { onPick: (u: User) => void }) {
   const [users, setUsers] = useState<User[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [locks, setLocks] = useState(false);
   useEffect(() => {
     api.users().then(setUsers, (e) => setError(e.message));
+    // Tour protégée par mot de passe : on peut verrouiller cet appareil (l'app a ses propres réglages).
+    api.health().then((h) => setLocks(!!h.auth && !inApp()), () => {});
   }, []);
+
+  async function lock() {
+    try {
+      await api.logout();
+      window.location.reload();
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
 
   async function pick(u: User) {
     try {
@@ -33,6 +47,11 @@ export function ProfilePicker({ onPick }: { onPick: (u: User) => void }) {
         ))}
       </div>
       {error && <p role="alert" className="picker__error">{error}</p>}
+      {locks && (
+        <button className="button button--quiet button--small picker__lock" onClick={lock}>
+          Verrouiller cet appareil
+        </button>
+      )}
     </main>
   );
 }
