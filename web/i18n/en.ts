@@ -22,6 +22,7 @@ export const en: Translation<typeof fr> = {
   "count.countries": { one: "{count} country", other: "{count} countries" },
   "count.days": { one: "{count} day", other: "{count} days" },
   "count.stops": { one: "{count} stop", other: "{count} stops" },
+  "count.periods": { one: "{count} period", other: "{count} periods" },
 
   // Language
   "lang.label": "Language",
@@ -70,6 +71,24 @@ export const en: Translation<typeof fr> = {
   "trips.empty.text": "Add your photos: Waysake finds the trips, countries and stops from when and where each photo was taken.",
   "trips.filters": "Filter by color",
   "trips.filter.all": "All",
+  "trips.section.trips": "Trips",
+  "trips.section.places": "Places of life",
+  "trips.section.places.hint": "Where you live or keep coming back to. Their photos don't make trips: they're sorted by period.",
+  // Places of life
+  "place.options": "Place options",
+  "place.kind": "Place of life",
+  "place.rename": "Rename place",
+  "place.rename.hint": "Leave empty to go back to the automatic name: “{auto}”.",
+  "place.periods": "Periods",
+  "place.figure.periods": { one: "period", other: "periods" },
+  "place.reject": "This isn't a place of life",
+  "place.reject.hint": "Its photos go back to trips",
+  "place.reject.confirm": "Give the photos of {title} back to trips?",
+  "place.reject.confirm.action": "Yes, it isn't a place of life",
+  "place.reject.confirm.hint": "Waysake won't suggest it again. You can undo this from a trip.",
+  "place.notFound.title": "This place of life doesn't exist (anymore).",
+  "place.notFound.text": "Its photos may have gone back to trips.",
+  "place.notFound.action": "See trips",
 
   // Photos
   "library.title": "Photos",
@@ -245,6 +264,8 @@ export const en: Translation<typeof fr> = {
   "trip.changeCover.hint": "Open a photo, then “Use as cover”",
   "trip.badge": "Make a fridge badge",
   "trip.badge.hint": "QR code or NFC badge",
+  "trip.toPlace": "It's a place of life (I lived there, family…)",
+  "trip.toPlace.hint": "Its photos leave trips and are sorted by period",
   "trip.options": "Trip options",
   "trip.route": "Route",
   "trip.notePlaceholder": "Tell the story of this trip: what not to forget, the laughs, the good spots…",
@@ -409,6 +430,9 @@ export const en: Translation<typeof fr> = {
   "api.invalid_media": "Invalid photo.",
   "api.shortcut_missing": "The iPhone shortcut hasn't been put on your server yet.",
   "api.invalid_color": "Unknown colour.",
+  "api.place_not_found": "This place doesn't exist (anymore).",
+  "api.cover_not_in_place": "This photo isn't part of this place.",
+  "api.invalid_status": "Unknown status.",
 
   "tripColor.title": "Trip colour",
   "tripColor.auto": "Automatic",

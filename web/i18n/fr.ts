@@ -18,6 +18,7 @@ export const fr = {
   "count.countries": { one: "{count} pays", other: "{count} pays" },
   "count.days": { one: "{count} jour", other: "{count} jours" },
   "count.stops": { one: "{count} étape", other: "{count} étapes" },
+  "count.periods": { one: "{count} période", other: "{count} périodes" },
 
   // Langue
   "lang.label": "Langue",
@@ -66,6 +67,24 @@ export const fr = {
   "trips.empty.text": "Ajoute vos photos : Waysake reconnaît les voyages, les pays et les étapes grâce à la date et au lieu de chaque photo.",
   "trips.filters": "Filtrer par couleur",
   "trips.filter.all": "Tous",
+  "trips.section.trips": "Voyages",
+  "trips.section.places": "Lieux de vie",
+  "trips.section.places.hint": "Là où vous vivez ou revenez souvent. Leurs photos ne font pas de voyages : elles sont rangées par période.",
+  // Lieux de vie
+  "place.options": "Options du lieu",
+  "place.kind": "Lieu de vie",
+  "place.rename": "Renommer le lieu",
+  "place.rename.hint": "Laisse vide pour revenir au nom automatique : « {auto} ».",
+  "place.periods": "Périodes",
+  "place.figure.periods": { one: "période", other: "périodes" },
+  "place.reject": "Ce n'est pas un lieu de vie",
+  "place.reject.hint": "Ses photos retournent dans les voyages",
+  "place.reject.confirm": "Rendre les photos de {title} aux voyages ?",
+  "place.reject.confirm.action": "Oui, ce n'est pas un lieu de vie",
+  "place.reject.confirm.hint": "Waysake ne le proposera plus. Tu pourras le refaire depuis un voyage.",
+  "place.notFound.title": "Ce lieu de vie n'existe pas (ou plus).",
+  "place.notFound.text": "Ses photos sont peut-être retournées dans les voyages.",
+  "place.notFound.action": "Voir les voyages",
 
   // Photos
   "library.title": "Photos",
@@ -241,6 +260,8 @@ export const fr = {
   "trip.changeCover.hint": "Ouvre une photo, puis « Utiliser comme couverture »",
   "trip.badge": "Créer un badge pour le frigo",
   "trip.badge.hint": "QR code ou badge NFC",
+  "trip.toPlace": "C'est un lieu de vie (j'y ai vécu, de la famille…)",
+  "trip.toPlace.hint": "Ses photos quittent les voyages et sont rangées par période",
   "trip.options": "Options du voyage",
   "trip.route": "Itinéraire",
   "trip.notePlaceholder": "Raconte ce voyage : ce qu'il ne faut pas oublier, les fous rires, les adresses…",
@@ -405,6 +426,9 @@ export const fr = {
   "api.invalid_media": "Photo invalide.",
   "api.shortcut_missing": "Le raccourci iPhone n'a pas encore été déposé sur la tour.",
   "api.invalid_color": "Couleur inconnue.",
+  "api.place_not_found": "Ce lieu de vie n'existe pas (ou plus).",
+  "api.cover_not_in_place": "Cette photo ne fait pas partie de ce lieu.",
+  "api.invalid_status": "Statut inconnu.",
 
   // Couleurs de voyage (palette Horizon, identifiants dans server/trip-palette.ts)
   "tripColor.title": "Couleur du voyage",

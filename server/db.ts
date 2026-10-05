@@ -162,6 +162,25 @@ const MIGRATIONS = [
   ALTER TABLE trip ADD COLUMN color TEXT;
   ALTER TABLE trip ADD COLUMN auto_color TEXT;
   `,
+  `
+  -- Lieux de vie (villes habitées, maison de famille) : détectés (au moins 4 mois distincts), confirmés ou
+  -- rejetés à la main. Le rejet est mémorisé : la ligne reste, le lieu n'est plus actif.
+  CREATE TABLE life_place (
+    id INTEGER PRIMARY KEY,
+    slug TEXT NOT NULL UNIQUE,
+    title TEXT NOT NULL,
+    custom_title TEXT,
+    lat REAL NOT NULL,
+    lon REAL NOT NULL,
+    status TEXT NOT NULL DEFAULT 'auto' CHECK (status IN ('auto', 'confirmed', 'rejected')),
+    cover_media_id INTEGER REFERENCES media(id) ON DELETE SET NULL,
+    auto_cover_media_id INTEGER REFERENCES media(id) ON DELETE SET NULL,
+    media_ids TEXT NOT NULL DEFAULT '[]',
+    media_count INTEGER NOT NULL DEFAULT 0,
+    start_at INTEGER,
+    end_at INTEGER
+  );
+  `,
 ];
 
 export type Profile = { id: string; name: string; color: string };

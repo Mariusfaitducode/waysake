@@ -57,7 +57,7 @@ describe("migration v8 : couleur des voyages", () => {
     const dir = mkdtempSync(join(tmpdir(), "waysake-"));
     const db = openDb(dir, undefined);
     // Remet la base dans l'état de la v7 (avant la migration), avec un voyage existant.
-    db.exec("ALTER TABLE trip DROP COLUMN color; ALTER TABLE trip DROP COLUMN auto_color; PRAGMA user_version = 7;");
+    db.exec("DROP TABLE life_place; ALTER TABLE trip DROP COLUMN color; ALTER TABLE trip DROP COLUMN auto_color; PRAGMA user_version = 7;");
     db.prepare(
       `INSERT INTO trip (slug, title, start_at, end_at, center_lat, center_lon, country_codes, route, media_count)
        VALUES ('sicile-2025', 'Sicile', 1, 2, 37.5, 14.2, '["IT"]', '[]', 35)`,
@@ -65,7 +65,7 @@ describe("migration v8 : couleur des voyages", () => {
     db.close();
 
     const after = openDb(dir, undefined);
-    expect(after.pragma("user_version", { simple: true })).toBe(8);
+    expect(after.pragma("user_version", { simple: true })).toBe(9);
     expect(after.prepare("SELECT slug, title, media_count, color, auto_color FROM trip").all()).toEqual([
       { slug: "sicile-2025", title: "Sicile", media_count: 35, color: null, auto_color: null },
     ]);

@@ -96,6 +96,26 @@ export type Chapter = {
 };
 export type Note = { chapterId: number | null; body: string; author: string; updatedAt: number };
 export type Trip = TripSummary & { route: [number, number][]; chapters: Chapter[]; notes: Note[]; favorites: number[] };
+/** Lieu de vie (ville habitée, maison de famille) : ses photos ne font pas de voyages, elles sont rangées par période. */
+export type LifePlaceSummary = {
+  id: number;
+  slug: string;
+  title: string;
+  autoTitle: string;
+  lat: number;
+  lon: number;
+  status: "auto" | "confirmed" | "rejected";
+  mediaCount: number;
+  startAt: number | null;
+  endAt: number | null;
+  /** Nombre de périodes (séjours continus). */
+  periods: number;
+  coverMediaId: number | null;
+  cover: string | null;
+  coverLarge: string | null;
+};
+export type LifePeriod = { startAt: number; endAt: number; count: number; media: Media[] };
+export type LifePlace = Omit<LifePlaceSummary, "periods"> & { periodCount: number; periods: LifePeriod[] };
 export type Country = { code: string; name: string; flag: string; trips: number; firstVisit: number; photos: number };
 export type Overview = { countries: number; trips: number; photos: number; videos: number; km: number };
 export type Wish = {
@@ -282,6 +302,12 @@ export const api = {
     send<{ color: TripColorId; colorAuto: boolean; autoColor: TripColorId }>("PUT", `/api/trips/${encodeURIComponent(slug)}/color`, { color }),
   updateTrip: (slug: string, patch: { title?: string | null; coverMediaId?: number | null }) =>
     send("PATCH", `/api/trips/${encodeURIComponent(slug)}`, patch),
+  placesOfLife: () => get<LifePlaceSummary[]>("/api/places-of-life"),
+  placeOfLife: (slug: string) => get<LifePlace>(`/api/places-of-life/${encodeURIComponent(slug)}`),
+  updatePlaceOfLife: (slug: string, patch: { title?: string | null; coverMediaId?: number | null; status?: "confirmed" | "rejected" }) =>
+    send("PATCH", `/api/places-of-life/${encodeURIComponent(slug)}`, patch),
+  /** « C'est un lieu de vie » : le voyage disparaît, ses photos rejoignent le lieu (dont le lien est rendu). */
+  tripToPlaceOfLife: (slug: string) => send<{ slug: string }>("POST", `/api/trips/${encodeURIComponent(slug)}/to-place-of-life`),
   renameChapter: (id: number, title: string | null) => send("PATCH", `/api/chapters/${id}`, { title }),
   mergeChapter: (id: number) => send("POST", `/api/chapters/${id}/merge-previous`),
   countries: () => get<Country[]>("/api/countries"),

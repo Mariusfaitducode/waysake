@@ -1,7 +1,9 @@
 import type { LocationSource } from "./routes/media.js";
 import type { Db } from "./db.js";
 import { tripFavorites } from "./social.js";
-import { clusterTrips, detectHome, type ChapterDraft, type ClusterInput, type LatLon, type TripDraft } from "./clustering.js";
+import { clusterTrips, detectHome, inferLocations, type ChapterDraft, type ClusterInput, type LatLon, type TripDraft } from "./clustering.js";
+import { detectLifePlaces } from "./lifeplaces.js";
+import { mergeLifePlaces, writeLifePlaceMedia } from "./lifeplace-store.js";
 import { reverseGeocode, type GeoPlace } from "./geo.js";
 import { isTripColorId, NEUTRAL_TRIP_COLOR, type TripColorId } from "./trip-palette.js";
 import { notifyTripsChanged } from "./trip-events.js";
@@ -15,7 +17,7 @@ import { notifyTripsChanged } from "./trip-events.js";
 export type MediaRow = { id: number; taken_at: number | null; lat: number | null; lon: number | null; geo: string | null; width: number | null; height: number | null; has_thumbs: number };
 
 const json = (v: unknown) => JSON.stringify(v);
-const slugify = (s: string) =>
+export const slugify = (s: string) =>
   s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/&/g, " ").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 48) || "voyage";
 
 function homeFor(db: Db, items: ClusterInput[]): LatLon | null {
@@ -62,7 +64,7 @@ function applyMerges(chapters: ChapterDraft[], anchors: Set<number>): (ChapterDr
   return out;
 }
 
-export function autoCover(trip: TripDraft, media: Map<number, MediaRow>): number | null {
+export function autoCover(trip: Pick<TripDraft, "startAt" | "endAt" | "mediaIds">, media: Map<number, MediaRow>): number | null {
   // Une photo en paysage proche du milieu du voyage : le cœur du voyage, pas le trajet aller.
   const mid = (trip.startAt + trip.endAt) / 2;
   const candidates = trip.mediaIds
@@ -97,10 +99,14 @@ export function rebuildTrips(db: Db): { trips: number; home: LatLon | null } {
   const media = new Map(rows.map((r) => [r.id, r]));
 
   const home = homeFor(db, items);
-  const { trips } = clusterTrips(items, { home });
+  const drafts = detectLifePlaces(inferLocations(items));
 
   const result = db.transaction(() => {
     db.prepare("INSERT INTO setting (key, value) VALUES ('home.detected', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").run(json(home));
+    // Lieux de vie : détectés, fusionnés avec la table (identité stable), puis seuls les actifs écartent des voyages.
+    const active = mergeLifePlaces(db, drafts, home);
+    const { trips, places } = clusterTrips(items, { homes: active });
+    writeLifePlaceMedia(db, active, places, media);
 
     const oldTripOf = new Map<number, number>();
     const oldChapterOf = new Map<number, number>();

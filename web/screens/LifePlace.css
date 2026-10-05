@@ -1,0 +1,33 @@
+/*
+ * Page d'un lieu de vie : elle reprend la page d'un voyage (Trip.css : couverture « la photo d'abord », route,
+ * étapes, sections de photos), en Ardoise neutre. Ici, seulement ce qui diffère.
+ */
+
+/* Le nom se modifie en le touchant : un bouton qui garde l'allure du titre. */
+.place__title {
+  display: inline;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+.place__title:hover { text-decoration: underline; text-decoration-thickness: 2px; text-decoration-color: var(--line-strong); text-underline-offset: 6px; }
+
+/* Frise des périodes : une colonne étroite ; au-delà de huit périodes, elle défile dans sa propre boîte. */
+.place__route { grid-template-columns: minmax(0, 1fr); }
+.place__steps { max-width: 420px; }
+/* La liste va de la période la plus récente à la plus ancienne : le point plein est en haut. */
+.place__steps li:first-child button::before { background: var(--trip); }
+.place__steps li:last-child button::before { background: var(--trip-page); }
+.place__steps--long { max-height: 22rem; overflow-y: auto; overscroll-behavior: contain; padding-right: var(--sp-2); }
+
+.place__error { margin: 0; padding: var(--sp-2) 0 var(--sp-4); color: var(--danger); font-size: var(--fs-md); }
+
+@media (min-width: 900px) {
+  .place__route { grid-template-columns: minmax(0, 1fr); }
+}

@@ -206,15 +206,27 @@ function makeTrip(photos: Placed[]): TripDraft {
   };
 }
 
+/**
+ * Regroupe les photos en voyages. `homes` : les lieux de vie actifs ; une photo à moins de 30 km de l'un d'eux
+ * ne va dans aucun voyage, termine le voyage en cours (« rentrer à la maison ») et rejoint le lieu le plus proche
+ * (`places[i]`, aligné sur `homes`). Compatibilité : `home` seul devient `[home]` ; sans l'un ni l'autre, le
+ * domicile est détecté (`detectHome`).
+ */
 export function clusterTrips(
   items: ClusterInput[],
-  opts: { home?: LatLon | null } = {},
-): { trips: TripDraft[]; home: LatLon | null; unplaced: number[] } {
+  opts: { home?: LatLon | null; homes?: LatLon[] } = {},
+): { trips: TripDraft[]; home: LatLon | null; homes: LatLon[]; places: number[][]; unplaced: number[] } {
   const located = inferLocations(items);
-  const home = opts.home !== undefined ? opts.home : detectHome(located);
+  let homes: LatLon[];
+  if (opts.homes) homes = opts.homes;
+  else {
+    const home = opts.home !== undefined ? opts.home : detectHome(located);
+    homes = home ? [home] : [];
+  }
   const dated = located.filter((p) => p.takenAt !== null).sort((a, b) => a.takenAt! - b.takenAt! || a.id - b.id);
 
   const trips: TripDraft[] = [];
+  const places: number[][] = homes.map(() => []);
   const unplaced: number[] = [];
   let current: Placed[] = [];
   const flush = () => {
@@ -227,8 +239,15 @@ export function clusterTrips(
       continue;
     }
     const q = p as Placed;
-    if (home && distanceKm(home.lat, home.lon, q.lat, q.lon) <= HOME_RADIUS_KM) {
-      flush(); // rentrer à la maison termine le voyage
+    let nearest = -1;
+    let nearestKm = Infinity;
+    homes.forEach((h, i) => {
+      const km = distanceKm(h.lat, h.lon, q.lat, q.lon);
+      if (km <= HOME_RADIUS_KM && km < nearestKm) [nearest, nearestKm] = [i, km];
+    });
+    if (nearest >= 0) {
+      places[nearest].push(q.id);
+      flush(); // rentrer dans un lieu de vie termine le voyage
       continue;
     }
     const last = current.at(-1);
@@ -236,5 +255,5 @@ export function clusterTrips(
     current.push(q);
   }
   flush();
-  return { trips, home, unplaced };
+  return { trips, home: homes[0] ?? null, homes, places, unplaced };
 }

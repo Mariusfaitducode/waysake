@@ -4,6 +4,7 @@ import type { Db } from "./db.js";
 import { clusterTrips, HOME_RADIUS_KM } from "./clustering.js";
 import { distanceKm } from "./geo.js";
 import { autoCover, clusterInputs, homeOf, rebuildTrips } from "./trips.js";
+import { activeLifePlaceCenters, rejectedLifePlaces } from "./lifeplace-store.js";
 import { derivedPath } from "./ingest.js";
 import { THUMB_SIZES } from "./thumbs.js";
 import { analyzeCover, snapToPalette } from "./trip-colors.js";
@@ -46,7 +47,12 @@ function classify(db: Db, importId: number) {
   // Le regroupement voit tout ce qui est déjà dans Waysake, plus ce qui arrive (sauf captures et photos décochées).
   const { rows, items } = clusterInputs(db, "status = 'ready' OR (import_id = ? AND status = 'pending' AND screenshot = 0)", importId);
   const home = homeOf(db, items.filter((i) => !byId.has(i.id) || byId.get(i.id)!.excluded === 0));
-  const { trips } = clusterTrips(items, { home });
+  // Lieux de vie actifs (dernier recalcul), plus le domicile s'il n'a pas été rejeté et n'en fait pas déjà partie.
+  const homes = activeLifePlaceCenters(db);
+  const near = (list: { lat: number; lon: number }[], p: { lat: number; lon: number }) =>
+    list.some((h) => distanceKm(h.lat, h.lon, p.lat, p.lon) <= HOME_RADIUS_KM);
+  if (home && !near(homes, home) && !near(rejectedLifePlaces(db), home)) homes.push(home);
+  const { trips } = clusterTrips(items, { homes });
 
   const tripOfReady = new Map<number, { slug: string; title: string }>();
   for (const r of db
@@ -95,7 +101,7 @@ function classify(db: Db, importId: number) {
   for (const m of pending) {
     if (inTrip.has(m.id)) continue;
     if (m.screenshot) screenshots.push(m);
-    else if (home && m.lat !== null && m.lon !== null && distanceKm(home.lat, home.lon, m.lat, m.lon) <= HOME_RADIUS_KM) atHome.push(m);
+    else if (m.lat !== null && m.lon !== null && near(homes, { lat: m.lat, lon: m.lon })) atHome.push(m);
     else loose.push(m);
   }
   return { imp, pending, newTrips, extended: [...extended.values()], screenshots, atHome, loose };

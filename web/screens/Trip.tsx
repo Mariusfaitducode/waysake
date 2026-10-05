@@ -29,7 +29,8 @@ type Overlay =
   | { kind: "chapter-menu"; chapter: Chapter; index: number }
   | { kind: "rename-chapter"; chapter: Chapter }
   | { kind: "cover-help" }
-  | { kind: "color" };
+  | { kind: "color" }
+  | { kind: "error"; message: string };
 
 export function TripScreen() {
   const { slug = "" } = useParams();
@@ -125,6 +126,19 @@ export function TripScreen() {
     { label: t("tripColor.title"), hint: tripColorName(trip.color), onSelect: () => setOverlay({ kind: "color" }) },
     { label: t("trip.changeCover"), hint: t("trip.changeCover.hint"), onSelect: () => setOverlay({ kind: "cover-help" }) },
     { label: t("trip.badge"), hint: t("trip.badge.hint"), onSelect: () => setOverlay({ kind: "badge" }) },
+    // « En fait, c'est un lieu de vie » : la tour recalcule, puis on arrive sur la page du lieu.
+    {
+      label: t("trip.toPlace"),
+      hint: t("trip.toPlace.hint"),
+      onSelect: () =>
+        api
+          .tripToPlaceOfLife(trip.slug)
+          .then(({ slug: place }) => {
+            navigate(`/l/${place}`, { replace: true });
+            bump();
+          })
+          .catch((e: Error) => setOverlay({ kind: "error", message: e.message })),
+    },
   ];
 
   return (
@@ -282,6 +296,13 @@ export function TripScreen() {
       {overlay?.kind === "color" && (
         <Sheet onClose={() => setOverlay(null)}>
           <TripColorPicker value={trip.colorAuto ? null : trip.color} autoColor={trip.autoColor} onChange={(c) => api.setTripColor(trip.slug, c).then(bump)} />
+        </Sheet>
+      )}
+      {overlay?.kind === "error" && (
+        <Sheet onClose={() => setOverlay(null)}>
+          <p role="alert" className="place__error">
+            {overlay.message}
+          </p>
         </Sheet>
       )}
       {overlay?.kind === "postcard" && <PostcardSheet slug={trip.slug} title={trip.title} onClose={() => setOverlay(null)} />}

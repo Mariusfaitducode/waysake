@@ -12,6 +12,7 @@ import { expireImports } from "./imports.js";
 import { identify, userRoutes } from "./routes/users.js";
 import { mediaRoutes } from "./routes/media.js";
 import { tripRoutes } from "./routes/trips.js";
+import { lifePlaceRoutes } from "./routes/lifeplaces.js";
 import { journalRoutes } from "./routes/journal.js";
 import { importRoutes } from "./routes/imports.js";
 import { locateRoutes } from "./routes/locate.js";
@@ -147,6 +148,7 @@ export async function buildApp(opts: {
   userRoutes(app, db);
   mediaRoutes(app, db, opts.dataDir, scheduleRebuild);
   tripRoutes(app, db);
+  lifePlaceRoutes(app, db);
   journalRoutes(app, db);
   importRoutes(app, db, opts.dataDir);
   locateRoutes(app, db);

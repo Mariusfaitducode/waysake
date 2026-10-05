@@ -33,3 +33,44 @@
   .trips__body { padding-inline: calc(var(--sp-10) - var(--row-inset)); }
   .trips__filters { margin-top: var(--sp-4); -webkit-mask-image: none; mask-image: none; flex-wrap: wrap; }
 }
+
+/* ---------- Deux parties : Voyages, puis Lieux de vie ---------- */
+.trips__section-title {
+  margin: var(--sp-6) 0 0;
+  padding: 0 var(--row-inset);
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--lh-snug);
+}
+.trips__places { margin-top: var(--sp-6); }
+.trips__section-hint { margin: 2px 0 0; padding: 0 var(--row-inset); max-width: 60ch; color: var(--text-muted); font-size: var(--fs-sm); }
+
+/* Cartes des lieux de vie : couverture 3:2 sans texte dessus, nom et chiffres dessous. */
+.places-grid {
+  list-style: none;
+  margin: var(--sp-4) 0 0;
+  padding: 0 var(--row-inset);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 156px), 1fr));
+  gap: var(--sp-5) var(--sp-3);
+}
+.places-grid > li { min-width: 0; }
+.place-card { display: grid; gap: 2px; min-width: 0; color: var(--text); text-decoration: none; }
+.place-card__photo {
+  display: block;
+  aspect-ratio: 3 / 2;
+  margin-bottom: var(--sp-2);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: var(--surface-sunken);
+}
+.place-card__photo img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 300ms var(--ease); }
+.place-card:hover .place-card__photo img { transform: scale(1.03); }
+.place-card__title { font-size: var(--fs-md); font-weight: var(--fw-semibold); line-height: var(--lh-snug); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.place-card__meta { color: var(--text-muted); font-size: var(--fs-sm); line-height: var(--lh-snug); }
+.place-card:focus-visible { outline: 2px solid var(--focus); outline-offset: 4px; border-radius: var(--r-lg); }
+
+@media (min-width: 900px) {
+  .places-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--sp-6) var(--sp-4); }
+}

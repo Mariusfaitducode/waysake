@@ -55,6 +55,21 @@ export function dateRange(start: number, end: number, l = locale()) {
   return `${dayMonth(l).format(a)} – ${dayMonthYear(l).format(b)}`;
 }
 
+const shortMonthYear = (l: Locale) => fmt(l, "shortMonthYear", { month: "short", year: "numeric" });
+/** Période d'un lieu de vie : « Sept. 2023 – juin 2024 », « Mars 2025 » (un seul mois). */
+export function monthRange(start: number, end: number, l = locale()) {
+  const a = new Date(start);
+  const b = new Date(end);
+  if (a.toISOString().slice(0, 7) === b.toISOString().slice(0, 7)) return capitalize(month(l).format(a));
+  return `${capitalize(shortMonthYear(l).format(a))} – ${shortMonthYear(l).format(b)}`;
+}
+/** « 2019 – 2026 », ou « 2024 ». */
+export function yearRange(start: number, end: number) {
+  const a = year(start);
+  const b = year(end);
+  return a === b ? a : `${a} – ${b}`;
+}
+
 export const days = (start: number, end: number) =>
   Math.round((Date.parse(new Date(end).toISOString().slice(0, 10)) - Date.parse(new Date(start).toISOString().slice(0, 10))) / 86_400_000) + 1;
 

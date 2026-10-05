@@ -14,6 +14,7 @@ import { Library } from "./screens/Library.js";
 import { GlobeScreen } from "./screens/Globe.js";
 import { Trips } from "./screens/Trips.js";
 import { TripScreen } from "./screens/Trip.js";
+import { LifePlaceScreen } from "./screens/LifePlace.js";
 import { Notebook } from "./screens/Notebook.js";
 import { Countries } from "./screens/Countries.js";
 import { NotFound } from "./screens/NotFound.js";
@@ -96,6 +97,7 @@ export function App() {
                 <Route index element={<GlobeScreen />} />
                 <Route path="voyages" element={<Trips />} />
                 <Route path="v/:slug" element={<TripScreen />} />
+                <Route path="l/:slug" element={<LifePlaceScreen />} />
                 <Route path="photos" element={<Library />} />
                 <Route path="photos/a-localiser" element={<Locate />} />
                 <Route path="carnet" element={<Notebook />} />
