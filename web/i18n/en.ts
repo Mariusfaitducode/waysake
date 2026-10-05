@@ -197,6 +197,8 @@ export const en: Translation<typeof fr> = {
   // Place picker
   "place.title": "Where were you?",
   "place.search": "Search for a place",
+  "place.suggestions": "Suggestions",
+  "place.suggestions.hint": "Likely places, from your located photos taken around the same time",
   "place.placeholder": "Bled, Split, Lake Braies…",
   "place.none": "No place by that name. Point to it on the map: every small village is there.",
   "place.confirm": "Place <b>{photos}</b> in <b>{place}</b>?",

@@ -39,7 +39,7 @@ describe("lieux de vie en base", () => {
     expect(paris.coverMediaId).not.toBeNull();
   });
 
-  it("détecte une seconde ville habitée (au moins 4 mois) et la retire des voyages", () => {
+  it("détecte une seconde ville habitée (au moins 3 mois) et la retire des voyages", () => {
     ["2022-01", "2022-03", "2022-05", "2022-07", "2022-09"].forEach((m, i) => insertAt(9000 + i, `${m}-12T10:00:00`, 48.1173, -1.6778));
     insertAt(9100, "2024-02-12T10:00:00", 48.8566, 2.3522); // un 4e mois à Paris (la démo n'en a que 3)
     rebuildTrips(db);

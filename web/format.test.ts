@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { bytes, countryName, dateRange, days, monthLabel, monthRange, number, yearRange } from "./format.js";
+import { bytes, countryName, dateRange, days, monthLabel, monthRange, number, suggestIds, yearRange } from "./format.js";
 
 describe("bytes", () => {
   it("Mo, Go, To selon la langue", () => {
@@ -52,5 +52,16 @@ describe("périodes des lieux de vie", () => {
     expect(monthRange(Date.UTC(2023, 8, 3), Date.UTC(2024, 5, 2), "en")).toBe("Sep 2023 – Jun 2024");
     expect(yearRange(Date.UTC(2019, 1, 1), Date.UTC(2026, 1, 1))).toBe("2019 – 2026");
     expect(yearRange(Date.UTC(2024, 1, 1), Date.UTC(2024, 6, 1))).toBe("2024");
+  });
+});
+
+describe("suggestIds", () => {
+  it("garde tout jusqu'à 500 photos, sinon les 499 premières et la dernière (l'intervalle de temps reste entier)", () => {
+    expect(suggestIds([3, 1, 2])).toEqual([3, 1, 2]);
+    const many = Array.from({ length: 800 }, (_, i) => i + 1);
+    const out = suggestIds(many);
+    expect(out).toHaveLength(500);
+    expect(out[0]).toBe(1);
+    expect(out.at(-1)).toBe(800);
   });
 });

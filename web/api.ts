@@ -1,6 +1,7 @@
 import type { TripColorId } from "./trip-colors.js";
 import { t } from "./i18n/index.js";
 import { fr } from "./i18n/fr.js";
+import { suggestIds } from "./format.js";
 // Mode démo statique (pnpm build:demo) ; `null` dans le build normal, où vite.config.ts substitue web/demo/off.ts.
 import { demo } from "./demo/runtime.js";
 
@@ -179,6 +180,8 @@ export type Proposal = {
 };
 export type UnlocatedMedia = { id: number; kind: "photo" | "video"; width: number | null; height: number | null; hasThumbs: boolean; thumb: string; preview: string; original: string; uploadedBy: string; takenAtLocal: string };
 /** Le lieu le plus proche d'un point posé sur la carte (null en pleine mer). */
+/** Lieu suggéré pour un groupe de photos (GET /api/places/suggest). */
+export type PlaceSuggestion = { name: string; country: string; countryCode: string; flag: string | null; lat: number; lon: number; count: number };
 export type ReversePlace = { lat: number; lon: number; name: string | null; country: string | null; countryCode: string | null; flag: string | null };
 export type UnlocatedDay = { day: string; count: number; moments: { start: string; end: string; ids: number[]; count: number }[]; media: UnlocatedMedia[] };
 export type PlaceHit = { kind: "country" | "region" | "place"; name: string; country: string; countryCode: string; lat: number; lon: number; flag: string };
@@ -332,6 +335,7 @@ export const api = {
   updateWish: (id: number, patch: Partial<Wish> & { doneTripSlug?: string | null }) => send("PATCH", `/api/wishes/${id}`, patch),
   deleteWish: (id: number) => send("DELETE", `/api/wishes/${id}`),
   places: (q: string) => get<PlaceHit[]>(`/api/places?q=${encodeURIComponent(q)}`),
+  suggestPlaces: (ids: number[]) => get<PlaceSuggestion[]>(`/api/places/suggest?ids=${suggestIds(ids).join(",")}`),
   reversePlace: (lat: number, lon: number) => get<ReversePlace>(`/api/places/reverse?lat=${lat}&lon=${lon}`),
   space: () => get<Space>("/api/space"),
   statsOverview: () => get<StatsOverview>("/api/stats/overview"),

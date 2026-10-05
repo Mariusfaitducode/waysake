@@ -183,7 +183,7 @@ export const demo: DemoRuntime | null = {
     const u = new URL(url, "http://demo");
     const path = u.pathname;
     if (path === "/api/memories") return memories(u.searchParams.get("today") ?? new Date().toISOString().slice(0, 10));
-    if (path === "/api/places") return [];
+    if (path === "/api/places" || path === "/api/places/suggest") return [];
     if (path === "/api/places/reverse") {
       const lat = Number(u.searchParams.get("lat"));
       const lon = Number(u.searchParams.get("lon"));

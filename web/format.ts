@@ -107,3 +107,6 @@ export const shortDay = (d: string, l = locale()) => fmt(l, "shortDay", { weekda
 /** Défilement doux, sauf si le système demande moins de mouvement. */
 export const scrollBehavior = (): ScrollBehavior =>
   typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+
+/** Les photos envoyées pour les lieux suggérés (500 au plus) : on garde la première et la dernière, donc l'intervalle. */
+export const suggestIds = (ids: number[], max = 500) => (ids.length <= max ? ids : [...ids.slice(0, max - 1), ids.at(-1)!]);

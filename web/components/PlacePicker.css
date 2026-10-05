@@ -41,3 +41,30 @@
 .place-hits svg { flex: none; width: 18px; height: 18px; color: var(--text-muted); }
 .place-hits small { display: block; color: var(--text-muted); font-size: var(--fs-sm); }
 .place-confirm p { margin: 0 0 var(--sp-2); font-size: var(--fs-lg); }
+
+/* Lieux suggérés (photos localisées du même moment) : une rangée de pastilles au-dessus du champ de recherche. */
+.place-suggest { display: grid; gap: var(--sp-2); margin-bottom: var(--sp-3); }
+.place-suggest__label { color: var(--text-muted); font-size: var(--fs-xs); font-weight: var(--fw-medium); }
+.place-suggest ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.place-suggest li { min-width: 0; max-width: 100%; }
+.place-suggest button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  min-height: 44px;
+  padding: 0 var(--sp-4);
+  border: 0;
+  border-radius: var(--r-full);
+  background: var(--surface-sunken);
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--fs-md);
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+.place-suggest button:hover { background: var(--surface-raised); box-shadow: inset 0 0 0 1px var(--line-strong); }
+.place-suggest__name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.place-suggest small { flex: none; color: var(--text-muted); font-size: var(--fs-sm); font-weight: var(--fw-regular); }

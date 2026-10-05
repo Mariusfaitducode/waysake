@@ -3,7 +3,8 @@ import type { Db } from "../db.js";
 import { inferLocations } from "../clustering.js";
 import { groupMoments } from "../moments.js";
 import { rebuildTrips } from "../trips.js";
-import { flag, reverseGeocode } from "../geo.js";
+import { flag, reverseGeocode, type GeoPlace } from "../geo.js";
+import { suggestPlaces, WIDE_WINDOW } from "../place-suggest.js";
 
 type Row = { id: number; taken_at: number; taken_at_local: string; lat: number | null; lon: number | null; width: number | null; height: number | null; has_thumbs: number; kind: string; uploaded_by: string };
 
@@ -52,6 +53,39 @@ export function locateRoutes(app: FastifyInstance, db: Db) {
       countryCode: g?.countryCode ?? null,
       flag: g ? flag(g.countryCode) : null,
     };
+  });
+
+  /**
+   * Lieux suggérés pour un groupe (au plus 3) : les villes des photos déjà localisées prises au même moment.
+   * Les identifiants inconnus sont ignorés.
+   */
+  app.get<{ Querystring: { ids?: string } }>("/api/places/suggest", async (req, reply) => {
+    const parts = (req.query.ids ?? "").split(",");
+    if (!req.query.ids || parts.length > 500 || !parts.every((x) => /^\d+$/.test(x)))
+      return reply.code(400).send({ error: "Lieu ou photos invalides.", code: "invalid_place" });
+    const ids = JSON.stringify(parts.map(Number));
+    const group = db
+      .prepare("SELECT MIN(taken_at) AS start, MAX(taken_at) AS end FROM media WHERE id IN (SELECT value FROM json_each(?)) AND taken_at IS NOT NULL")
+      .get(ids) as { start: number | null; end: number | null };
+    if (group.start === null || group.end === null) return [];
+    const owner = db
+      .prepare("SELECT uploaded_by FROM media WHERE id IN (SELECT value FROM json_each(?)) GROUP BY uploaded_by ORDER BY COUNT(*) DESC, uploaded_by LIMIT 1")
+      .get(ids) as { uploaded_by: string } | undefined;
+    const rows = db
+      .prepare(
+        `SELECT taken_at, lat, lon, geo, uploaded_by FROM media
+         WHERE status = 'ready' AND lat IS NOT NULL AND lon IS NOT NULL AND taken_at BETWEEN ? AND ?
+           AND id NOT IN (SELECT value FROM json_each(?))`,
+      )
+      .all(group.start - WIDE_WINDOW, group.end + WIDE_WINDOW, ids) as { taken_at: number; lat: number; lon: number; geo: string | null; uploaded_by: string }[];
+    const candidates = rows.map((r) => ({
+      takenAt: r.taken_at,
+      lat: r.lat,
+      lon: r.lon,
+      geo: r.geo ? (JSON.parse(r.geo) as GeoPlace) : reverseGeocode(r.lat, r.lon),
+      uploadedBy: r.uploaded_by,
+    }));
+    return suggestPlaces({ start: group.start, end: group.end }, owner?.uploaded_by ?? null, candidates);
   });
 
   app.post<{ Body: { ids?: unknown; lat?: unknown; lon?: unknown } }>("/api/media/locate", async (req, reply) => {

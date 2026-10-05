@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { api, type PlaceHit } from "../api.js";
+import { api, type PlaceHit, type PlaceSuggestion } from "../api.js";
 import { countryName, hitName } from "../format.js";
 import { t } from "../i18n/index.js";
 import { rich } from "../i18n/rich.js";
@@ -36,6 +36,7 @@ export function PlacePicker({ photos, preview, previews, onDone, onClose }: { ph
   const [mode, setMode] = useState<"search" | "map">("search");
   const [q, setQ] = useState("");
   const [hits, setHits] = useState<PlaceHit[]>([]);
+  const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
   const [spot, setSpot] = useState<Spot | null>(null);
   const [view, setView] = useState<{ center: [number, number]; zoom: number }>(() => {
     const last = lastPlace();
@@ -43,6 +44,20 @@ export function PlacePicker({ photos, preview, previews, onDone, onClose }: { ph
   });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Lieux probables : les villes des photos déjà localisées prises au même moment.
+  const photoKey = photos.join(",");
+  useEffect(() => {
+    let live = true;
+    api.suggestPlaces(photos).then(
+      (s) => live && setSuggestions(s),
+      () => live && setSuggestions([]),
+    );
+    return () => {
+      live = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [photoKey]);
 
   useEffect(() => {
     if (q.trim().length < 2) return setHits([]);
@@ -117,6 +132,27 @@ export function PlacePicker({ photos, preview, previews, onDone, onClose }: { ph
 
       {mode === "search" ? (
         <>
+          {suggestions.length > 0 && (
+            <div className="place-suggest" role="group" aria-label={t("place.suggestions.hint")}>
+              <span className="place-suggest__label" aria-hidden="true">
+                {t("place.suggestions")}
+              </span>
+              <ul>
+                {suggestions.map((s) => (
+                  <li key={`${s.countryCode}-${s.name}`}>
+                    <button
+                      type="button"
+                      onClick={() => choose({ kind: "place", name: s.name, country: s.country, countryCode: s.countryCode, lat: s.lat, lon: s.lon, flag: s.flag ?? "" })}
+                    >
+                      {s.flag && <span aria-hidden="true">{s.flag}</span>}
+                      <span className="place-suggest__name">{s.name}</span>
+                      <small>{countryName(s.countryCode, s.country)}</small>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           <input className="field" autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("place.placeholder")} autoComplete="off" aria-label={t("place.search")} />
           <ul className="place-hits">
             {hits.map((h) => (

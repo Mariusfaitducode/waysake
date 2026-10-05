@@ -70,3 +70,41 @@ describe("lieu d'un point posé sur la carte", () => {
     expect((await app.inject({ url: "/api/places/reverse?lat=95&lon=1" })).statusCode).toBe(400);
   });
 });
+
+describe("lieux suggérés pour un groupe", () => {
+  const suggest = async (ids: string) => app.inject({ url: `/api/places/suggest?ids=${ids}` });
+  beforeEach(() => {
+    ins(10, "2026-09-05T12:00:00", 46.3683, 14.1146, "exif"); // Bled, la veille
+    ins(11, "2026-09-05T12:30:00", 46.3690, 14.1150, "exif");
+    ins(12, "2026-08-31T12:00:00", 46.0569, 14.5058, "exif"); // Ljubljana, six jours avant : seulement en élargissant
+    ins(13, "2026-07-01T12:00:00", 45.8150, 15.9819, "exif"); // Zagreb, deux mois avant : jamais
+  });
+
+  it("propose les villes des photos localisées prises au même moment, la plus probable d'abord", async () => {
+    const res = await suggest("1,2,3");
+    expect(res.statusCode).toBe(200);
+    const out = res.json();
+    expect(out).toHaveLength(3);
+    expect(out[0]).toMatchObject({ country: "Slovénie", countryCode: "SI", flag: "🇸🇮", count: 2 });
+    expect(out[0].lat).toBeCloseTo(46.36865, 4);
+    expect(out[1].countryCode).toBe("HR"); // la photo 4, le lendemain matin
+    expect(out[2]).toMatchObject({ countryCode: "SI", count: 1 });
+    expect(out.map((s: any) => s.name)).not.toContain("Zagreb");
+    for (const s of out) expect(Object.keys(s).sort()).toEqual(["count", "country", "countryCode", "flag", "lat", "lon", "name"]);
+  });
+
+  it("ne compte pas les photos du groupe lui-même, et ignore les identifiants inconnus", async () => {
+    const out = (await suggest("1,2,3,4,9999")).json();
+    expect(out.map((s: any) => s.countryCode)).toEqual(["SI", "SI"]);
+    expect((await suggest("9999")).json()).toEqual([]);
+  });
+
+  it("refuse une liste invalide", async () => {
+    for (const ids of ["", "abc", "1,,2", "1.5", "-1", Array.from({ length: 501 }, (_, i) => i + 1).join(",")]) {
+      const res = await suggest(ids);
+      expect(res.statusCode).toBe(400);
+      expect(res.json().code).toBe("invalid_place");
+    }
+    expect((await app.inject({ url: "/api/places/suggest" })).statusCode).toBe(400);
+  });
+});

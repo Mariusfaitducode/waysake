@@ -194,6 +194,8 @@ export const fr = {
   "place.title": "Où étiez-vous ?",
   "place.search": "Chercher un lieu",
   "place.placeholder": "Bled, Split, Lac de Braies…",
+  "place.suggestions": "Suggestions",
+  "place.suggestions.hint": "Lieux probables, d'après tes photos localisées du même moment",
   "place.none": "Aucun lieu de ce nom. Pointe-le sur la carte : les petits villages y sont tous.",
   "place.confirm": "Localiser <b>{photos}</b> à <b>{place}</b> ?",
   "place.confirm.hint": "Les voyages, les étapes et l'itinéraire se mettront à jour tout seuls.",

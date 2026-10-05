@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { detectLifePlaces, periodsOf, PERIOD_GAP } from "./lifeplaces.js";
+import { detectLifePlaces, LIFE_PLACE_MIN_MONTHS, periodsOf, PERIOD_GAP } from "./lifeplaces.js";
 import { clusterTrips, type ClusterInput } from "./clustering.js";
 import { reverseGeocode } from "./geo.js";
 
@@ -16,7 +16,7 @@ const ETRETAT = { lat: 49.7071, lon: 0.2042 }; // à plus de 30 km de Paris et d
 const monthly = (months: string[], p: { lat: number; lon: number }) => months.map((m) => photo(`${m}-10T12:00:00`, p.lat + 0.01, p.lon - 0.01));
 
 describe("detectLifePlaces", () => {
-  it("trouve les foyers où l'on a pris des photos au moins 4 mois différents", () => {
+  it("trouve les foyers où l'on a pris des photos au moins 3 mois différents", () => {
     const items = [
       ...monthly(["2023-01", "2023-03", "2023-06", "2023-09", "2024-02"], PARIS),
       ...monthly(["2021-02", "2021-05", "2021-08", "2021-11"], RENNES),
@@ -31,24 +31,54 @@ describe("detectLifePlaces", () => {
     expect(rennes.mediaIds).toHaveLength(4);
   });
 
-  it("trois voyages à Rome en trois ans ne font pas un lieu de vie", () => {
+  it("deux voyages à Rome (deux mois) ne font pas un lieu de vie", () => {
+    const rome = [
+      ...[1, 2, 3].map((d) => photo(`2022-04-0${d}T10:00:00`, ROME.lat, ROME.lon)),
+      ...[1, 2, 3].map((d) => photo(`2023-10-0${d}T10:00:00`, ROME.lat, ROME.lon)),
+    ];
+    expect(detectLifePlaces(rome)).toEqual([]);
+  });
+
+  it("trois voyages à Rome (trois mois distincts) font désormais un lieu de vie", () => {
     const rome = [
       ...[1, 2, 3].map((d) => photo(`2022-04-0${d}T10:00:00`, ROME.lat, ROME.lon)),
       ...[1, 2, 3].map((d) => photo(`2023-10-0${d}T10:00:00`, ROME.lat, ROME.lon)),
       ...[1, 2, 3].map((d) => photo(`2024-05-0${d}T10:00:00`, ROME.lat, ROME.lon)),
     ];
-    expect(detectLifePlaces(rome)).toEqual([]);
+    const places = detectLifePlaces(rome);
+    expect(places).toHaveLength(1);
+    expect(places[0].months).toBe(3);
+    expect(LIFE_PLACE_MIN_MONTHS).toBe(3);
   });
 
-  it("le seuil est de 4 mois calendaires distincts (pas 4 photos)", () => {
-    const three = [...monthly(["2024-01", "2024-02", "2024-03"], PARIS), photo("2024-03-20T10:00:00", PARIS.lat, PARIS.lon)];
-    expect(detectLifePlaces(three)).toEqual([]);
-    expect(detectLifePlaces([...three, ...monthly(["2024-07"], PARIS)])).toHaveLength(1);
+  it("le seuil est de 3 mois calendaires distincts (pas 3 photos)", () => {
+    const two = [...monthly(["2024-01", "2024-02"], PARIS), photo("2024-02-20T10:00:00", PARIS.lat, PARIS.lon)];
+    expect(detectLifePlaces(two)).toEqual([]);
+    expect(detectLifePlaces([...two, ...monthly(["2024-07"], PARIS)])).toHaveLength(1);
+  });
+
+  it("une ville voisine d'un foyer dense (≈ 40 km) reste un lieu à part (Mulhouse et Belfort)", () => {
+    // Belfort : 8 mois. Un village entre les deux (≈ 20 km de Belfort, ≈ 27 km de Mulhouse) relie les deux villes :
+    // centré sur lui, un rayon de 30 km couvre Belfort ET Mulhouse, donc le plus de mois distincts.
+    const BELFORT = { lat: 47.64, lon: 6.85 };
+    const BETWEEN = { lat: 47.79, lon: 6.98 };
+    const MULHOUSE = { lat: 47.72, lon: 7.32 };
+    const items = [
+      ...monthly(["2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08"], BELFORT),
+      ...monthly(["2023-01", "2023-01", "2023-01"], BELFORT),
+      ...monthly(["2023-03", "2023-03"], BETWEEN),
+      ...monthly(["2023-03", "2024-11", "2026-06", "2026-08"], MULHOUSE),
+    ];
+    const places = detectLifePlaces(items);
+    expect(places.map((p) => p.title).sort()).toEqual(["Belfort", "Mulhouse"]);
+    const mulhouse = places.find((p) => p.title === "Mulhouse")!;
+    expect(mulhouse.mediaIds).toHaveLength(4);
+    expect(mulhouse.months).toBe(4);
   });
 
   it("ignore les photos sans date ou sans lieu", () => {
     const items: ClusterInput[] = [
-      ...monthly(["2024-01", "2024-02", "2024-03"], PARIS),
+      ...monthly(["2024-01", "2024-02"], PARIS),
       { id: 999, takenAt: null, lat: PARIS.lat, lon: PARIS.lon, geo: reverseGeocode(PARIS.lat, PARIS.lon) },
       { id: 998, takenAt: at("2024-09-01T10:00:00"), lat: null, lon: null, geo: null },
     ];
