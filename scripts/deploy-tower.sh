@@ -4,6 +4,9 @@
 #   scripts/deploy-tower.sh moi@tour E:/Atlas   (autre dossier de données)
 # Prérequis sur la tour : OpenSSH Server activé (voir README), Docker Desktop démarré, Tailscale connecté.
 set -euo pipefail
+# Les journaux de la tour sont en Windows-1252 : on les traite octet par octet (sinon tr échoue sur « é »,
+# le script rate « EXIT 0 » et croit à un échec alors que la tour est à jour).
+export LC_ALL=C
 TARGET="${1:?Usage : scripts/deploy-tower.sh utilisateur@tour [D:/Atlas]}"
 DATA="${2:-D:/Atlas}"
 cd "$(dirname "$0")/.."
