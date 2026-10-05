@@ -9,7 +9,7 @@ import { HOME_RADIUS_KM, type ClusterInput } from "./clustering.js";
 const DAY = 86_400_000;
 /** Une période (séjour continu) se termine après plus de 21 jours sans photo sur place. */
 export const PERIOD_GAP = 21 * DAY;
-/** Un foyer devient un lieu de vie s'il couvre au moins 3 mois calendaires distincts (4 jusqu'au 2026-10-05 : Liège manquait). */
+/** Un foyer devient un lieu de vie s'il couvre au moins 3 mois calendaires distincts (4 auparavant : une ville habitée trois mois était manquée). */
 export const LIFE_PLACE_MIN_MONTHS = 3;
 
 export type LifePlaceDraft = {
@@ -45,7 +45,7 @@ export function placeName(lat: number, lon: number): string {
  * pour rester rapide avec des dizaines de milliers de photos.
  *
  * La zone choisie est ensuite recentrée sur la médiane de ses photos, et seules les cellules à 30 km de ce centre
- * forment le foyer : sans cela, une cellule entre deux villes (un village entre Belfort et Mulhouse) couvre les
+ * forment le foyer : sans cela, une cellule entre deux villes (un village entre deux villes voisines) couvre les
  * deux à la fois, la médiane tombe sur la plus dense et l'autre, retirée avec elle, n'est jamais un lieu de vie.
  */
 export function detectLifePlaces(items: ClusterInput[], minMonths = LIFE_PLACE_MIN_MONTHS): LifePlaceDraft[] {

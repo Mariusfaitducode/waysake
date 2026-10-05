@@ -57,23 +57,24 @@ describe("detectLifePlaces", () => {
     expect(detectLifePlaces([...two, ...monthly(["2024-07"], PARIS)])).toHaveLength(1);
   });
 
-  it("une ville voisine d'un foyer dense (≈ 40 km) reste un lieu à part (Mulhouse et Belfort)", () => {
-    // Belfort : 8 mois. Un village entre les deux (≈ 20 km de Belfort, ≈ 27 km de Mulhouse) relie les deux villes :
-    // centré sur lui, un rayon de 30 km couvre Belfort ET Mulhouse, donc le plus de mois distincts.
-    const BELFORT = { lat: 47.64, lon: 6.85 };
-    const BETWEEN = { lat: 47.79, lon: 6.98 };
-    const MULHOUSE = { lat: 47.72, lon: 7.32 };
+  it("une ville voisine d'un foyer dense (≈ 40 km) reste un lieu à part", () => {
+    // Ville A : 8 mois. Un village entre les deux (≈ 20 km de A, ≈ 27 km de B) relie les deux villes :
+    // centré sur lui, un rayon de 30 km couvrirait A ET B, donc le plus de mois distincts.
+    // (Géométrie fictive : seules les distances comptent.)
+    const CITY_A = { lat: 47.64, lon: 1.85 };
+    const BETWEEN = { lat: 47.79, lon: 1.98 };
+    const CITY_B = { lat: 47.72, lon: 2.32 };
     const items = [
-      ...monthly(["2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08"], BELFORT),
-      ...monthly(["2023-01", "2023-01", "2023-01"], BELFORT),
+      ...monthly(["2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08"], CITY_A),
+      ...monthly(["2023-01", "2023-01", "2023-01"], CITY_A),
       ...monthly(["2023-03", "2023-03"], BETWEEN),
-      ...monthly(["2023-03", "2024-11", "2026-06", "2026-08"], MULHOUSE),
+      ...monthly(["2023-03", "2024-11", "2026-06", "2026-08"], CITY_B),
     ];
     const places = detectLifePlaces(items);
-    expect(places.map((p) => p.title).sort()).toEqual(["Belfort", "Mulhouse"]);
-    const mulhouse = places.find((p) => p.title === "Mulhouse")!;
-    expect(mulhouse.mediaIds).toHaveLength(4);
-    expect(mulhouse.months).toBe(4);
+    expect(places).toHaveLength(2);
+    const b = places.find((p) => p.months === 4)!;
+    expect(b.mediaIds).toHaveLength(4);
+    expect(new Set(places.map((p) => p.title)).size).toBe(2);
   });
 
   it("ignore les photos sans date ou sans lieu", () => {
