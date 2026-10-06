@@ -55,6 +55,24 @@ export function dateRange(start: number, end: number, l = locale()) {
   return `${dayMonth(l).format(a)} – ${dayMonthYear(l).format(b)}`;
 }
 
+const weekdayDayMonth = (l: Locale) => fmt(l, "weekdayDayMonth", { weekday: "long", day: "numeric", month: "long" });
+/**
+ * Jours d'une ville dans une étape, d'après l'heure locale de prise de vue, sans l'année (elle est dans le titre du
+ * voyage) : « Mercredi 12 août », « 12 – 14 août », « 31 août – 2 septembre ».
+ */
+export function dayRange(startLocal: string | null, endLocal: string | null, l = locale()) {
+  const from = startLocal ?? endLocal;
+  const to = endLocal ?? startLocal;
+  if (!from || !to) return "";
+  const a = new Date(`${from.slice(0, 10)}T00:00:00Z`);
+  const b = new Date(`${to.slice(0, 10)}T00:00:00Z`);
+  if (from.slice(0, 10) === to.slice(0, 10)) return capitalize(weekdayDayMonth(l).format(a));
+  if (a.getUTCFullYear() !== b.getUTCFullYear()) return dateRange(a.getTime(), b.getTime(), l);
+  if (l === "en") return dayMonth(l).formatRange(a, b);
+  if (a.getUTCMonth() === b.getUTCMonth()) return `${a.getUTCDate()} – ${b.getUTCDate()} ${monthOnly(l).format(b)}`;
+  return `${dayMonth(l).format(a)} – ${dayMonth(l).format(b)}`;
+}
+
 const shortMonthYear = (l: Locale) => fmt(l, "shortMonthYear", { month: "short", year: "numeric" });
 /** Période d'un lieu de vie : « Sept. 2023 – juin 2024 », « Mars 2025 » (un seul mois). */
 export function monthRange(start: number, end: number, l = locale()) {

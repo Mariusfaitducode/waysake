@@ -137,6 +137,7 @@ await keep(`/api/games/${gameId}`);
 
 const finalTrips = await get<TripRow[]>("/api/trips");
 api["/api/trips"] = finalTrips;
+await keep("/api/globe/stops");
 /** Pour les souvenirs (« Il y a un an… »), calculés dans le navigateur : à quel voyage appartient chaque photo. */
 const mediaTrips: Record<number, { slug: string; title: string }> = {};
 for (const t of finalTrips) {

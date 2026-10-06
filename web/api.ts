@@ -95,6 +95,8 @@ export type Chapter = {
   centerLon: number;
   media: Media[];
 };
+/** Une étape vue du globe de près : sa position, la couleur de son voyage et 1 à 3 miniatures. */
+export type GlobeStop = { tripSlug: string; color: TripColorId; chapterId: number; title: string; lat: number; lon: number; thumbs: string[] };
 export type Note = { chapterId: number | null; body: string; author: string; updatedAt: number };
 export type Trip = TripSummary & { route: [number, number][]; chapters: Chapter[]; notes: Note[]; favorites: number[] };
 /** Lieu de vie (ville habitée, maison de famille) : ses photos ne font pas de voyages, elles sont rangées par période. */
@@ -300,6 +302,7 @@ export const api = {
   cancelImport: (id: number) => send("DELETE", `/api/imports/${id}`),
   trips: () => get<TripSummary[]>("/api/trips"),
   trip: (slug: string) => get<Trip>(`/api/trips/${encodeURIComponent(slug)}`),
+  globeStops: () => get<GlobeStop[]>("/api/globe/stops"),
   /** Fige la couleur d'un voyage, ou revient à « Automatique » avec null. */
   setTripColor: (slug: string, color: TripColorId | null) =>
     send<{ color: TripColorId; colorAuto: boolean; autoColor: TripColorId }>("PUT", `/api/trips/${encodeURIComponent(slug)}/color`, { color }),

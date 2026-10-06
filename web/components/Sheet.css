@@ -45,6 +45,8 @@
 .actions__item:focus-visible { outline-offset: -2px; border-radius: 0; }
 .actions__item small { color: var(--text-muted); font-size: var(--fs-sm); font-weight: var(--fw-regular); }
 .actions__item.is-danger { color: var(--danger); }
+.actions__item:disabled { color: var(--text-faint); cursor: default; }
+.actions__item:disabled:hover { background: var(--surface-sunken); }
 
 .prompt { display: grid; gap: var(--sp-3); }
 .prompt__hint { margin: 0; color: var(--text-muted); font-size: var(--fs-sm); }

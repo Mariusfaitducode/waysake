@@ -160,6 +160,48 @@
 }
 .chapter__note { margin: 14px var(--gutter) 0; }
 
+/* Villes d'une étape (sous-étapes). Sous le titre, une rangée de pastilles qu'on fait défiler du doigt et qui
+   mènent à chaque ville ; puis, pour chaque ville, un petit en-tête (point à la couleur du voyage, nom, jours,
+   nombre de photos) au-dessus de ses photos. Hiérarchie : nettement sous le titre de l'étape. */
+.chapter__cities {
+  list-style: none;
+  margin: calc(-1 * var(--sp-1)) 0 var(--sp-2);
+  padding: 0 var(--gutter);
+  display: flex;
+  gap: var(--sp-2);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.chapter__cities::-webkit-scrollbar { display: none; }
+.chapter__cities li { flex: none; }
+/* Cible de 44 px, pastille visuelle plus fine. */
+.chapter__cities button { display: flex; align-items: center; min-height: 44px; padding: 0; border: 0; background: none; color: var(--text); cursor: pointer; }
+.chapter__cities span {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--r-full);
+  background: color-mix(in srgb, var(--trip) 13%, transparent);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  white-space: nowrap;
+  transition: background-color var(--dur-fast) var(--ease);
+}
+.chapter__cities small { color: var(--text-muted); font-size: var(--fs-xs); font-variant-numeric: tabular-nums; }
+.chapter__cities button:hover span { background: color-mix(in srgb, var(--trip) 22%, transparent); }
+
+.substop { scroll-margin-top: var(--sp-3); }
+.substop + .substop { margin-top: var(--sp-5); }
+.substop__head { display: flex; align-items: flex-start; gap: var(--sp-3); padding: 0 var(--gutter); margin-bottom: var(--sp-2); }
+/* Le fil de l'étape : un point évidé à la couleur du voyage, comme les étapes de l'itinéraire. */
+.substop__dot { flex: none; margin-top: 8px; width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--trip); box-sizing: border-box; }
+.substop__titles { flex: 1; min-width: 0; }
+.substop__title { margin: 0; font-size: var(--fs-lg); font-weight: var(--fw-semibold); letter-spacing: var(--tracking-tight); line-height: var(--lh-snug); overflow-wrap: anywhere; }
+.substop__meta { margin: 1px 0 0; color: var(--text-muted); font-size: var(--fs-sm); }
+.substop__more { flex: none; background: transparent; color: var(--text-muted); }
+
 @media (min-width: 900px) {
   .trip-cover__photo { height: min(86vh, 900px); min-height: 520px; }
   .trip-cover__veil { height: max(40%, 300px); -webkit-mask-image: linear-gradient(to bottom, transparent, #000 45%); mask-image: linear-gradient(to bottom, transparent, #000 45%); }
@@ -185,7 +227,7 @@
   .trip__body { gap: var(--sp-12); padding-top: var(--sp-10); }
   .trip__route { padding-inline: var(--sp-10); grid-template-columns: minmax(220px, 300px) minmax(0, 1fr); gap: var(--sp-8); align-items: start; }
   .trip__route--map-only { grid-template-columns: minmax(0, 1fr); }
-  .trip__section, .chapter__head { padding-inline: var(--sp-10); }
+  .trip__section, .chapter__head, .chapter__cities, .substop__head { padding-inline: var(--sp-10); }
   .trip__section .note { max-width: 760px; }
   .chapter__add-note { margin-inline: var(--sp-10); }
   .chapter__note { margin-inline: var(--sp-10); max-width: 760px; }

@@ -79,6 +79,8 @@
   pointer-events: none;
 }
 .globe__side > * { pointer-events: auto; }
+.globe__side { transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease), visibility var(--dur); }
+.globe[data-trips-hidden] .globe__side { opacity: 0; transform: translateX(-12px); visibility: hidden; }
 .globe__side .memory { margin-top: 0; }
 
 .globe__legend {
@@ -121,12 +123,52 @@
 .globe__legend-text small { font-size: var(--fs-2xs); color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .globe__legend-row em { font-style: normal; font-size: var(--fs-2xs); color: var(--text-muted); }
 
-/* ---------- Bandeau des voyages (bas) ---------- */
-.globe__strip {
+/* ---------- Bandeau des voyages (bas), repliable ---------- */
+.globe__dock {
   position: absolute;
   left: 0;
   right: 0;
   bottom: var(--sp-3);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  pointer-events: none;
+}
+.globe__dock > * { pointer-events: auto; }
+/* Bouton « Masquer / Voir les voyages » : pilule en verre au-dessus des cartes, seul reste une fois replié. */
+.globe__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 44px;
+  margin-right: var(--gutter);
+  padding: 0 var(--sp-4) 0 var(--sp-3);
+  border: 0;
+  border-radius: var(--r-full);
+  background: var(--glass);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: var(--shadow-sm), inset 0 0 0 1px var(--line);
+  color: var(--text);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+}
+.globe__toggle:hover { background: var(--surface); }
+.globe__toggle:active { transform: scale(0.97); }
+.globe__toggle svg { width: 18px; height: 18px; transition: transform var(--dur) var(--ease); }
+.globe[data-trips-hidden] .globe__toggle svg { transform: rotate(180deg); }
+/* Repli : la hauteur passe à 0 (grille 1fr → 0fr), les cartes glissent vers le bas en s'effaçant. */
+.globe__strip-frame {
+  align-self: stretch;
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows var(--dur) var(--ease), opacity var(--dur) var(--ease), transform var(--dur) var(--ease), visibility var(--dur);
+}
+.globe[data-trips-hidden] .globe__strip-frame { grid-template-rows: 0fr; opacity: 0; transform: translateY(12px); visibility: hidden; }
+.globe__strip {
+  min-height: 0;
   display: flex;
   gap: var(--sp-3);
   padding: 10px var(--gutter) 10px;
@@ -168,5 +210,7 @@
   .globe__me { display: none; }
   .globe__side { top: 88px; left: var(--sp-10); max-height: calc(100% - 88px - 290px); }
   .globe__legend { display: block; }
-  .globe__strip { padding-inline: var(--sp-10); scroll-padding-inline: var(--sp-10); bottom: var(--sp-6); }
+  .globe__dock { bottom: var(--sp-6); }
+  .globe__toggle { margin-right: var(--sp-10); }
+  .globe__strip { padding-inline: var(--sp-10); scroll-padding-inline: var(--sp-10); }
 }

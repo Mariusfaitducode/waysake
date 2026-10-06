@@ -42,21 +42,3 @@
 .lmoment__text { flex: 1; min-width: 0; display: grid; line-height: var(--lh-snug); }
 .lmoment__text strong { font-size: var(--fs-md); font-weight: var(--fw-semibold); }
 .lmoment__text span { color: var(--text-muted); font-size: var(--fs-sm); }
-
-.toast {
-  position: fixed;
-  left: 50%;
-  bottom: calc(96px + var(--safe-bottom));
-  translate: -50% 0;
-  z-index: 60;
-  max-width: calc(100vw - 2 * var(--gutter));
-  padding: var(--sp-3) var(--sp-5);
-  border-radius: var(--r-full);
-  background: var(--accent);
-  color: var(--on-accent);
-  font-size: var(--fs-md);
-  font-weight: var(--fw-semibold);
-  box-shadow: var(--shadow-lg);
-  animation: toast 3.2s var(--ease) both;
-}
-@keyframes toast { 0% { opacity: 0; transform: translateY(10px); } 10%, 85% { opacity: 1; transform: none; } 100% { opacity: 0; } }

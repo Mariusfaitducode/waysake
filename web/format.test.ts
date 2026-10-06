@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { bytes, countryName, dateRange, days, monthLabel, monthRange, number, suggestIds, yearRange } from "./format.js";
+import { bytes, countryName, dateRange, dayRange, days, monthLabel, monthRange, number, suggestIds, yearRange } from "./format.js";
 
 describe("bytes", () => {
   it("Mo, Go, To selon la langue", () => {
@@ -64,4 +64,16 @@ describe("suggestIds", () => {
     expect(out[0]).toBe(1);
     expect(out.at(-1)).toBe(800);
   });
+});
+
+describe("dayRange (sous-étapes, sans l'année)", () => {
+  it("un seul jour : avec le jour de la semaine", () => expect(dayRange("2026-08-12T09:00:00", "2026-08-12T18:00:00", "fr")).toBe("Mercredi 12 août"));
+  it("même mois", () => expect(dayRange("2026-08-12T09:00:00", "2026-08-14T18:00:00", "fr")).toBe("12 – 14 août"));
+  it("mois différents", () => expect(dayRange("2026-08-31T09:00:00", "2026-09-02T18:00:00", "fr")).toBe("31 août – 2 septembre"));
+  it("années différentes", () => expect(dayRange("2025-12-30T09:00:00", "2026-01-02T18:00:00", "fr")).toBe("30 décembre 2025 – 2 janvier 2026"));
+  it("en anglais", () => {
+    expect(dayRange("2026-08-12T09:00:00", "2026-08-12T18:00:00", "en")).toBe("Wednesday, August 12");
+    expect(plain(dayRange("2026-08-12T09:00:00", "2026-08-14T18:00:00", "en"))).toBe("August 12 – 14");
+  });
+  it("date inconnue : rien", () => expect(dayRange(null, null, "fr")).toBe(""));
 });

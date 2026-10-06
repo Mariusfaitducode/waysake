@@ -41,6 +41,12 @@ export const IconBack = () => (
     <path d="M15 5 8 12l7 7" />
   </svg>
 );
+/** Chevron vers le bas (tourné par CSS pour monter). */
+export const IconChevronDown = () => (
+  <svg {...base} strokeWidth={2.2}>
+    <path d="m6 9 6 6 6-6" />
+  </svg>
+);
 export const IconMore = () => (
   <svg {...base} strokeWidth={2.4}>
     <path d="M6 12h.01M12 12h.01M18 12h.01" />
@@ -49,6 +55,12 @@ export const IconMore = () => (
 export const IconClose = () => (
   <svg {...base} strokeWidth={2.2}>
     <path d="M6 6l12 12M18 6 6 18" />
+  </svg>
+);
+/** Agrandir : deux flèches vers les coins opposés. */
+export const IconExpand = () => (
+  <svg {...base} strokeWidth={2}>
+    <path d="M14 4h6v6M10 20H4v-6M20 4l-6.5 6.5M4 20l6.5-6.5" />
   </svg>
 );
 export const IconNfc = () => (

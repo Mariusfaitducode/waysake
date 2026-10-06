@@ -2,9 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import * as maplibregl from "maplibre-gl";
 import type { GeoJSONSource, Map as MlMap, Marker, PaddingOptions, StyleSpecification } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { resourceUrl, type Wish } from "../api.js";
+import { resourceUrl, type GlobeStop, type Wish } from "../api.js";
 import { tripColorHex, type TripColorId } from "../trip-colors.js";
+import { chooseStops, orbit, STOP_PHOTOS_MIN_ZOOM } from "../globe-stops.js";
+import { t } from "../i18n/index.js";
+import { placeTitle } from "../i18n/places.js";
 import "./GlobeMap.css";
+import "./MapPhotos.css";
 
 /** Un voyage tel que le globe le dessine : ses étapes dans l'ordre, [lon, lat]. */
 export type GlobeTrip = { slug: string; name: string; color: TripColorId; stops: [number, number][] };
@@ -21,6 +25,10 @@ type Props = {
   padding: PaddingOptions;
   onSelect: (slug: string | null) => void;
   onHover: (slug: string | null) => void;
+  /** Étapes avec leurs vignettes, montrées autour de chaque point d'étape à partir de STOP_PHOTOS_MIN_ZOOM. */
+  stops?: GlobeStop[];
+  /** Toucher une vignette : ouvrir le voyage à cette étape. */
+  onOpenStop?: (slug: string, chapterId: number) => void;
 };
 
 const css = (name: string) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -101,14 +109,14 @@ function boundsOf(stops: [number, number][]): [[number, number], [number, number
  * aucun réseau), pays visités en gris plus soutenu, l'itinéraire de chaque voyage dans sa couleur (ligne sur
  * un liseré, points d'étape, le dernier plus gros), le nom du voyage au bout, un anneau par envie.
  */
-export function GlobeMap({ trips, wishes, visited, selected, focus, padding, onSelect, onHover }: Props) {
+export function GlobeMap({ trips, wishes, visited, selected, focus, padding, onSelect, onHover, stops = [], onOpenStop }: Props) {
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<MlMap | null>(null);
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
   // Dernières valeurs, pour reconstruire le style au changement de thème et pour les écouteurs MapLibre.
-  const live = useRef({ trips, visited, focus, padding, onSelect, onHover });
-  live.current = { trips, visited, focus, padding, onSelect, onHover };
+  const live = useRef({ trips, visited, focus, padding, onSelect, onHover, onOpenStop });
+  live.current = { trips, visited, focus, padding, onSelect, onHover, onOpenStop };
   const labels = useRef<Map<string, Marker>>(new Map());
   const framed = useRef(false);
 
@@ -281,6 +289,69 @@ export function GlobeMap({ trips, wishes, visited, selected, focus, padding, onS
     if (!m || !ready || !trip || trip.stops.length === 0) return;
     m.fitBounds(boundsOf(trip.stops), { padding: live.current.padding, maxZoom: 6, duration: matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 1400 });
   }, [selected, ready]);
+
+  // Vignettes des étapes, de près : recalculées à la fin de chaque mouvement (les marqueurs suivent la carte
+  // pendant le geste) ; seules les étapes qui apparaissent ou disparaissent touchent au DOM.
+  useEffect(() => {
+    const m = map.current;
+    if (!m || !ready || stops.length === 0) return;
+    const shown = new Map<number, Marker>();
+    const clear = () => {
+      for (const mk of shown.values()) mk.remove();
+      shown.clear();
+    };
+    const create = (s: GlobeStop) => {
+      const holder = document.createElement("div");
+      holder.className = "stop-photos";
+      holder.style.setProperty("--trip", `var(--trip-${s.color})`);
+      orbit(s.thumbs.length).forEach(([x, y], i) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "stop-photo";
+        b.style.setProperty("--x", `${x}px`);
+        b.style.setProperty("--y", `${y}px`);
+        b.style.setProperty("--i", String(i));
+        b.setAttribute("aria-label", t("globe.stopPhoto", { title: placeTitle(s.title) }));
+        b.addEventListener("click", (e) => (e.stopPropagation(), live.current.onOpenStop?.(s.tripSlug, s.chapterId)));
+        b.addEventListener("pointerenter", () => live.current.onHover(s.tripSlug));
+        b.addEventListener("pointerleave", () => live.current.onHover(null));
+        const img = document.createElement("img");
+        img.src = resourceUrl(s.thumbs[i]);
+        img.alt = "";
+        img.loading = "lazy";
+        img.decoding = "async";
+        img.draggable = false;
+        b.appendChild(img);
+        holder.appendChild(b);
+      });
+      return new maplibregl.Marker({ element: holder }).setLngLat([s.lon, s.lat]).addTo(m);
+    };
+    const update = () => {
+      if (m.getZoom() < STOP_PHOTOS_MIN_ZOOM) return clear();
+      const center = m.getCenter().toArray() as [number, number];
+      const canvas = m.getContainer();
+      const candidates = stops
+        .filter((s) => arc(center, [s.lon, s.lat]) < 75)
+        .map((s) => {
+          const p = m.project([s.lon, s.lat]);
+          return { stop: s, x: p.x, y: p.y };
+        });
+      const keep = chooseStops(candidates, { width: canvas.clientWidth, height: canvas.clientHeight }).map((c) => c.stop);
+      const ids = new Set(keep.map((s) => s.chapterId));
+      for (const [id, mk] of shown) if (!ids.has(id)) (mk.remove(), shown.delete(id));
+      for (const s of keep) if (!shown.has(s.chapterId)) shown.set(s.chapterId, create(s));
+    };
+    // En dézoomant sous le seuil, les vignettes partent tout de suite (sans attendre la fin du geste).
+    const onZoom = () => shown.size > 0 && m.getZoom() < STOP_PHOTOS_MIN_ZOOM && clear();
+    update();
+    m.on("moveend", update);
+    m.on("zoom", onZoom);
+    return () => {
+      m.off("moveend", update);
+      m.off("zoom", onZoom);
+      clear();
+    };
+  }, [stops, ready]);
 
   // Envies : un anneau.
   useEffect(() => {

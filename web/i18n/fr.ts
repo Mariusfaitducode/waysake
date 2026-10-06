@@ -50,6 +50,9 @@ export const fr = {
   "globe.yourTrips": "Vos voyages",
   "globe.summary": "{trips} · {countries}",
   "globe.legend": "Légende des voyages",
+  "globe.hideTrips": "Masquer les voyages",
+  "globe.showTrips": "Voir les voyages",
+  "globe.stopPhoto": "{title} : ouvrir l'étape",
 
   // Pays
   "countries.title": "Pays découverts",
@@ -188,6 +191,9 @@ export const fr = {
   "map.zoomWindows": "Ctrl + molette pour zoomer",
   "map.zoomMac": "⌘ + molette pour zoomer",
   "map.twoFingers": "Deux doigts pour déplacer la carte",
+  "map.cityPhotos": "{place} : voir les photos",
+  "map.expand": "Agrandir la carte",
+  "map.full": "Carte du voyage",
   "map.stop": "Étape {n} : {title}",
 
   // Choix d'un lieu
@@ -281,6 +287,17 @@ export const fr = {
   "chapter.merge.hint": "Les deux étapes n'en feront plus qu'une",
   "chapter.addNote": "Ajouter un souvenir à cette étape",
   "chapter.notePlaceholder": "Un souvenir de {title}…",
+  // Sous-étapes : les villes d'une étape
+  "substop.list": "Villes de l'étape {title}",
+  "substop.unknown": "Lieu inconnu",
+  "substop.options": "Options de {place}",
+  "substop.relocate": "Changer le lieu",
+  "substop.relocate.hint": "Toutes les photos de cette ville",
+  "substop.relocate.some": { one: "Seule la photo sans GPS d'origine changera", other: "Seules les {count} photos sans GPS d'origine changeront" },
+  "substop.relocate.locked": "Lieu d'origine de l'appareil : non modifiable",
+  "substop.view": "Voir en grand",
+  "substop.moved": { one: "{count} photo déplacée à {place}", other: "{count} photos déplacées à {place}" },
+  "substop.moved.none": "Aucune photo déplacée : leur lieu vient de l'appareil",
 
   // Carnet
   "notebook.title": "Carnet",

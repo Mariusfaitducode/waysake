@@ -5,6 +5,7 @@ import { getTrip, listTrips, mergeChapterWithPrevious, renameChapter, renameTrip
 import { isTripColorId, TRIP_COLORS } from "../trip-palette.js";
 import { mediaUrls } from "./media.js";
 import { tripFavorites, withSocial } from "../social.js";
+import { globeStops } from "../globe-stops.js";
 
 const cover = (id: number | null) => (id ? mediaUrls(id).thumb : null);
 const coverLarge = (id: number | null) => (id ? mediaUrls(id).preview : null);
@@ -13,6 +14,9 @@ export function tripRoutes(app: FastifyInstance, db: Db) {
   app.get("/api/trips", async () =>
     listTrips(db).map((t) => ({ ...t, cover: cover(t.coverMediaId), coverLarge: coverLarge(t.coverMediaId) })),
   );
+
+  // Étapes de tous les voyages avec une à trois vignettes chacune (le globe les montre de près).
+  app.get("/api/globe/stops", async () => globeStops(db));
 
   app.get<{ Params: { slug: string } }>("/api/trips/:slug", async (req, reply) => {
     const t = getTrip(db, req.params.slug);

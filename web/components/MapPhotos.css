@@ -1,0 +1,39 @@
+/*
+ * Vignettes de lieu sur une carte (globe vu de près, carte d'un voyage) : 1 à 3 photos rondes en éventail
+ * au-dessus du point, cerclées de la couleur du voyage (--trip) sur un liseré couleur de page. Le point reste visible.
+ */
+.stop-photos { width: 0; height: 0; pointer-events: none; }
+.stop-photo {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: grid;
+  place-items: center;
+  width: 44px; /* zone de toucher */
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  pointer-events: auto;
+  transform: translate(calc(var(--x) - 22px), calc(var(--y) - 22px));
+  animation: stop-photo-in var(--dur-slow) var(--ease) backwards;
+  animation-delay: calc(var(--i) * 40ms);
+}
+.stop-photo img {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-full);
+  object-fit: cover;
+  background: var(--surface-sunken);
+  box-shadow: 0 0 0 2px var(--trip), 0 0 0 3.5px var(--bg), var(--shadow-sm);
+  transition: transform var(--dur-fast) var(--ease);
+}
+.stop-photo:hover img { transform: scale(1.12); }
+.stop-photo:active img { transform: scale(0.96); }
+.stop-photo:focus-visible { outline: none; }
+.stop-photo:focus-visible img { box-shadow: 0 0 0 2px var(--trip), 0 0 0 4px var(--focus); }
+.stop-photos:hover { z-index: 3; }
+@keyframes stop-photo-in {
+  from { opacity: 0; transform: translate(-22px, -22px) scale(0.4); }
+}

@@ -140,3 +140,22 @@ code, kbd, samp { font-family: var(--font-mono); font-size: 0.9em; }
 @media (min-width: 900px) {
   .back-link { margin: var(--sp-6) 0 calc(-1 * var(--sp-5)) var(--sp-8); }
 }
+
+/* Message bref en bas d'écran (« 12 photos déplacées à Sienne »), qui s'efface tout seul. */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(96px + var(--safe-bottom));
+  translate: -50% 0;
+  z-index: 60;
+  max-width: calc(100vw - 2 * var(--gutter));
+  padding: var(--sp-3) var(--sp-5);
+  border-radius: var(--r-full);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semibold);
+  box-shadow: var(--shadow-lg);
+  animation: toast 3.2s var(--ease) both;
+}
+@keyframes toast { 0% { opacity: 0; transform: translateY(10px); } 10%, 85% { opacity: 1; transform: none; } 100% { opacity: 0; } }

@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate, useParams, useSearchParams } from "react-router";
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router";
 import { useLive } from "../live.js";
 import { useProfile } from "../profile.js";
 import { api, type Chapter, type Media, type Trip } from "../api.js";
 import { useApi, useDataVersion } from "../data.js";
-import { countryName, dateRange, days, number, scrollBehavior } from "../format.js";
+import { countryName, dateRange, dayRange, days, hitName, number, scrollBehavior } from "../format.js";
 import { t } from "../i18n/index.js";
 import { localizeTrip } from "../i18n/places.js";
 import { PhotoGrid } from "../components/PhotoGrid.js";
@@ -16,6 +16,9 @@ import { ActionSheet, PromptSheet, Sheet, type Action } from "../components/Shee
 import { TripColorPicker, tripColorName } from "../components/TripColor.js";
 import { EmptyState } from "../components/EmptyState.js";
 import { TripStatsPanel } from "../components/TripStatsPanel.js";
+import { PlacePicker } from "../components/PlacePicker.js";
+import { canRelocate, subStops, type SubStop } from "../substops.js";
+import { cityPins } from "../trip-map.js";
 import { IconBack, IconMore, IconPlay, IconPostcard, IconTogether } from "../shell/icons.js";
 import { PostcardSheet } from "../components/PostcardSheet.js";
 import { tripColorProps } from "../trip-colors.js";
@@ -28,6 +31,8 @@ type Overlay =
   | { kind: "postcard" }
   | { kind: "chapter-menu"; chapter: Chapter; index: number }
   | { kind: "rename-chapter"; chapter: Chapter }
+  | { kind: "substop-menu"; stop: SubStop }
+  | { kind: "relocate"; stop: SubStop }
   | { kind: "cover-help" }
   | { kind: "color" }
   | { kind: "error"; message: string };
@@ -43,8 +48,15 @@ export function TripScreen() {
   const [overlay, setOverlay] = useState<Overlay | null>(null);
   const [viewer, setViewer] = useState<number | null>(null);
   const chapterRefs = useRef<(HTMLElement | null)[]>([]);
+  const cityRefs = useRef(new Map<string, HTMLElement>());
+  const [toast, setToast] = useState<string | null>(null);
 
   const flat = useMemo(() => trip?.chapters.flatMap((c) => c.media) ?? [], [trip]);
+  // Les villes de chaque étape, dans l'ordre : elles découpent les photos de l'étape sans les réordonner,
+  // donc la visionneuse (qui parcourt `flat`) suit exactement ce qui est affiché.
+  const cities = useMemo(() => new Map(trip?.chapters.map((c) => [c.id, subStops(c.media)]) ?? []), [trip]);
+  // Les mêmes villes sur la carte, avec quelques miniatures chacune.
+  const pins = useMemo(() => cityPins(trip?.chapters ?? []), [trip]);
   const live = useLive();
   const { me } = useProfile();
   const [params, setParams] = useSearchParams();
@@ -95,6 +107,19 @@ export function TripScreen() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [slug]);
+  // Arrivée depuis une vignette d'étape du globe : la page s'ouvre sur cette étape.
+  const fromStop = (useLocation().state as { chapter?: number } | null)?.chapter;
+  const loaded = !!trip;
+  useEffect(() => {
+    if (!loaded || !fromStop) return;
+    const i = trip!.chapters.findIndex((c) => c.id === fromStop);
+    if (i < 0) return;
+    // Une seconde fois quand la carte et les panneaux du haut ont pris leur hauteur.
+    const go = () => chapterRefs.current[i]?.scrollIntoView({ block: "start" });
+    const frame = requestAnimationFrame(go);
+    const later = setTimeout(go, 400);
+    return () => (cancelAnimationFrame(frame), clearTimeout(later));
+  }, [loaded, slug, fromStop]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!trip && error)
     return (
@@ -109,6 +134,11 @@ export function TripScreen() {
   const noteFor = (chapterId: number | null) => trip.notes.find((n) => n.chapterId === chapterId)?.body ?? "";
   const back = () => (history.length > 1 ? navigate(-1) : navigate("/voyages"));
   const goToChapter = (i: number) => chapterRefs.current[i]?.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
+  const goToCity = (key: string) => cityRefs.current.get(key)?.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
+  // Une ville touchée sur la carte : on défile jusqu'à sa section (l'étape entière si elle n'a qu'une ville).
+  const goToPin = (pin: { key: string; chapter: number }) => (cityRefs.current.has(pin.key) ? goToCity(pin.key) : goToChapter(pin.chapter));
+  const cityName = (s: SubStop) => s.place ?? t("substop.unknown");
+  const open = (m: Media) => setViewer(flat.indexOf(m));
   const many = trip.chapters.length > 1;
   const countries = trip.countryCodes.map((c) => countryName(c)).join(", ");
   const figures = [
@@ -229,7 +259,7 @@ export function TripScreen() {
                 ))}
               </ol>
             )}
-            {trip.route.length > 1 && <TripMap route={trip.route} chapters={trip.chapters} color={trip.color} onChapter={goToChapter} />}
+            {trip.route.length > 1 && <TripMap route={trip.route} chapters={trip.chapters} cities={pins} color={trip.color} onChapter={goToChapter} onCity={goToPin} />}
           </section>
         )}
 
@@ -258,22 +288,64 @@ export function TripScreen() {
           </section>
         )}
 
-        {trip.chapters.map((c, i) => (
-          <section key={c.id} className="chapter" ref={(el) => void (chapterRefs.current[i] = el)} aria-labelledby={`c-${c.id}`}>
-            <div className="chapter__head">
-              {many && <span className="step-number">{i + 1}</span>}
-              <div className="chapter__titles">
-                <h2 id={`c-${c.id}`} className="chapter__title">{c.title}</h2>
-                <p className="chapter__meta">{[c.places.join(", "), dateRange(c.startAt, c.endAt), t("count.photos", { count: c.media.length })].filter(Boolean).join(" · ")}</p>
+        {trip.chapters.map((c, i) => {
+          const stops = cities.get(c.id) ?? [];
+          const split = stops.length > 1;
+          return (
+            <section key={c.id} className="chapter" ref={(el) => void (chapterRefs.current[i] = el)} aria-labelledby={`c-${c.id}`}>
+              <div className="chapter__head">
+                {many && <span className="step-number">{i + 1}</span>}
+                <div className="chapter__titles">
+                  <h2 id={`c-${c.id}`} className="chapter__title">{c.title}</h2>
+                  {/* Les villes sont listées juste dessous quand l'étape en compte plusieurs. */}
+                  <p className="chapter__meta">{[!split && c.places.join(", "), dateRange(c.startAt, c.endAt), t("count.photos", { count: c.media.length })].filter(Boolean).join(" · ")}</p>
+                </div>
+                <button className="icon-button chapter__more" onClick={() => setOverlay({ kind: "chapter-menu", chapter: c, index: i })} aria-label={t("chapter.options", { title: c.title })}>
+                  <IconMore />
+                </button>
               </div>
-              <button className="icon-button chapter__more" onClick={() => setOverlay({ kind: "chapter-menu", chapter: c, index: i })} aria-label={t("chapter.options", { title: c.title })}>
-                <IconMore />
-              </button>
-            </div>
-            <PhotoGrid items={c.media} onOpen={(m) => setViewer(flat.indexOf(m))} />
-            <ChapterNote trip={trip} chapter={c} initial={noteFor(c.id)} />
-          </section>
-        ))}
+              {split ? (
+                <>
+                  <ol className="chapter__cities" aria-label={t("substop.list", { title: c.title })}>
+                    {stops.map((s) => (
+                      <li key={s.key}>
+                        <button onClick={() => goToCity(s.key)} aria-label={`${cityName(s)}, ${t("count.photos", { count: s.media.length })}`}>
+                          <span>
+                            {cityName(s)}
+                            <small aria-hidden="true">{s.media.length}</small>
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ol>
+                  {stops.map((s) => (
+                    <section
+                      key={s.key}
+                      className="substop"
+                      ref={(el) => void (el ? cityRefs.current.set(s.key, el) : cityRefs.current.delete(s.key))}
+                      aria-labelledby={`s-${s.media[0].id}`}
+                    >
+                      <div className="substop__head">
+                        <i className="substop__dot" aria-hidden="true" />
+                        <div className="substop__titles">
+                          <h3 id={`s-${s.media[0].id}`} className="substop__title">{cityName(s)}</h3>
+                          <p className="substop__meta">{[dayRange(s.startLocal, s.endLocal), t("count.photos", { count: s.media.length })].filter(Boolean).join(" · ")}</p>
+                        </div>
+                        <button className="icon-button substop__more" onClick={() => setOverlay({ kind: "substop-menu", stop: s })} aria-label={t("substop.options", { place: cityName(s) })}>
+                          <IconMore />
+                        </button>
+                      </div>
+                      <PhotoGrid items={s.media} onOpen={open} />
+                    </section>
+                  ))}
+                </>
+              ) : (
+                <PhotoGrid items={c.media} onOpen={open} />
+              )}
+              <ChapterNote trip={trip} chapter={c} initial={noteFor(c.id)} />
+            </section>
+          );
+        })}
 
         <TripStatsPanel stats={stats} />
       </div>
@@ -335,6 +407,43 @@ export function TripScreen() {
           ]}
           onClose={() => setOverlay(null)}
         />
+      )}
+      {overlay?.kind === "substop-menu" && (
+        <ActionSheet
+          title={cityName(overlay.stop)}
+          actions={[
+            {
+              label: t("substop.relocate"),
+              // Une ville dont toutes les photos ont un GPS d'origine ne peut pas changer de lieu : on dit pourquoi.
+              hint: !overlay.stop.editable
+                ? t("substop.relocate.locked")
+                : overlay.stop.media.every(canRelocate)
+                  ? t("substop.relocate.hint")
+                  : t("substop.relocate.some", { count: overlay.stop.media.filter(canRelocate).length }),
+              disabled: !overlay.stop.editable,
+              onSelect: () => setOverlay({ kind: "relocate", stop: overlay.stop }),
+            },
+            { label: t("substop.view"), onSelect: () => open(overlay.stop.media[0]) },
+          ]}
+          onClose={() => setOverlay(null)}
+        />
+      )}
+      {overlay?.kind === "relocate" && (
+        <PlacePicker
+          photos={overlay.stop.media.filter(canRelocate).map((m) => m.id)}
+          previews={overlay.stop.media.filter(canRelocate).map((m) => m.preview)}
+          onClose={() => setOverlay(null)}
+          onDone={(place, updated) => {
+            setToast(updated ? t("substop.moved", { count: updated, place: hitName(place) }) : t("substop.moved.none"));
+            // La tour a recalculé voyages et étapes : la page se recharge et les villes peuvent se regrouper.
+            bump();
+          }}
+        />
+      )}
+      {toast && (
+        <div className="toast" role="status" onAnimationEnd={() => setToast(null)}>
+          {toast}
+        </div>
       )}
       {overlay?.kind === "rename-chapter" && (
         <PromptSheet

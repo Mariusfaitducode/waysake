@@ -30,7 +30,8 @@ export function Sheet({ title, onClose, children, dismissable = true }: { title?
   );
 }
 
-export type Action = { label: string; onSelect: () => void; danger?: boolean; hint?: string };
+/** `disabled` : l'action reste visible, grisée, et son `hint` dit pourquoi. */
+export type Action = { label: string; onSelect: () => void; danger?: boolean; hint?: string; disabled?: boolean };
 
 /** Menu d'actions façon iOS. */
 export function ActionSheet({ title, actions, onClose }: { title?: string; actions: Action[]; onClose: () => void }) {
@@ -41,6 +42,7 @@ export function ActionSheet({ title, actions, onClose }: { title?: string; actio
           <button
             key={a.label}
             className={`actions__item${a.danger ? " is-danger" : ""}`}
+            disabled={a.disabled}
             onClick={() => {
               onClose();
               a.onSelect();

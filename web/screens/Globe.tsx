@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { api, type TripSummary } from "../api.js";
 import { useApi } from "../data.js";
 import { GlobeMap, type GlobeTrip } from "../components/GlobeMap.js";
@@ -10,7 +10,7 @@ import { TripCard } from "../components/TripCard.js";
 import { TripColorDot, tripColorName } from "../components/TripColor.js";
 import { useUpload } from "../shell/upload.js";
 import { useProfile } from "../profile.js";
-import { IconPlus } from "../shell/icons.js";
+import { IconChevronDown, IconPlus } from "../shell/icons.js";
 import { t, useLocale } from "../i18n/index.js";
 import { autoName } from "../i18n/places.js";
 import { dateRange, scrollBehavior } from "../format.js";
@@ -35,16 +35,44 @@ function tripStops(trip: TripSummary): [number, number][] {
 
 const wide = () => matchMedia("(min-width: 900px)").matches;
 
+/** Choix « voyages masqués » de cette personne sur cet appareil (absent ou illisible = affichés). */
+const HIDDEN_KEY = "waysake.globe.tripsHidden";
+function readHidden() {
+  try {
+    return localStorage.getItem(HIDDEN_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+function writeHidden(hidden: boolean) {
+  try {
+    if (hidden) localStorage.setItem(HIDDEN_KEY, "1");
+    else localStorage.removeItem(HIDDEN_KEY);
+  } catch {
+    // stockage indisponible (navigation privée…) : le choix vaut pour cette visite seulement
+  }
+}
+
 export function GlobeScreen() {
   useLocale();
   const { data: trips } = useApi(api.trips);
   const { data: wishes } = useApi(api.wishes);
   const { data: overview } = useApi(api.overview);
+  const { data: stops } = useApi(api.globeStops);
+  const navigate = useNavigate();
+  const onOpenStop = useCallback((slug: string, chapter: number) => navigate(`/v/${slug}`, { state: { chapter } }), [navigate]);
   const { open: openUpload } = useUpload();
   const { me, switchProfile } = useProfile();
   const [selected, setSelected] = useState<string | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
   const strip = useRef<HTMLDivElement>(null);
+  const [tripsHidden, setTripsHidden] = useState(readHidden);
+  const toggleTrips = () => {
+    setTripsHidden((h) => {
+      writeHidden(!h);
+      return !h;
+    });
+  };
 
   const visited = useMemo(() => [...new Set((trips ?? []).flatMap((t) => t.countryCodes))], [trips]);
   const globeTrips = useMemo<GlobeTrip[]>(
@@ -55,13 +83,14 @@ export function GlobeScreen() {
   const onHover = useCallback((slug: string | null) => setHovered(slug), []);
 
   // Place laissée au globe : la légende à gauche (grand écran), les cartes en bas, le titre en haut.
-  const [padding, setPadding] = useState(() => framing());
+  const [isWide, setWide] = useState(wide);
   useEffect(() => {
     const mq = matchMedia("(min-width: 900px)");
-    const update = () => setPadding(framing());
+    const update = () => setWide(mq.matches);
     mq.addEventListener("change", update);
     return () => mq.removeEventListener("change", update);
   }, []);
+  const padding = useMemo(() => framing(isWide, tripsHidden), [isWide, tripsHidden]);
 
   // Le voyage choisi sur le globe vient se placer dans le bandeau.
   useEffect(() => {
@@ -73,8 +102,8 @@ export function GlobeScreen() {
   const hasTrips = !!trips && trips.length > 0;
 
   return (
-    <div className="globe">
-      <GlobeMap trips={globeTrips} wishes={wishes ?? []} visited={visited} selected={selected} focus={focus} padding={padding} onSelect={onSelect} onHover={onHover} />
+    <div className="globe" data-trips-hidden={(hasTrips && tripsHidden) || undefined}>
+      <GlobeMap trips={globeTrips} wishes={wishes ?? []} visited={visited} selected={selected} focus={focus} padding={padding} onSelect={onSelect} onHover={onHover} stops={stops ?? undefined} onOpenStop={onOpenStop} />
 
       <div className="globe__top">
         <div className="globe__brand">
@@ -100,7 +129,7 @@ export function GlobeScreen() {
         </div>
       </div>
 
-      <div className="globe__side">
+      <div className="globe__side" inert={hasTrips && tripsHidden}>
         <MemoryCard />
         {hasTrips && (
           <nav className="globe__legend" aria-label={t("globe.legend")}>
@@ -143,26 +172,35 @@ export function GlobeScreen() {
       )}
 
       {hasTrips && (
-        <div className="globe__strip" ref={strip} aria-label={t("globe.yourTrips")}>
-          {trips.map((trip) => (
-            <div
-              key={trip.slug}
-              data-slug={trip.slug}
-              {...tripColorProps(trip.color)}
-              className={`globe__slot${selected === trip.slug ? " is-selected" : ""}`}
-              onPointerEnter={() => matchMedia("(hover: hover)").matches && setHovered(trip.slug)}
-              onPointerLeave={() => setHovered(null)}
-            >
-              <TripCard trip={trip} size="sm" />
+        <div className="globe__dock">
+          <button type="button" className="globe__toggle" aria-expanded={!tripsHidden} aria-controls="globe-trips" onClick={toggleTrips}>
+            <IconChevronDown />
+            <span>{tripsHidden ? t("globe.showTrips") : t("globe.hideTrips")}</span>
+          </button>
+          <div className="globe__strip-frame" inert={tripsHidden}>
+            <div className="globe__strip" id="globe-trips" ref={strip} aria-label={t("globe.yourTrips")}>
+              {trips.map((trip) => (
+                <div
+                  key={trip.slug}
+                  data-slug={trip.slug}
+                  {...tripColorProps(trip.color)}
+                  className={`globe__slot${selected === trip.slug ? " is-selected" : ""}`}
+                  onPointerEnter={() => matchMedia("(hover: hover)").matches && setHovered(trip.slug)}
+                  onPointerLeave={() => setHovered(null)}
+                >
+                  <TripCard trip={trip} size="sm" />
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
         </div>
       )}
     </div>
   );
 }
 
-/** Marges de cadrage du globe selon la largeur (légende à gauche sur grand écran, cartes du bas). */
-function framing() {
-  return wide() ? { top: 120, bottom: 270, left: 340, right: 80 } : { top: 110, bottom: 250, left: 40, right: 40 };
+/** Marges de cadrage du globe selon la largeur (légende à gauche sur grand écran, cartes du bas), réduites quand les voyages sont masqués. */
+function framing(isWide: boolean, hidden: boolean) {
+  if (hidden) return isWide ? { top: 120, bottom: 90, left: 80, right: 80 } : { top: 110, bottom: 80, left: 40, right: 40 };
+  return isWide ? { top: 120, bottom: 270, left: 340, right: 80 } : { top: 110, bottom: 250, left: 40, right: 40 };
 }

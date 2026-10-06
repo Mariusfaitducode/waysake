@@ -53,6 +53,37 @@ describe("voyages", () => {
   });
 });
 
+describe("étapes du globe", () => {
+  it("donne chaque étape avec sa position, la couleur du voyage et une à trois vignettes", async () => {
+    const stops = await get("/api/globe/stops");
+    const t = await get("/api/trips/italie-slovenie-croatie-2026");
+    const mine = stops.filter((s: any) => s.tripSlug === t.slug);
+    expect(mine.map((s: any) => s.chapterId)).toEqual(t.chapters.map((c: any) => c.id));
+    expect(mine[0]).toEqual({
+      tripSlug: t.slug,
+      color: t.color,
+      chapterId: t.chapters[0].id,
+      title: t.chapters[0].title,
+      lat: t.chapters[0].centerLat,
+      lon: t.chapters[0].centerLon,
+      thumbs: expect.any(Array),
+    });
+    for (const s of stops) {
+      expect(s.thumbs.length).toBeGreaterThanOrEqual(1);
+      expect(s.thumbs.length).toBeLessThanOrEqual(3);
+      for (const u of s.thumbs) expect(u).toMatch(/^\/api\/media\/\d+\/thumb$/);
+    }
+  });
+
+  it("met en premier la photo la plus réagie de l'étape", async () => {
+    const t = await get("/api/trips/italie-slovenie-croatie-2026");
+    const fav = t.chapters[1].media.at(-1).id;
+    expect((await send("POST", `/api/media/${fav}/reactions`, { emoji: "❤️", on: true })).statusCode).toBe(200);
+    const stop = (await get("/api/globe/stops")).find((s: any) => s.chapterId === t.chapters[1].id);
+    expect(stop.thumbs[0]).toBe(`/api/media/${fav}/thumb`);
+  });
+});
+
 describe("pays et vue d'ensemble", () => {
   it("liste les pays découverts avec drapeau et première visite", async () => {
     const countries = await get("/api/countries");

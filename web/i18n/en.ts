@@ -54,6 +54,9 @@ export const en: Translation<typeof fr> = {
   "globe.yourTrips": "Your trips",
   "globe.summary": "{trips} · {countries}",
   "globe.legend": "Trip legend",
+  "globe.hideTrips": "Hide trips",
+  "globe.showTrips": "Show trips",
+  "globe.stopPhoto": "{title}: open this stop",
 
   // Countries
   "countries.title": "Countries",
@@ -192,6 +195,9 @@ export const en: Translation<typeof fr> = {
   "map.zoomWindows": "Ctrl + scroll to zoom",
   "map.zoomMac": "⌘ + scroll to zoom",
   "map.twoFingers": "Use two fingers to move the map",
+  "map.cityPhotos": "{place}: see the photos",
+  "map.expand": "Enlarge the map",
+  "map.full": "Trip map",
   "map.stop": "Stop {n}: {title}",
 
   // Place picker
@@ -285,6 +291,17 @@ export const en: Translation<typeof fr> = {
   "chapter.merge.hint": "The two stops become one",
   "chapter.addNote": "Add a memory to this stop",
   "chapter.notePlaceholder": "A memory from {title}…",
+  // Sub-stops: the towns of a stop
+  "substop.list": "Towns in {title}",
+  "substop.unknown": "Unknown place",
+  "substop.options": "Options for {place}",
+  "substop.relocate": "Change the place",
+  "substop.relocate.hint": "All the photos from this town",
+  "substop.relocate.some": { one: "Only the photo without original GPS will move", other: "Only the {count} photos without original GPS will move" },
+  "substop.relocate.locked": "Place recorded by the camera: can't be changed",
+  "substop.view": "View full screen",
+  "substop.moved": { one: "{count} photo moved to {place}", other: "{count} photos moved to {place}" },
+  "substop.moved.none": "No photo moved: their place comes from the camera",
 
   // Notebook
   "notebook.title": "Notebook",
